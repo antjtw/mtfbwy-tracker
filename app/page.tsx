@@ -12,9 +12,10 @@ const STATUS: Record<PlayerStatus, { label: string; gold: boolean }> = {
 };
 
 function PlayerList({ players, chars }: { players: Player[]; chars: Character[] }) {
+  const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name, "en-GB"));
   return (
     <ul className="list">
-      {players.map((p) => {
+      {sorted.map((p) => {
         const names = chars.filter((c) => c.player_id === p.id && c.is_main).map((c) => c.name);
         const shown = names.slice(0, 4);
         const more = names.length > shown.length;

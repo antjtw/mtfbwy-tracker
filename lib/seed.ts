@@ -5,8 +5,8 @@ import type { Character, Player } from "./types";
  * Re-run `npm run seed` after editing; it updates details and maximums but never resets slot usage.
  */
 export const SEED_PLAYERS: Player[] = [
-  { id: "james-allen", name: "James Allen", is_guest: false, status: "active", sort: 1 },
-  { id: "jake-cawthray", name: "Jake Cawthray", is_guest: false, status: "active", sort: 2 },
+  { id: "jake-cawthray", name: "Jake Cawthray", is_guest: false, status: "active", sort: 1 },
+  { id: "james-allen", name: "James Allen", is_guest: false, status: "active", sort: 2 },
   { id: "josh-huntley", name: "Josh Huntley", is_guest: false, status: "active", sort: 3 },
   { id: "matthew-fox", name: "Matthew Fox", is_guest: false, status: "active", sort: 4 },
   { id: "naoise-oshea", name: "Naoise O’Shea", is_guest: false, status: "partial", sort: 5 },
@@ -74,7 +74,7 @@ const MATT = "matthew-fox";
 const NAOISE = "naoise-oshea";
 const WILDE = "wilde-wathne";
 
-export const SEED_CHARACTERS: Character[] = [
+const ROSTER: Character[] = [
   // James
   c(JAMES, "Fenrir", { adventures: [C2], description: "A Pooba Jedi Knight", era: "Active in 140 BBY", slots: [8, 6, 0] }),
   c(JAMES, "Tholo Endin", { adventures: [C3], description: "An enigmatic Ikkrukkian Force wielder", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
@@ -138,3 +138,26 @@ export const SEED_CHARACTERS: Character[] = [
   c("jack-pedleham", "Gary Woodland", { adventures: [NEXU], main: true, description: "Tiss’shar" }),
   c("ryan-scott", "Gan Acka", { adventures: [NEXU], main: true, description: "Anzellan" }),
 ];
+
+/**
+ * Display order per player, following the Notion dashboards (roughly each character's timeline).
+ * Bolsa Roodah is new and isn't on the dashboards yet, so he sits next to Bowen (Campaign 2).
+ */
+const TIMELINE: Record<string, string[]> = {
+  "james-allen": ["Tim", "Eisor Trius", "Fenrir", "Ji-Toh Codox", "Tholo Endin", "Pamlian Roleb", "Vomdek Vus", "Sebastian Quickfin"],
+  "jake-cawthray": ["Bezulok Fhargon", "Cors Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Bromtek Raag", "Terri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Rayzer Botch"],
+  "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Fubbo", "Bingus K’aar", "Rosama Melmi"],
+  "matthew-fox": ["Kainard Plusttr", "Kael", "Ras Mithra", "Vesh Caldrin", "Tabitha Topaz", "Tristan Topaz", "Barbossa", "Errol Reza", "Biz Ube Hurley", "ECCO"],
+  "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Dago Lomek", "Thalen Skellig", "BNT-333"],
+  "wilde-wathne": ["Mark Mantis", "A13-XA", "Sol’ina", "Rue Dahlia", "Dia Tarkdona", "Kaja Vel", "Tantoori Vozo"],
+  "jack-pedleham": ["Gary Woodland"],
+  "ryan-scott": ["Gan Acka"],
+};
+
+/** Global sort = player position * 100 + position in that player's timeline. */
+export const SEED_CHARACTERS: Character[] = ROSTER.map((c) => {
+  const pi = SEED_PLAYERS.findIndex((p) => p.id === c.player_id);
+  const ti = TIMELINE[c.player_id]?.indexOf(c.name) ?? -1;
+  if (pi < 0 || ti < 0) throw new Error(`${c.name} is missing from TIMELINE`);
+  return { ...c, sort: (pi + 1) * 100 + ti };
+}).sort((a, b) => a.sort - b.sort);
