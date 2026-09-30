@@ -187,7 +187,8 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .tabs { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); margin-top: var(--pad-sm); }
 .tab { font: inherit; font-size: 14px; color: var(--text-subdued); background: transparent; border: 1px solid var(--outline-navy-subdued); border-radius: 999px; padding: 4px 14px; cursor: pointer; }
 .tab[aria-pressed="true"] { color: var(--text-gold); border-color: var(--outline-gold); }
-.admin-card { border: 1px solid var(--outline-navy-subdued); background: var(--surface-navy-lighter); padding: var(--pad-sm); margin-top: var(--pad-sm); }
+.admin-card { border: 1px solid var(--outline-navy-subdued); border-radius: 8px; background: var(--surface-navy-lighter); padding: var(--pad-sm); margin-top: var(--pad-sm); }
+.admin-card header .muted { font-size: 16px; line-height: 24px; } /* player name + Open tracker: body-sm, secondary to the character name */
 .admin-card header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--pad-2xs); align-items: baseline; }
 .admin-tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--pad-sm) var(--pad-2xl); margin-top: var(--pad-sm); }
 .admin-track .label { font-size: 13px; line-height: 18px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-subdued); font-weight: 700; }
