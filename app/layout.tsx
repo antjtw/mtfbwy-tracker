@@ -13,23 +13,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-GB">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        {/* Stand-in fonts until the licensed ones are added */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Oswald:wght@600;700&display=swap"
-        />
+        <link rel="preload" href="/fonts/ITCSerifGothic-Heavy.ttf" as="font" type="font/ttf" crossOrigin="" />
+        <link rel="preload" href="/fonts/FFDINVariable.ttf" as="font" type="font/ttf" crossOrigin="" />
       </head>
       <body>
         <header className="site-header">
           <Link href="/" className="logo" aria-label="MTFBWY home">
-            MTF
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
-              <circle cx="12" cy="12" r="10.5" />
-              <path d="M12 4v16M12 9l-4 4M12 9l4 4M12 13l-3 3M12 13l3 3" />
-            </svg>
-            BWY
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="MTFBWY" width={86} height={24} />
           </Link>
         </header>
         {children}
