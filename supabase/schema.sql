@@ -15,6 +15,7 @@ create table if not exists characters (
   era         text not null default '',
   adventures  text[] not null default '{}',
   is_main     boolean not null default true,
+  tracked     boolean not null default false,
   sort        int not null default 0,
   hp_max      int not null default 7 check (hp_max between 0 and 12),
   hp_used     int not null default 0,

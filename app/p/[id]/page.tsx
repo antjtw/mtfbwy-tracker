@@ -11,7 +11,11 @@ function CharList({ chars }: { chars: Character[] }) {
     <ul className="list">
       {chars.map((c) => (
         <li key={c.id}>
-          <Link href={`/c/${c.id}`} className="name">{c.name}</Link>
+          {c.tracked ? (
+            <Link href={`/c/${c.id}`} className="name">{c.name}</Link>
+          ) : (
+            <span className="name static">{c.name}</span>
+          )}
           {/* One tag per row here: the first adventure listed. The admin view lists every adventure. */}
           {c.adventures[0] && (
             <span className={`tag ${CURRENT_ADVENTURES.includes(c.adventures[0]) ? "gold" : ""}`}>{c.adventures[0]}</span>

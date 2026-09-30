@@ -19,6 +19,8 @@ export interface Character {
    * filters) but share a single set of slots, so usage carries across adventures.
    */
   adventures: string[];
+  /** Has a tracker switched on. Only Campaign 2 and 3 characters for now; the rest are listed but not linked. */
+  tracked: boolean;
   /** Main character (true) or side character (false) */
   is_main: boolean;
   sort: number;

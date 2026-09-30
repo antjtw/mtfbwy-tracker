@@ -55,6 +55,7 @@ function c(
     description: opts.description ?? "",
     era: opts.era ?? "",
     adventures,
+    tracked: opts.slots !== undefined, // real slot numbers supplied = Campaign 2/3, tracker on
     is_main: opts.main ?? adventures.some((a) => MAIN_ADVENTURES.includes(a)),
     sort: ++sortCounter,
     hp_max: hp,
@@ -107,7 +108,7 @@ export const SEED_CHARACTERS: Character[] = [
   // Matthew
   c(MATT, "Ras Mithra", { adventures: [C2], description: "Pkorian", slots: [7, 8, 0] }),
   c(MATT, "ECCO", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
-  c(MATT, "Kainard Plusttr", { adventures: [QOTJ, STAR, C2], description: "Besalisk" }),
+  c(MATT, "Kainard Plusttr", { adventures: [STAR, QOTJ, C2], description: "Besalisk" }),
   c(MATT, "Tabitha Topaz", { adventures: [NEXU], main: true, description: "Human" }),
   c(MATT, "Tristan Topaz", { adventures: [NEXU], main: true, description: "Human" }),
   c(MATT, "Kael", { adventures: [RTS], description: "Mon Calamari" }),

@@ -52,6 +52,7 @@ h2 { font-family: var(--font-heading); font-weight: 700; text-transform: upperca
 .list { list-style: none; margin: var(--pad-sm) 0 0; padding: 0; border-top: 1px solid var(--outline-navy); }
 .list li { border-bottom: 1px solid var(--outline-navy); padding: var(--pad-xs) 0; display: grid; grid-template-columns: 1fr auto; gap: 0 var(--pad-sm); align-items: start; }
 .list .name { font-size: 16px; line-height: 24px; }
+.list .name.static { color: var(--text-default); }
 .list .meta { grid-column: 1; font-size: 13px; line-height: 18px; color: var(--text-subdued); }
 .tag { font-size: 11px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; background: #232b34; color: var(--text-subdued); white-space: nowrap; grid-column: 2; grid-row: 1; }
 .tags { grid-column: 2; grid-row: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }

@@ -10,7 +10,7 @@ export default async function TrackerPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/c/${id}`)}`);
   const ch = await getStore().character(id);
-  if (!ch) notFound();
+  if (!ch || !ch.tracked) notFound();
 
   return (
     <main>

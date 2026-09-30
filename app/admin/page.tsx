@@ -13,7 +13,7 @@ export default async function AdminPage() {
   return (
     <main>
       <div className="col wide">
-        <AdminDashboard initial={chars} players={players} />
+        <AdminDashboard initial={chars.filter((c) => c.tracked)} players={players} />
         <p className="section"><Link href="/">Back to players</Link></p>
       </div>
     </main>
