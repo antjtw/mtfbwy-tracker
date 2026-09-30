@@ -174,7 +174,7 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .slots.mini { grid-template-columns: repeat(12, 12px); gap: 3px; margin-top: 0; }
 .slots.mini .slot { height: 12px; border-width: 1px; border-radius: 2px; cursor: default; }
-.sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 999px; }
+.sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }
 .sync.bad { color: var(--text-error); border-color: var(--outline-error); }
 
 /* Admin */
