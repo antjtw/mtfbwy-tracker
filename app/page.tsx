@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PageHeading } from "@/components/PageHeading";
 import { getStore } from "@/lib/store";
 import type { Character, Player, PlayerStatus } from "@/lib/types";
 
@@ -37,8 +38,7 @@ export default async function Home() {
   return (
     <main>
       <div className="col">
-        <p className="eyebrow">Select a player</p>
-        <h1>The Nexuverse</h1>
+        <PageHeading>The Nexuverse</PageHeading>
         <p className="lede">A multi-campaign story, spanning 200 years in a galaxy far, far away….</p>
 
         <section className="section">

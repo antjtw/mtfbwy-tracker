@@ -2,6 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PageHeading } from "@/components/PageHeading";
+import { FORGOTTEN_CODE_MAILTO, MESSAGE_GM_MAILTO } from "@/lib/contact";
 
 function CodeForm() {
   const router = useRouter();
@@ -43,17 +45,23 @@ function CodeForm() {
           <div className="banner" role="alert">
             <div>
               <strong>{error === "wrong" ? "Do or do not, there is no try" : "Lost in hyperspace"}</strong>
-              {error === "wrong"
-                ? "The code you entered is incorrect. Please try again or message the Games Master for a new one."
-                : "Couldn’t reach the server. Check your connection and try again."}
+              {error === "wrong" ? (
+                <>
+                  The code you entered is incorrect. Please try again or{" "}
+                  <a href={MESSAGE_GM_MAILTO}>contact the Games Master</a>.
+                </>
+              ) : (
+                "Couldn’t reach the server. Check your connection and try again."
+              )}
             </div>
             <button type="button" aria-label="Dismiss" onClick={() => setError(null)}>×</button>
           </div>
         )}
-        <p className="eyebrow">{admin ? "GM access" : "Enter your code"}</p>
-        <h1>Enter code</h1>
+        <PageHeading>Enter code</PageHeading>
         <p className="lede">{admin ? "GM code required." : "Welcome back to a galaxy far, far away…."}</p>
-        <p className="sub">Need a code? Message the GM.</p>
+        <p className="sub">
+          Need a code? <a href={MESSAGE_GM_MAILTO}>Message the GM</a>.
+        </p>
 
         <form onSubmit={submit} noValidate className="section stack">
           <div className={`field ${error === "empty" ? "error" : ""}`}>
@@ -78,6 +86,11 @@ function CodeForm() {
             <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} />
             Show code
           </label>
+          {!admin && (
+            <p>
+              <a href={FORGOTTEN_CODE_MAILTO}>I’ve forgotten my code</a>
+            </p>
+          )}
           <div className="section">
             <button className="btn" type="submit" disabled={busy}>{busy ? "Checking…" : "Continue"}</button>
           </div>

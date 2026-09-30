@@ -1,5 +1,6 @@
 "use client";
 
+import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { TRACKS, type Character } from "@/lib/types";
@@ -10,8 +11,7 @@ export function Tracker({ initial }: { initial: Character }) {
 
   return (
     <>
-      <p className="eyebrow">Stat tracker</p>
-      <h1>Track {ch.name}’s stats</h1>
+      <PageHeading>{`Track ${ch.name}’s stats`}</PageHeading>
       <p className="lede">
         Use this space to track {ch.name}’s health, armour and willpower, with the character sheet as a helpful reference.
       </p>

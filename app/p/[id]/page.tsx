@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getRole } from "@/lib/auth";
+import { PageHeading } from "@/components/PageHeading";
 import { getStore } from "@/lib/store";
 import { CURRENT_ADVENTURES, type Character } from "@/lib/types";
 
@@ -45,8 +46,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
   return (
     <main>
       <div className="col">
-        <p className="eyebrow">Select a character</p>
-        <h1>Select a character</h1>
+        <PageHeading>Select a character</PageHeading>
         <p className="lede">You’ve taken your first step into a larger world.</p>
         {main.length > 0 && (
           <section className="section">

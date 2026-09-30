@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player } from "@/lib/types";
@@ -30,8 +31,7 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
 
   return (
     <>
-      <p className="eyebrow">GM access</p>
-      <h1>Admin view</h1>
+      <PageHeading>Admin view</PageHeading>
       <p className="lede">See where everyone is at, and set how many slots each character has.</p>
 
       <div className="tabs" role="group" aria-label="Filter by adventure">
