@@ -23,8 +23,9 @@ With no Supabase variables set it uses a local JSON file (`.data/`, git-ignored)
 2. SQL Editor: paste and run `supabase/schema.sql`.
 3. Project Settings → API: copy the **Project URL** and the **service_role** key into `.env.local` as
    `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`. The key is server-only: never prefix it with `NEXT_PUBLIC_`.
-4. `npm run seed` loads the players and characters from `lib/seed.ts`. Re-running it updates names and
-   maximums but never resets live slot usage.
+4. SQL Editor again: paste and run `supabase/seed.sql` (players, characters, slot maximums). Re-running it
+   updates details and maximums but never resets live slot usage. Edit `lib/seed.ts` and run
+   `npm run seed:sql` to regenerate it. (`npm run seed` does the same from a terminal using `.env.local`.)
 
 ## Deploy on Vercel
 Import the repo, then add `PLAYER_CODES`, `GM_CODE`, `SESSION_SECRET` (`openssl rand -hex 32`),

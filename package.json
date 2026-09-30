@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "seed": "tsx --env-file=.env.local scripts/seed.ts"
+    "seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "seed:sql": "tsx scripts/seed-sql.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
