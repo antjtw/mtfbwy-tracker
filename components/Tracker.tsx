@@ -27,6 +27,7 @@ export function Tracker({ initial }: { initial: Character }) {
             </div>
             <p className="sub">{t.blurb}</p>
             <SlotGrid
+              penalties={t.key === "wp"}
               label={t.label}
               max={max}
               used={used}
