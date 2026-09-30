@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { getRole } from "@/lib/auth";
 import { getStore } from "@/lib/store";
-import type { Character } from "@/lib/types";
+import { CURRENT_ADVENTURES, type Character } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,10 @@ function CharList({ chars }: { chars: Character[] }) {
       {chars.map((c) => (
         <li key={c.id}>
           <Link href={`/c/${c.id}`} className="name">{c.name}</Link>
-          {c.campaign && <span className={`tag ${c.current ? "gold" : ""}`}>{c.campaign}</span>}
+          {/* One tag per row here: the first adventure listed. The admin view lists every adventure. */}
+          {c.adventures[0] && (
+            <span className={`tag ${CURRENT_ADVENTURES.includes(c.adventures[0]) ? "gold" : ""}`}>{c.adventures[0]}</span>
+          )}
           {c.description && <span className="meta">{c.description}</span>}
           {c.era && <span className="meta">{c.era}</span>}
         </li>

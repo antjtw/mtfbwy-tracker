@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
-import { MAX_SLOTS, TRACKS, type Character, type Player } from "@/lib/types";
+import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player } from "@/lib/types";
 
 const ALL = "All";
 const OTHER = "Other";
@@ -13,19 +13,19 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
   const [tab, setTab] = useState(ALL);
 
-  const campaigns = useMemo(() => {
-    // Current campaigns first, then the rest alphabetically
-    const seen = new Map<string, boolean>();
-    for (const c of chars) {
-      const k = c.campaign || OTHER;
-      seen.set(k, (seen.get(k) ?? false) || c.current);
-    }
-    return [...seen.entries()]
-      .sort((a, b) => Number(b[1]) - Number(a[1]) || a[0].localeCompare(b[0]))
-      .map(([name]) => name);
+  // A character with several adventures is listed under each of them (same record, same slots)
+  const tagsOf = (c: Character) => (c.adventures.length ? c.adventures : [OTHER]);
+
+  const adventures = useMemo(() => {
+    const names = new Set(chars.flatMap(tagsOf));
+    // Current adventures first, then the rest alphabetically
+    return [...names].sort(
+      (a, b) =>
+        Number(CURRENT_ADVENTURES.includes(b)) - Number(CURRENT_ADVENTURES.includes(a)) || a.localeCompare(b),
+    );
   }, [chars]);
 
-  const visible = chars.filter((c) => tab === ALL || (c.campaign || OTHER) === tab);
+  const visible = chars.filter((c) => tab === ALL || tagsOf(c).includes(tab));
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? id;
 
   return (
@@ -34,8 +34,8 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
       <h1>Admin view</h1>
       <p className="lede">See where everyone is at, and set how many slots each character has.</p>
 
-      <div className="tabs" role="group" aria-label="Filter by campaign">
-        {[ALL, ...campaigns].map((c) => (
+      <div className="tabs" role="group" aria-label="Filter by adventure">
+        {[ALL, ...adventures].map((c) => (
           <button key={c} className="tab" aria-pressed={tab === c} onClick={() => setTab(c)}>{c}</button>
         ))}
       </div>
@@ -47,6 +47,13 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
             <span className="muted">
               {playerName(c.player_id)} · <Link href={`/c/${c.id}`}>Open tracker</Link>
             </span>
+            {c.adventures.length > 0 && (
+              <span className="tags" style={{ gridColumn: "auto", flexBasis: "100%", justifyContent: "flex-start" }}>
+                {c.adventures.map((a) => (
+                  <span key={a} className={`tag ${CURRENT_ADVENTURES.includes(a) ? "gold" : ""}`}>{a}</span>
+                ))}
+              </span>
+            )}
           </header>
           <div className="admin-tracks">
             {TRACKS.map((t) => {
@@ -71,7 +78,7 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
           </div>
         </article>
       ))}
-      {visible.length === 0 && <p className="muted">No characters in this campaign yet.</p>}
+      {visible.length === 0 && <p className="muted">No characters in this adventure yet.</p>}
       <SyncBadge sync={sync} />
     </>
   );

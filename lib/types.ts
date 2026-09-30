@@ -14,11 +14,12 @@ export interface Character {
   name: string;
   description: string;
   era: string;
-  /** Campaign or quest tag shown on the character row, also used to group in the admin view */
-  campaign: string;
-  /** Highlights the tag in gold (currently running campaigns) */
-  current: boolean;
-  /** Campaign character (true) or side character (false) */
+  /**
+   * Every adventure the character appears in. They show under each one (player list and admin
+   * filters) but share a single set of slots, so usage carries across adventures.
+   */
+  adventures: string[];
+  /** Main character (true) or side character (false) */
   is_main: boolean;
   sort: number;
   hp_max: number;
@@ -30,6 +31,9 @@ export interface Character {
 }
 
 export const MAX_SLOTS = 12;
+
+/** Adventures shown with a gold tag */
+export const CURRENT_ADVENTURES = ["Campaign 2", "Campaign 3"];
 
 export const TRACKS = [
   { key: "hp", label: "Hit point slots", blurb: "Your physical health, toughness and vitality" },
