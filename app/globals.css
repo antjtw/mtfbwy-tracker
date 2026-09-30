@@ -171,6 +171,12 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 .slot.avail { border-color: var(--outline-gold); cursor: pointer; }
 .slot.used { background: var(--outline-gold); border-color: var(--outline-gold); color: var(--page-bg); cursor: pointer; } /* penalty number inverted into the fill */
 .slot.locked { border-color: var(--outline-navy-subdued); color: color-mix(in srgb, var(--outline-navy) 55%, transparent); cursor: default; }
+/* Hover only where a real pointer exists, so taps on touch screens don't leave slots stuck dark gold */
+@media (hover: hover) {
+  button.slot { transition: background-color 0.1s; }
+  button.slot:hover { background: var(--surface-gold-darker); }
+  button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
+}
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .slots.mini { grid-template-columns: repeat(12, 12px); gap: 3px; margin-top: 0; }
 .slots.mini .slot { height: 12px; border-width: 1px; border-radius: 2px; cursor: default; }
