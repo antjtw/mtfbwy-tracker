@@ -12,7 +12,7 @@ function CharList({ chars }: { chars: Character[] }) {
       {chars.map((c) => (
         <li key={c.id}>
           <Link href={`/c/${c.id}`} className="name">{c.name}</Link>
-          <span className={`tag ${c.current ? "gold" : ""}`}>{c.campaign}</span>
+          {c.campaign && <span className={`tag ${c.current ? "gold" : ""}`}>{c.campaign}</span>}
           {c.description && <span className="meta">{c.description}</span>}
           {c.era && <span className="meta">{c.era}</span>}
         </li>

@@ -7,6 +7,7 @@ import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { MAX_SLOTS, TRACKS, type Character, type Player } from "@/lib/types";
 
 const ALL = "All";
+const OTHER = "Other";
 
 export function AdminDashboard({ initial, players }: { initial: Character[]; players: Player[] }) {
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
@@ -15,13 +16,16 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
   const campaigns = useMemo(() => {
     // Current campaigns first, then the rest alphabetically
     const seen = new Map<string, boolean>();
-    for (const c of chars) seen.set(c.campaign, (seen.get(c.campaign) ?? false) || c.current);
+    for (const c of chars) {
+      const k = c.campaign || OTHER;
+      seen.set(k, (seen.get(k) ?? false) || c.current);
+    }
     return [...seen.entries()]
       .sort((a, b) => Number(b[1]) - Number(a[1]) || a[0].localeCompare(b[0]))
       .map(([name]) => name);
   }, [chars]);
 
-  const visible = chars.filter((c) => tab === ALL || c.campaign === tab);
+  const visible = chars.filter((c) => tab === ALL || (c.campaign || OTHER) === tab);
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? id;
 
   return (

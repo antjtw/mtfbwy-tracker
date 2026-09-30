@@ -1,8 +1,8 @@
 import type { Character, Player } from "./types";
 
 /**
- * Placeholder seed taken from the Figma designs. Replace with the real roster
- * (players, characters, campaigns, starting maximums) and re-run `npm run seed`.
+ * Roster seeded from Ant's dictated notes and the Notion player dashboards.
+ * Re-run `npm run seed` after editing; it updates details and maximums but never resets slot usage.
  */
 export const SEED_PLAYERS: Player[] = [
   { id: "james-allen", name: "James Allen", is_guest: false, status: "active", sort: 1 },
@@ -15,47 +15,107 @@ export const SEED_PLAYERS: Player[] = [
   { id: "ryan-scott", name: "Ryan Scott", is_guest: true, status: "inactive", sort: 8 },
 ];
 
-type C = Omit<Character, "hp_used" | "wp_used" | "ar_used" | "hp_max" | "wp_max" | "ar_max"> &
-  Partial<Pick<Character, "hp_max" | "wp_max" | "ar_max">>;
+/** [hit points, willpower, armour] */
+type Slots = [number, number, number];
 
-const c = (
-  id: string,
+/** Used where the real numbers haven't been supplied yet. Set the real ones in the admin view. */
+const TBC: Slots = [6, 6, 3];
+
+let sortCounter = 0;
+
+function c(
   player_id: string,
   name: string,
-  description: string,
-  era: string,
-  campaign: string,
-  is_main: boolean,
-  sort: number,
-  current = false,
-): C => ({ id, player_id, name, description, era, campaign, is_main, sort, current });
+  opts: {
+    main: boolean;
+    campaign?: string;
+    description?: string;
+    era?: string;
+    slots?: Slots;
+  },
+): Character {
+  const [hp, wp, ar] = opts.slots ?? TBC;
+  const campaign = opts.campaign ?? "";
+  return {
+    id: name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    player_id,
+    name,
+    description: opts.description ?? "",
+    era: opts.era ?? "",
+    campaign,
+    current: campaign === "Campaign 2" || campaign === "Campaign 3",
+    is_main: opts.main,
+    sort: ++sortCounter,
+    hp_max: hp,
+    hp_used: 0,
+    wp_max: wp,
+    wp_used: 0,
+    ar_max: ar,
+    ar_used: 0,
+  };
+}
 
-const RAW: C[] = [
-  c("fenrir", "james-allen", "Fenrir", "A Pooba Jedi Knight", "Active in 140 BBY", "Campaign 2", true, 1, true),
-  c("ji-toh-codox", "james-allen", "Ji-Toh Codox", "A Cerean Jedi Survivor", "Active in 13 BBY", "Nexu Crew", true, 2),
-  c("sebastian-quickfin", "james-allen", "Sebastian Quickfin", "A Tynann Rebellion agent", "Active in 3 ABY", "Starfall", true, 3),
-  c("tholo-endin", "james-allen", "Tholo Endin", "An enigmatic Ikkrukkian Force wielder", "Active in 7 ABY", "Campaign 3", true, 4, true),
-  c("tim", "james-allen", "Tim", "A normal, Human man", "Active in 382 BBY", "Quest of the Jedi", false, 5),
-  c("eisor-trius", "james-allen", "Eisor Trius", "An Iktotchi Nihil marauder", "Active in 231 BBY", "Ride the Storm", false, 6),
-  c("pamlian-roleb", "james-allen", "Pamlian Roleb", "A lawless Lasat on Coruscant", "Active in 16 BBY", "Train Heist", false, 7),
-  c("vomdeck-vus", "james-allen", "Vomdeck Vus", "A legendary Lasat war hero", "Active in 13 BBY", "Several", false, 8),
-  // Placeholders for the remaining players, swap for real data
-  c("vezulok-khargon", "jake-cawthray", "Vezulok Khargon", "", "", "Campaign 2", true, 1, true),
-  c("zooq", "jake-cawthray", "Zooq", "", "", "Nexu Crew", true, 2),
-  c("bingus-kaar", "josh-huntley", "Bingus K’aar", "", "", "Campaign 2", true, 1, true),
-  c("tristan-and-tabitha-topaz", "matthew-fox", "Tristan and Tabitha Topaz", "", "", "Campaign 2", true, 1, true),
-  c("dago-lomek", "naoise-oshea", "Dago Lomek", "", "", "Campaign 2", true, 1, true),
-  c("solina", "wilde-wathne", "Sol’ina", "", "", "Campaign 2", true, 1, true),
-  c("gary-woodland", "jack-pedleham", "Gary Woodland", "", "", "Several", false, 1),
-  c("gan-acka", "ryan-scott", "Gan Acka", "", "", "Several", false, 1),
+const JAMES = "james-allen";
+const JAKE = "jake-cawthray";
+const JOSH = "josh-huntley";
+const MATT = "matthew-fox";
+const NAOISE = "naoise-oshea";
+const WILDE = "wilde-wathne";
+
+export const SEED_CHARACTERS: Character[] = [
+  // James
+  c(JAMES, "Fenrir", { main: true, campaign: "Campaign 2", description: "A Pooba Jedi Knight", era: "Active in 140 BBY", slots: [8, 6, 0] }),
+  c(JAMES, "Tholo Endin", { main: true, campaign: "Campaign 3", description: "An enigmatic Ikkrukkian Force wielder", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
+  c(JAMES, "Ji-Toh Codox", { main: true, campaign: "Nexu Crew", description: "A Cerean Jedi Survivor", era: "Active in 13 BBY" }),
+  c(JAMES, "Sebastian Quickfin", { main: false, campaign: "Starfall", description: "A Tynann Rebellion agent", era: "Active in 3 ABY" }),
+  c(JAMES, "Tim", { main: false, campaign: "Quest of the Jedi", description: "A normal, Human man", era: "Active in 382 BBY" }),
+  c(JAMES, "Eisor Trius", { main: false, campaign: "Ride the Storm", description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
+  c(JAMES, "Pamlian Roleb", { main: false, campaign: "Train Heist", description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
+  c(JAMES, "Vomdeck Vus", { main: false, campaign: "Several", description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
+
+  // Jake
+  c(JAKE, "Bowen Clandis", { main: true, campaign: "Campaign 2", slots: [7, 7, 0] }),
+  c(JAKE, "Bromtek Raag", { main: true, campaign: "Campaign 3", slots: [6, 6, 3] }),
+  c(JAKE, "Vezulok Khargon", { main: true }),
+  c(JAKE, "Zooq", { main: true }),
+  c(JAKE, "Bolsa Roodah", { main: false, campaign: "Campaign 2", slots: [7, 7, 5] }),
+  c(JAKE, "Rayzer Botch", { main: false }),
+
+  // Josh
+  c(JOSH, "Gadge Millet", { main: true, campaign: "Campaign 2", description: "Ikkrukian", slots: [6, 6, 3] }),
+  c(JOSH, "Fubbo", { main: true, campaign: "Campaign 3", description: "Wookiee", slots: [7, 6, 4] }),
+  c(JOSH, "Bingus K’aar", { main: true, campaign: "Nexu Crew", description: "Tusken" }),
+  c(JOSH, "Agen Ankor", { main: false, campaign: "Quest of the Jedi", description: "Zabrack" }),
+  c(JOSH, "Battarux", { main: false, campaign: "Ride the Storm", description: "Dashade" }),
+  c(JOSH, "Rosama Melmi", { main: false, campaign: "Underworld Train Heist", description: "Human" }),
+
+  // Matthew
+  c(MATT, "Ras Mithra", { main: true, campaign: "Campaign 2", description: "Pkorian", slots: [7, 8, 0] }),
+  c(MATT, "ECCO", { main: true, campaign: "Campaign 3", description: "Human", slots: [6, 6, 3] }),
+  c(MATT, "Tabitha Topaz", { main: true, campaign: "Nexu Crew", description: "Human" }),
+  c(MATT, "Tristan Topaz", { main: true, campaign: "Nexu Crew", description: "Human" }),
+  c(MATT, "Kainard Plusttr", { main: false, campaign: "Quest of the Jedi", description: "Besalisk" }),
+  c(MATT, "Kael", { main: false, campaign: "Ride the Storm", description: "Mon Calamari" }),
+  c(MATT, "Vesh Caldrin", { main: false, campaign: "Rancor Heist", description: "Kage" }),
+  c(MATT, "Barbossa", { main: false, campaign: "Underworld Train Heist", description: "Chironian" }),
+  c(MATT, "Errol Reza", { main: false, campaign: "Nexu Crew", description: "Kalleran" }),
+  c(MATT, "Biz Ube Hurley", { main: false, campaign: "Grakkus Arena", description: "Bith" }),
+
+  // Naoise
+  c(NAOISE, "L1-M3", { main: true, campaign: "Campaign 2", description: "Class 2 Droid", slots: [7, 6, 0] }),
+  c(NAOISE, "Thalen Skellig", { main: true, campaign: "Campaign 3", description: "Human", slots: [7, 6, 4] }),
+  c(NAOISE, "Dago Lomek", { main: true, campaign: "Nexu Crew", description: "Rodian" }),
+  c(NAOISE, "Tommy Gleb", { main: false, campaign: "Quest of the Jedi", description: "Besalisk" }),
+  c(NAOISE, "Viya Grah", { main: false, campaign: "Ride the Storm", description: "Nautolan" }),
+  c(NAOISE, "BNT-333", { main: false, campaign: "Nexu Crew", description: "Seeker Droid" }),
+
+  // Wilde
+  c(WILDE, "A13-XA", { main: true, campaign: "Campaign 2", slots: [7, 6, 3] }),
+  c(WILDE, "Rue Dahlia", { main: true, campaign: "Campaign 3", slots: [6, 6, 3] }),
+  c(WILDE, "Sol’ina", { main: true }),
+  c(WILDE, "Dia Tarkona", { main: false }),
+
+  // Guests
+  c("jack-pedleham", "Gary Woodland", { main: true, campaign: "Nexu Crew", description: "Tiss’shar" }),
+  c("ryan-scott", "Gan Acka", { main: true, campaign: "Nexu Crew", description: "Anzellan" }),
 ];
-
-export const SEED_CHARACTERS: Character[] = RAW.map((r) => ({
-  hp_max: 7,
-  wp_max: 7,
-  ar_max: 4,
-  ...r,
-  hp_used: 0,
-  wp_used: 0,
-  ar_used: 0,
-}));
