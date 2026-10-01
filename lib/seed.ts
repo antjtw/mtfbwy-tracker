@@ -133,7 +133,6 @@ const ROSTER: Character[] = [
   c(NAOISE, "Slakk Printall (Dago Lomek)", { id: "dago-lomek", adventures: [NEXU, C3], main: true, description: "Rodian" }),
   c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "Besalisk" }),
   c(NAOISE, "Viya Grah", { adventures: [RTS], description: "Nautolan" }),
-  c(NAOISE, "BNT-333", { adventures: [NEXU], description: "Seeker Droid" }),
 
   // Wilde
   c(WILDE, "A13-XA", { adventures: [C2], description: "Class 3 Droid", slots: [7, 6, 3] }),
@@ -159,7 +158,7 @@ const TIMELINE: Record<string, string[]> = {
   "jake-cawthray": ["Bezulok Fhargon", "Cors 'Blitz' Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Orrin Vox", "Bromtek Raag", "Teri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Wee Dunga Funq", "Rayzer Botch"],
   "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Drassk the Endurer", "Fubbroonfal", "Bingus-K’aar", "Rosama Melmi", "Rodneh Cheekoo"],
   "matthew-fox": ["Kainard Plusttr", "Kael", "Ras Mithra", "Vesh Caldrin", "Tabitha Topaz", "Tristan Topaz", "Barbossa", "Errol Reza", "Biz Ube Hurley", "ECCO"],
-  "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Slakk Printall (Dago Lomek)", "Thalen Skellig", "BNT-333"],
+  "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Slakk Printall (Dago Lomek)", "Thalen Skellig"],
   "wilde-wathne": ["Mark Mantis", "A13-XA", "Lucky Calder", "Sol’ina", "Rue Dahlia", "Dia Tarkona", "Kaja Verec", "Tantoori Vozo"],
   "jack-pedleham": ["Gary Woodland"],
   "ryan-scott": ["Gan Acka"],

@@ -57,7 +57,6 @@ insert into characters (id, player_id, name, description, era, adventures, is_ma
   ('viya-grah', 'naoise-oshea', 'Viya Grah', 'Nautolan', '', array['Ride the Storm']::text[], false, true, 502, 6, 6, 0),
   ('dago-lomek', 'naoise-oshea', 'Slakk Printall (Dago Lomek)', 'Rodian', '', array['Nexu Crew', 'Campaign 3']::text[], true, true, 503, 6, 6, 0),
   ('thalen-skellig', 'naoise-oshea', 'Thalen Skellig', 'Human', '', array['Campaign 3']::text[], true, true, 504, 7, 6, 4),
-  ('bnt-333', 'naoise-oshea', 'BNT-333', 'Seeker Droid', '', array['Nexu Crew']::text[], false, true, 505, 6, 6, 0),
   ('mark-mantis', 'wilde-wathne', 'Mark Mantis', 'Gand', '', array['Quest of the Jedi']::text[], false, true, 600, 6, 6, 0),
   ('a13-xa', 'wilde-wathne', 'A13-XA', 'Class 3 Droid', '', array['Campaign 2']::text[], true, true, 601, 7, 6, 3),
   ('lucky-calder', 'wilde-wathne', 'Lucky Calder', 'Human', '', array['Rancor Heist']::text[], false, true, 602, 6, 6, 0),
