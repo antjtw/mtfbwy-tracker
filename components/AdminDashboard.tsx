@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
-import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type TrackKey } from "@/lib/types";
+import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player, type TrackKey } from "@/lib/types";
 
 const ALL = "All";
 const OTHER = "Other";
@@ -29,7 +29,7 @@ function PlusIcon() {
   );
 }
 
-export function AdminDashboard({ initial }: { initial: Character[] }) {
+export function AdminDashboard({ initial, players }: { initial: Character[]; players: Player[] }) {
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
   const [tab, setTab] = useState(ALL);
 
@@ -44,6 +44,8 @@ export function AdminDashboard({ initial }: { initial: Character[] }) {
         Number(CURRENT_ADVENTURES.includes(b)) - Number(CURRENT_ADVENTURES.includes(a)) || a.localeCompare(b),
     );
   }, [chars]);
+
+  const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? "";
 
   // Cards are listed alphabetically by character name
   const visible = chars
@@ -65,7 +67,10 @@ export function AdminDashboard({ initial }: { initial: Character[] }) {
       <div className="gm-cards">
         {visible.map((c) => (
           <article className="gm-card" key={c.id} aria-labelledby={`gm-${c.id}`}>
-            <h2 className="gm-name" id={`gm-${c.id}`}>{c.name}</h2>
+            <div className="gm-head">
+              <h2 className="gm-name" id={`gm-${c.id}`}>{c.name}</h2>
+              <span className="gm-player">{playerName(c.player_id)}</span>
+            </div>
             {GM_TRACKS.map((t) => {
               const max = c[`${t.key}_max`];
               const used = c[`${t.key}_used`];
