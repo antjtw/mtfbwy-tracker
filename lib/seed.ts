@@ -31,6 +31,8 @@ const C2 = "Campaign 2";
 const C3 = "Campaign 3";
 const STAR = "Starfall";
 const HEIST = "Underworld Train Heist";
+const RANCOR = "Rancor Heist";
+const ARENA = "Grakkus Arena";
 
 let sortCounter = 0;
 
@@ -78,23 +80,27 @@ const ROSTER: Character[] = [
   // James
   c(JAMES, "Fenrir", { adventures: [C2], description: "A Pooba Jedi Knight", era: "Active in 140 BBY", slots: [8, 6, 0] }),
   c(JAMES, "Tholo Endin", { adventures: [C3], description: "An enigmatic Ikkrukkian Force wielder", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
-  c(JAMES, "Ji-Toh Codox", { adventures: [NEXU], main: true, description: "A Cerean Jedi Survivor", era: "Active in 13 BBY" }),
+  c(JAMES, "Ji-Toh Codox", { adventures: [NEXU, C3], main: true, description: "A Cerean Jedi Survivor", era: "Active in 13 BBY" }),
   c(JAMES, "Sebastian Quickfin", { adventures: [STAR], description: "A Tynann Rebellion agent", era: "Active in 3 ABY" }),
   c(JAMES, "Vomdek Vus", { adventures: [STAR], description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
   c(JAMES, "Tim", { adventures: [QOTJ], description: "A normal, Human man", era: "Active in 382 BBY" }),
   c(JAMES, "Eisor Trius", { adventures: [RTS], description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
+  c(JAMES, "Ashira Taal", { adventures: [RANCOR], description: "Twi’lek" }),
+  c(JAMES, "Kirk Dickson", { adventures: [ARENA], description: "Human" }),
   c(JAMES, "Pamlian Roleb", { adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
 
   // Jake
   c(JAKE, "Bowen Clandis", { adventures: [C2], description: "Pantoran", slots: [7, 7, 0] }),
   c(JAKE, "Bromtek Raag", { adventures: [C3], description: "Aqualish", slots: [6, 6, 3] }),
   c(JAKE, "Terri Zooq", { adventures: [NEXU], main: true, description: "Gand" }),
-  c(JAKE, "Vezulok Khargon", { adventures: [NEXU], main: true, description: "Barabel" }),
-  c(JAKE, "Rayzer Botch", { adventures: [STAR], description: "Tynann" }),
+  c(JAKE, "Vezulok Khargon", { adventures: [NEXU, C3], main: true, description: "Barabel" }),
+  c(JAKE, "Rayzer Botch", { adventures: [STAR, C3], description: "Tynann" }),
   c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, slots: [7, 7, 5] }),
   c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "Barabel" }),
   c(JAKE, "Cors Ghrenald", { adventures: [RTS], description: "Human" }),
   c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "Anomid" }),
+  c(JAKE, "Orrin Vox", { adventures: [RANCOR], description: "Bith" }),
+  c(JAKE, "Wee Dunga Funq", { adventures: [ARENA], description: "Rodian" }),
   c(JAKE, "Ulon Glost", { adventures: [NEXU], description: "Mustafarian" }),
 
   // Josh
@@ -103,24 +109,26 @@ const ROSTER: Character[] = [
   c(JOSH, "Bingus K’aar", { adventures: [NEXU], main: true, description: "Tusken" }),
   c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zabrack" }),
   c(JOSH, "Battarux", { adventures: [RTS], description: "Dashade" }),
+  c(JOSH, "Drassk the Endurer", { adventures: [RANCOR], description: "Trandoshan" }),
+  c(JOSH, "Rodneh Cheekoo", { adventures: [ARENA], description: "Rodian" }),
   c(JOSH, "Rosama Melmi", { adventures: [HEIST], description: "Human" }),
 
   // Matthew
   c(MATT, "Ras Mithra", { adventures: [C2], description: "Pkorian", slots: [7, 8, 0] }),
   c(MATT, "ECCO", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
   c(MATT, "Kainard Plusttr", { adventures: [STAR], description: "Besalisk" }),
-  c(MATT, "Tabitha Topaz", { adventures: [NEXU], main: true, description: "Human" }),
-  c(MATT, "Tristan Topaz", { adventures: [NEXU], main: true, description: "Human" }),
+  c(MATT, "Tabitha Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
+  c(MATT, "Tristan Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
   c(MATT, "Kael", { adventures: [RTS], description: "Mon Calamari" }),
-  c(MATT, "Vesh Caldrin", { adventures: ["Rancor Heist"], description: "Kage" }),
+  c(MATT, "Vesh Caldrin", { adventures: [RANCOR], description: "Kage" }),
   c(MATT, "Barbossa", { adventures: [HEIST], description: "Chironian" }),
   c(MATT, "Errol Reza", { adventures: [NEXU], description: "Kalleran" }),
-  c(MATT, "Biz Ube Hurley", { adventures: ["Grakkus Arena"], description: "Bith" }),
+  c(MATT, "Biz Ube Hurley", { adventures: [ARENA], description: "Bith" }),
 
   // Naoise
-  c(NAOISE, "L1-M3", { adventures: [C2], description: "Class 2 Droid", slots: [7, 6, 0] }),
+  c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Class 2 Droid", slots: [7, 6, 0] }),
   c(NAOISE, "Thalen Skellig", { adventures: [C3], description: "Human", slots: [7, 6, 4] }),
-  c(NAOISE, "Dago Lomek", { adventures: [NEXU], main: true, description: "Rodian" }),
+  c(NAOISE, "Dago Lomek", { adventures: [NEXU, C3], main: true, description: "Rodian" }),
   c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "Besalisk" }),
   c(NAOISE, "Viya Grah", { adventures: [RTS], description: "Nautolan" }),
   c(NAOISE, "BNT-333", { adventures: [NEXU], description: "Seeker Droid" }),
@@ -131,11 +139,12 @@ const ROSTER: Character[] = [
   c(WILDE, "Dia Tarkdona", { adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
   c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
+  c(WILDE, "Lucky Calder", { adventures: [RANCOR], description: "Human" }),
   c(WILDE, "Kaja Vel", { adventures: [HEIST], description: "Kiffar" }),
   c(WILDE, "Tantoori Vozo", { adventures: [NEXU], description: "Nikto" }),
 
   // Guests
-  c("jack-pedleham", "Gary Woodland", { adventures: [NEXU], main: true, description: "Tiss’shar" }),
+  c("jack-pedleham", "Gary Woodland", { adventures: [NEXU, C3], main: true, description: "Tiss’shar" }),
   c("ryan-scott", "Gan Acka", { adventures: [NEXU], main: true, description: "Anzellan" }),
 ];
 
@@ -144,12 +153,12 @@ const ROSTER: Character[] = [
  * Bolsa Roodah is new and isn't on the dashboards yet, so he sits next to Bowen (Campaign 2).
  */
 const TIMELINE: Record<string, string[]> = {
-  "james-allen": ["Tim", "Eisor Trius", "Fenrir", "Ji-Toh Codox", "Tholo Endin", "Pamlian Roleb", "Vomdek Vus", "Sebastian Quickfin"],
-  "jake-cawthray": ["Bezulok Fhargon", "Cors Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Bromtek Raag", "Terri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Rayzer Botch"],
-  "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Fubbo", "Bingus K’aar", "Rosama Melmi"],
+  "james-allen": ["Tim", "Eisor Trius", "Fenrir", "Ashira Taal", "Ji-Toh Codox", "Tholo Endin", "Pamlian Roleb", "Vomdek Vus", "Kirk Dickson", "Sebastian Quickfin"],
+  "jake-cawthray": ["Bezulok Fhargon", "Cors Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Orrin Vox", "Bromtek Raag", "Terri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Wee Dunga Funq", "Rayzer Botch"],
+  "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Drassk the Endurer", "Fubbo", "Bingus K’aar", "Rosama Melmi", "Rodneh Cheekoo"],
   "matthew-fox": ["Kainard Plusttr", "Kael", "Ras Mithra", "Vesh Caldrin", "Tabitha Topaz", "Tristan Topaz", "Barbossa", "Errol Reza", "Biz Ube Hurley", "ECCO"],
   "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Dago Lomek", "Thalen Skellig", "BNT-333"],
-  "wilde-wathne": ["Mark Mantis", "A13-XA", "Sol’ina", "Rue Dahlia", "Dia Tarkdona", "Kaja Vel", "Tantoori Vozo"],
+  "wilde-wathne": ["Mark Mantis", "A13-XA", "Lucky Calder", "Sol’ina", "Rue Dahlia", "Dia Tarkdona", "Kaja Vel", "Tantoori Vozo"],
   "jack-pedleham": ["Gary Woodland"],
   "ryan-scott": ["Gan Acka"],
 };
