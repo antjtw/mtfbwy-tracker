@@ -151,7 +151,7 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 .list .meta { grid-column: 1; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
 
 /* Badges */
-.tag { font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; background: var(--surface-navy-lighter); color: var(--text-subdued); white-space: nowrap; grid-column: 2; grid-row: 1; align-self: center; }
+.tag { font-size: 12px; line-height: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 8px; background: var(--surface-navy-lighter); color: var(--text-gold); white-space: nowrap; grid-column: 2; grid-row: 1; align-self: center; }
 .tags { grid-column: 2; grid-row: 1; display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; }
 .tags .tag { grid-column: auto; grid-row: auto; }
 .tag.gold { background: var(--surface-gold-darker); color: var(--text-gold); }

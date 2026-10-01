@@ -18,8 +18,8 @@ export const SEED_PLAYERS: Player[] = [
 /** [hit points, willpower, armour] */
 type Slots = [number, number, number];
 
-/** Used where the real numbers haven't been supplied yet. Set the real ones in the admin view. */
-const TBC: Slots = [6, 6, 3];
+/** Starting maximums where real numbers haven't been supplied. Adjust them in the GM view. */
+const TBC: Slots = [6, 6, 0];
 
 /** Characters in any of these adventures are main characters */
 const MAIN_ADVENTURES = ["Campaign 2", "Campaign 3", "Starfall"];
@@ -55,7 +55,7 @@ function c(
     description: opts.description ?? "",
     era: opts.era ?? "",
     adventures,
-    tracked: opts.slots !== undefined, // real slot numbers supplied = Campaign 2/3, tracker on
+    tracked: true, // every character has a tracker; maximums are managed in the GM view
     is_main: opts.main ?? adventures.some((a) => MAIN_ADVENTURES.includes(a)),
     sort: ++sortCounter,
     hp_max: hp,
@@ -80,7 +80,7 @@ const ROSTER: Character[] = [
   c(JAMES, "Tholo Endin", { adventures: [C3], description: "An enigmatic Ikkrukkian Force wielder", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
   c(JAMES, "Ji-Toh Codox", { adventures: [NEXU], main: true, description: "A Cerean Jedi Survivor", era: "Active in 13 BBY" }),
   c(JAMES, "Sebastian Quickfin", { adventures: [STAR], description: "A Tynann Rebellion agent", era: "Active in 3 ABY" }),
-  c(JAMES, "Vomdek Vus", { adventures: [NEXU, STAR], description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
+  c(JAMES, "Vomdek Vus", { adventures: [STAR], description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
   c(JAMES, "Tim", { adventures: [QOTJ], description: "A normal, Human man", era: "Active in 382 BBY" }),
   c(JAMES, "Eisor Trius", { adventures: [RTS], description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
   c(JAMES, "Pamlian Roleb", { adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
@@ -108,7 +108,7 @@ const ROSTER: Character[] = [
   // Matthew
   c(MATT, "Ras Mithra", { adventures: [C2], description: "Pkorian", slots: [7, 8, 0] }),
   c(MATT, "ECCO", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
-  c(MATT, "Kainard Plusttr", { adventures: [STAR, QOTJ, C2], description: "Besalisk" }),
+  c(MATT, "Kainard Plusttr", { adventures: [STAR], description: "Besalisk" }),
   c(MATT, "Tabitha Topaz", { adventures: [NEXU], main: true, description: "Human" }),
   c(MATT, "Tristan Topaz", { adventures: [NEXU], main: true, description: "Human" }),
   c(MATT, "Kael", { adventures: [RTS], description: "Mon Calamari" }),
@@ -128,7 +128,7 @@ const ROSTER: Character[] = [
   // Wilde
   c(WILDE, "A13-XA", { adventures: [C2], description: "Class 3 Droid", slots: [7, 6, 3] }),
   c(WILDE, "Rue Dahlia", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
-  c(WILDE, "Dia Tarkdona", { adventures: [STAR, C3], description: "Twi’lek" }),
+  c(WILDE, "Dia Tarkdona", { adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
   c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
   c(WILDE, "Kaja Vel", { adventures: [HEIST], description: "Kiffar" }),
