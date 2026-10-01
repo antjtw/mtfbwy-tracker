@@ -45,7 +45,10 @@ export function AdminDashboard({ initial }: { initial: Character[] }) {
     );
   }, [chars]);
 
-  const visible = chars.filter((c) => tab === ALL || tagsOf(c).includes(tab));
+  // Cards are listed alphabetically by character name
+  const visible = chars
+    .filter((c) => tab === ALL || tagsOf(c).includes(tab))
+    .sort((a, b) => a.name.localeCompare(b.name, "en-GB", { sensitivity: "base" }));
 
   return (
     <>
