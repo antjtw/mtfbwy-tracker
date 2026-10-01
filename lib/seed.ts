@@ -46,12 +46,14 @@ function c(
     description?: string;
     era?: string;
     slots?: Slots;
+    /** Keeps the original database id (and tracker URL) when a character is renamed */
+    id?: string;
   },
 ): Character {
   const [hp, wp, ar] = opts.slots ?? TBC;
   const adventures = opts.adventures ?? [];
   return {
-    id: name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    id: opts.id ?? name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
     player_id,
     name,
     description: opts.description ?? "",
@@ -87,17 +89,17 @@ const ROSTER: Character[] = [
   c(JAMES, "Eisor Trius", { adventures: [RTS], description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
   c(JAMES, "Ashira Taal", { adventures: [RANCOR], description: "Twi’lek" }),
   c(JAMES, "Kirk Dickson", { adventures: [ARENA], description: "Human" }),
-  c(JAMES, "Pamlian Roleb", { adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
+  c(JAMES, "Pamliven Roleb", { id: "pamlian-roleb", adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
 
   // Jake
   c(JAKE, "Bowen Clandis", { adventures: [C2], description: "Pantoran", slots: [7, 7, 0] }),
   c(JAKE, "Bromtek Raag", { adventures: [C3], description: "Aqualish", slots: [6, 6, 3] }),
-  c(JAKE, "Terri Zooq", { adventures: [NEXU], main: true, description: "Gand" }),
+  c(JAKE, "Teri Zooq", { id: "terri-zooq", adventures: [NEXU], main: true, description: "Gand" }),
   c(JAKE, "Vezulok Khargon", { adventures: [NEXU, C3], main: true, description: "Barabel" }),
   c(JAKE, "Rayzer Botch", { adventures: [STAR, C3], description: "Tynann" }),
-  c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, slots: [7, 7, 5] }),
+  c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, description: "Rodian", slots: [7, 7, 5] }),
   c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "Barabel" }),
-  c(JAKE, "Cors Ghrenald", { adventures: [RTS], description: "Human" }),
+  c(JAKE, "Cors 'Blitz' Ghrenald", { id: "cors-ghrenald", adventures: [RTS], description: "Human" }),
   c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "Anomid" }),
   c(JAKE, "Orrin Vox", { adventures: [RANCOR], description: "Bith" }),
   c(JAKE, "Wee Dunga Funq", { adventures: [ARENA], description: "Rodian" }),
@@ -105,9 +107,9 @@ const ROSTER: Character[] = [
 
   // Josh
   c(JOSH, "Gadge Millet", { adventures: [C2], description: "Ikkrukian", slots: [6, 6, 3] }),
-  c(JOSH, "Fubbo", { adventures: [C3], description: "Wookiee", slots: [7, 6, 4] }),
-  c(JOSH, "Bingus K’aar", { adventures: [NEXU], main: true, description: "Tusken" }),
-  c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zabrack" }),
+  c(JOSH, "Fubbroonfal", { id: "fubbo", adventures: [C3], description: "Wookiee", slots: [7, 6, 4] }),
+  c(JOSH, "Bingus-K’aar", { id: "bingus-kaar", adventures: [NEXU], main: true, description: "Tusken" }),
+  c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zebrak" }),
   c(JOSH, "Battarux", { adventures: [RTS], description: "Dashade" }),
   c(JOSH, "Drassk the Endurer", { adventures: [RANCOR], description: "Trandoshan" }),
   c(JOSH, "Rodneh Cheekoo", { adventures: [ARENA], description: "Rodian" }),
@@ -128,7 +130,7 @@ const ROSTER: Character[] = [
   // Naoise
   c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Class 2 Droid", slots: [7, 6, 0] }),
   c(NAOISE, "Thalen Skellig", { adventures: [C3], description: "Human", slots: [7, 6, 4] }),
-  c(NAOISE, "Dago Lomek", { adventures: [NEXU, C3], main: true, description: "Rodian" }),
+  c(NAOISE, "Slakk Printall (Dago Lomek)", { id: "dago-lomek", adventures: [NEXU, C3], main: true, description: "Rodian" }),
   c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "Besalisk" }),
   c(NAOISE, "Viya Grah", { adventures: [RTS], description: "Nautolan" }),
   c(NAOISE, "BNT-333", { adventures: [NEXU], description: "Seeker Droid" }),
@@ -136,11 +138,11 @@ const ROSTER: Character[] = [
   // Wilde
   c(WILDE, "A13-XA", { adventures: [C2], description: "Class 3 Droid", slots: [7, 6, 3] }),
   c(WILDE, "Rue Dahlia", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
-  c(WILDE, "Dia Tarkdona", { adventures: [STAR], description: "Twi’lek" }),
+  c(WILDE, "Dia Tarkona", { id: "dia-tarkdona", adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
   c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
   c(WILDE, "Lucky Calder", { adventures: [RANCOR], description: "Human" }),
-  c(WILDE, "Kaja Vel", { adventures: [HEIST], description: "Kiffar" }),
+  c(WILDE, "Kaja Verec", { id: "kaja-vel", adventures: [HEIST], description: "Kiffar" }),
   c(WILDE, "Tantoori Vozo", { adventures: [NEXU], description: "Nikto" }),
 
   // Guests
@@ -153,12 +155,12 @@ const ROSTER: Character[] = [
  * Bolsa Roodah is new and isn't on the dashboards yet, so he sits next to Bowen (Campaign 2).
  */
 const TIMELINE: Record<string, string[]> = {
-  "james-allen": ["Tim", "Eisor Trius", "Fenrir", "Ashira Taal", "Ji-Toh Codox", "Tholo Endin", "Pamlian Roleb", "Vomdek Vus", "Kirk Dickson", "Sebastian Quickfin"],
-  "jake-cawthray": ["Bezulok Fhargon", "Cors Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Orrin Vox", "Bromtek Raag", "Terri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Wee Dunga Funq", "Rayzer Botch"],
-  "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Drassk the Endurer", "Fubbo", "Bingus K’aar", "Rosama Melmi", "Rodneh Cheekoo"],
+  "james-allen": ["Tim", "Eisor Trius", "Fenrir", "Ashira Taal", "Ji-Toh Codox", "Tholo Endin", "Pamliven Roleb", "Vomdek Vus", "Kirk Dickson", "Sebastian Quickfin"],
+  "jake-cawthray": ["Bezulok Fhargon", "Cors 'Blitz' Ghrenald", "Bowen Clandis", "Bolsa Roodah", "Orrin Vox", "Bromtek Raag", "Teri Zooq", "Vezulok Khargon", "Korpel Yurik", "Ulon Glost", "Wee Dunga Funq", "Rayzer Botch"],
+  "josh-huntley": ["Agen Ankor", "Battarux", "Gadge Millet", "Drassk the Endurer", "Fubbroonfal", "Bingus-K’aar", "Rosama Melmi", "Rodneh Cheekoo"],
   "matthew-fox": ["Kainard Plusttr", "Kael", "Ras Mithra", "Vesh Caldrin", "Tabitha Topaz", "Tristan Topaz", "Barbossa", "Errol Reza", "Biz Ube Hurley", "ECCO"],
-  "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Dago Lomek", "Thalen Skellig", "BNT-333"],
-  "wilde-wathne": ["Mark Mantis", "A13-XA", "Lucky Calder", "Sol’ina", "Rue Dahlia", "Dia Tarkdona", "Kaja Vel", "Tantoori Vozo"],
+  "naoise-oshea": ["Tommy Gleb", "L1-M3", "Viya Grah", "Slakk Printall (Dago Lomek)", "Thalen Skellig", "BNT-333"],
+  "wilde-wathne": ["Mark Mantis", "A13-XA", "Lucky Calder", "Sol’ina", "Rue Dahlia", "Dia Tarkona", "Kaja Verec", "Tantoori Vozo"],
   "jack-pedleham": ["Gary Woodland"],
   "ryan-scott": ["Gan Acka"],
 };
