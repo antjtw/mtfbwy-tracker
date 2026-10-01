@@ -31,8 +31,9 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
 
   return (
     <>
-      <PageHeading>Admin view</PageHeading>
-      <p className="lede">See where everyone is at, and set how many slots each character has.</p>
+      <PageHeading title="Admin view">
+        <p className="lede">See where everyone is at, and set how many slots each character has.</p>
+      </PageHeading>
 
       <div className="tabs" role="group" aria-label="Filter by adventure">
         {[ALL, ...adventures].map((c) => (

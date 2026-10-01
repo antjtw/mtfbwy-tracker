@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="site-header">
           <Link href="/" className="logo" aria-label="MTFBWY home">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="MTFBWY" width={86} height={24} />
+            <img src="/logo.svg" alt="MTFBWY" width={129} height={36} />
           </Link>
         </header>
         {children}

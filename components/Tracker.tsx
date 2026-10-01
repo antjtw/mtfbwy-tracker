@@ -11,10 +11,11 @@ export function Tracker({ initial }: { initial: Character }) {
 
   return (
     <>
-      <PageHeading>{`Track ${ch.name}’s stats`}</PageHeading>
-      <p className="lede">
-        Use this space to track {ch.name}’s health, armour and willpower, with the character sheet as a helpful reference.
-      </p>
+      <PageHeading title={`Track ${ch.name}’s stats`}>
+        <p className="lede">
+          Use this space to track {ch.name}’s health, armour and willpower, with the character sheet as a helpful reference.
+        </p>
+      </PageHeading>
 
       {TRACKS.map((t) => {
         const max = ch[`${t.key}_max`];

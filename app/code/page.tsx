@@ -57,13 +57,14 @@ function CodeForm() {
             <button type="button" aria-label="Dismiss" onClick={() => setError(null)}>×</button>
           </div>
         )}
-        <PageHeading>Enter code</PageHeading>
-        <p className="lede">{admin ? "GM code required." : "Welcome back to a galaxy far, far away…."}</p>
-        <p className="sub">
-          Need a code? <a href={MESSAGE_GM_MAILTO}>Message the GM</a>.
-        </p>
+        <PageHeading title="Enter code">
+          <p className="lede">{admin ? "GM code required." : "Welcome back to a galaxy far, far away…."}</p>
+          <p className="sub">
+            Need a code? <a href={MESSAGE_GM_MAILTO}>Message the GM</a>.
+          </p>
+        </PageHeading>
 
-        <form onSubmit={submit} noValidate className="section stack">
+        <form onSubmit={submit} noValidate className="stack">
           <div className={`field ${error === "empty" ? "error" : ""}`}>
             <label htmlFor="code">Code</label>
             <input
@@ -79,8 +80,9 @@ function CodeForm() {
                 if (error === "empty") setError(null);
               }}
               aria-invalid={error === "empty"}
+              aria-describedby={error === "empty" ? "code-error" : undefined}
             />
-            {error === "empty" && <div className="err">You must enter a code</div>}
+            {error === "empty" && <div className="err" id="code-error">You must enter a code</div>}
           </div>
           <label className="switch">
             <input type="checkbox" checked={show} onChange={(e) => setShow(e.target.checked)} />
@@ -88,10 +90,10 @@ function CodeForm() {
           </label>
           {!admin && (
             <p>
-              <a href={FORGOTTEN_CODE_MAILTO}>I’ve forgotten my code</a>
+              <a className="standalone" href={FORGOTTEN_CODE_MAILTO}>I’ve forgotten my code</a>
             </p>
           )}
-          <div className="section">
+          <div className="actions">
             <button className="btn" type="submit" disabled={busy}>{busy ? "Checking…" : "Continue"}</button>
           </div>
         </form>

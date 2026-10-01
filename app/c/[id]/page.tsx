@@ -16,7 +16,7 @@ export default async function TrackerPage({ params }: { params: Promise<{ id: st
     <main>
       <div className="col tracker">
         <Tracker initial={ch} />
-        <p className="section"><Link href={`/p/${ch.player_id}`}>Back to characters</Link></p>
+        <p className="section"><Link className="standalone" href={`/p/${ch.player_id}`}>Back to characters</Link></p>
       </div>
     </main>
   );

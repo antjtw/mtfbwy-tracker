@@ -46,8 +46,9 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
   return (
     <main>
       <div className="col">
-        <PageHeading>Select a character</PageHeading>
-        <p className="lede">You’ve taken your first step into a larger world.</p>
+        <PageHeading title="Select a character">
+          <p className="lede">You’ve taken your first step into a larger world.</p>
+        </PageHeading>
         {main.length > 0 && (
           <section className="section">
             <h2>{first}’s campaign characters</h2>
@@ -60,7 +61,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
             <CharList chars={side} />
           </section>
         )}
-        <p className="section"><Link href="/">Back to players</Link></p>
+        <p className="section"><Link className="standalone" href="/">Back to players</Link></p>
       </div>
     </main>
   );

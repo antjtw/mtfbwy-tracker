@@ -39,8 +39,9 @@ export default async function Home() {
   return (
     <main>
       <div className="col">
-        <PageHeading>The Nexuverse</PageHeading>
-        <p className="lede">A multi-campaign story, spanning 200 years in a galaxy far, far away….</p>
+        <PageHeading title="The Nexuverse">
+          <p className="lede">A multi-campaign story, spanning 200 years in a galaxy far, far away….</p>
+        </PageHeading>
 
         <section className="section">
           <h2>Main players</h2>
@@ -51,7 +52,7 @@ export default async function Home() {
           <PlayerList players={players.filter((p) => p.is_guest)} chars={chars} />
         </section>
         <p className="section">
-          <Link href={`/code?admin=1&next=${encodeURIComponent("/admin")}`}>Admin view</Link>
+          <Link className="standalone" href={`/code?admin=1&next=${encodeURIComponent("/admin")}`}>Admin view</Link>
         </p>
       </div>
     </main>
