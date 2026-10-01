@@ -84,6 +84,7 @@
   --column-margin: 20px;
   --column-full: 1080px;
   --column-half: 530px; /* primary reading/form column */
+  --column-gm: 709px; /* Column – Full width (Lg min): GM dashboard */
   --input-max: 390px;
   --masthead: 64px;
   --target: 44px; /* minimum pointer target */
@@ -130,6 +131,7 @@ a.standalone { display: inline-block; padding: calc((var(--target) - 28px) / 2) 
 main { flex: 1; width: 100%; padding: var(--pad-2xl) var(--column-margin); }
 .col { max-width: var(--column-half); margin: 0 auto; }
 .col.wide { max-width: var(--column-full); }
+.col.gm { max-width: var(--column-gm); }
 
 /* Page heading: caption, title, lead with an 8px gap; 64px (Lg) / 48px (Sm) below */
 .page-heading { display: flex; flex-direction: column; gap: var(--pad-2xs); margin-bottom: var(--pad-3xl); }
@@ -201,26 +203,24 @@ button.slot::before { content: ""; position: absolute; inset: -3.5px -1.5px; }
   button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-.slots.mini { display: grid; grid-template-columns: repeat(12, 12px); gap: 3px; margin-top: 0; }
-.slots.mini .slot { width: auto; height: 12px; border-width: 1px; border-radius: 2px; cursor: default; }
-.slots.mini .slot.locked { border-color: var(--outline-navy-subdued); }
+.slots.mini { flex: 1 1 0; min-width: 0; gap: var(--pad-2xs); margin-top: 0; align-content: flex-start; }
+.slots.mini .slot { width: 32px; height: 20px; border-width: 2px; cursor: default; }
 .sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }
 .sync.bad { color: var(--text-error); border-color: var(--outline-error); }
 
-/* Admin (not in the spec; follows its tokens and the 44px target rule) */
+/* Games Master dashboard (Figma "GM dashboard" + "character block") */
 .tabs { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); }
 .tab { min-height: var(--target); font: inherit; font-size: 16px; line-height: 24px; color: var(--text-subdued); background: transparent; border: 1px solid var(--outline-navy-subdued); border-radius: 24px; padding: 9px 16px; cursor: pointer; }
 .tab[aria-pressed="true"] { color: var(--text-gold); border-color: var(--outline-gold); }
-.admin-card { border: 1px solid var(--outline-navy-subdued); border-radius: 8px; background: var(--surface-navy-lighter); padding: var(--pad-sm); margin-top: var(--pad-sm); }
-.admin-card header { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--pad-2xs); align-items: baseline; }
-.admin-card header .muted { font-size: 16px; line-height: 24px; } /* player name + Open tracker: body-sm, secondary to the character name */
-.admin-card header .muted a { display: inline-block; padding: calc((var(--target) - 24px) / 2) 0; }
-.admin-tracks { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: var(--pad-sm) var(--pad-2xl); margin-top: var(--pad-sm); }
-.admin-track .label { font-size: 12px; line-height: 16px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-subdued); font-weight: 700; }
-.admin-track .row { display: flex; align-items: center; gap: var(--pad-xs); margin-top: 6px; }
-.stepper { display: inline-flex; align-items: center; gap: var(--pad-2xs); margin-left: auto; }
-.stepper button { position: relative; width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--outline-navy); background: transparent; color: var(--text-default); font-size: 16px; line-height: 1; cursor: pointer; }
-.stepper button::before { content: ""; position: absolute; inset: -7px; } /* 44px target around the 32px circle */
-.stepper button:disabled { opacity: 0.35; cursor: default; }
-.stepper output { min-width: 18px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
-.admin-track .nums { font-size: 16px; line-height: 24px; color: var(--text-subdued); margin-top: 4px; }
+.gm-cards { display: flex; flex-direction: column; gap: var(--pad-lg); margin-top: var(--pad-lg); }
+.gm-card { background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy); border-radius: 8px; padding: var(--pad-xs) var(--pad-xs) var(--pad-sm) var(--pad-md); }
+.gm-name { font: 400 19px/28px var(--font-body); text-transform: none; letter-spacing: 0; color: var(--text-default); padding-bottom: var(--pad-xs); }
+.gm-track { padding-bottom: var(--pad-xs); }
+.gm-label { margin: 0; font: 400 16px/24px var(--font-body); color: var(--text-default); padding-bottom: var(--pad-xs); }
+.gm-row { display: flex; align-items: center; gap: var(--pad-2xs); }
+.stepper { flex: none; display: inline-flex; align-items: center; gap: var(--pad-2xs); padding: 0 4px; }
+.stepper button { position: relative; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 28px; border: 1px solid var(--outline-gold); background: transparent; color: var(--text-gold); cursor: pointer; }
+.stepper button::before { content: ""; position: absolute; inset: -5px; } /* 44px target around the 36px circle */
+.stepper button:disabled { border-color: var(--outline-navy); color: var(--outline-navy); cursor: default; }
+@media (hover: hover) { .stepper button:not(:disabled):hover { background: var(--surface-gold-darker); } }
+.stepper output { width: 24px; text-align: center; font-size: 19px; line-height: 28px; color: var(--text-default); font-variant-numeric: tabular-nums; }
