@@ -183,16 +183,17 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 .banner a { color: var(--text-error); }
 .banner button { flex: none; width: var(--target); height: var(--target); margin: -10px -12px -10px 0; background: none; border: 0; border-radius: 4px; color: var(--text-error); font-size: 24px; line-height: 1; cursor: pointer; }
 
-/* Stat groups and slots: 64x40, 12px gap, wrapping (7 per row in the 530 column, 5 at 393 wide) */
+/* Stat groups and slots: 64x36 boxes, each with a 4px tap margin above and below (64x44 target).
+   12px across, 4px between rows of targets = 12px visible both ways. 7 per row at 530 wide, 5 at 393. */
 .track { margin-top: var(--pad-2xl); }
 .page-heading + .track { margin-top: 0; }
 .track-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--pad-sm); }
 .track .sub { margin-top: var(--pad-3xs); }
 .count { font-size: 16px; font-weight: 700; color: var(--text-gold); font-variant-numeric: tabular-nums; }
-.slots { display: flex; flex-wrap: wrap; gap: var(--pad-xs); margin-top: var(--pad-sm); }
-.slot { position: relative; flex: none; width: 64px; height: 40px; display: flex; align-items: center; justify-content: center; font: 700 16px/1 var(--font-body); color: var(--text-gold-subdued); border-radius: 4px; padding: 0; background: var(--surface-navy-darker); border: 1.5px solid var(--outline-navy); }
-/* Invisible 2px extension above and below so each slot is a 64x44 target (fits within the 12px gap) */
-button.slot::before { content: ""; position: absolute; inset: -3.5px -1.5px; }
+.slots { display: flex; flex-wrap: wrap; gap: var(--pad-3xs) var(--pad-xs); margin-top: calc(var(--pad-sm) - var(--pad-3xs)); }
+.slot { position: relative; flex: none; width: 64px; height: 36px; margin: var(--pad-3xs) 0; display: flex; align-items: center; justify-content: center; font: 700 16px/1 var(--font-body); color: var(--text-gold-subdued); border-radius: 4px; padding: 0; background: var(--surface-navy-darker); border: 1.5px solid var(--outline-navy); }
+/* Tap target fills the 4px margin above and below: 64x44 (inset is from the padding box, inside the 1.5px border) */
+button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
 .slot.avail { border-color: var(--outline-gold); cursor: pointer; }
 .slot.used { background: var(--outline-gold); border-color: var(--outline-gold); color: var(--page-bg); cursor: pointer; } /* penalty number inverted into the fill */
 .slot.locked { border-color: var(--outline-navy); color: var(--outline-navy); cursor: default; }
@@ -204,7 +205,7 @@ button.slot::before { content: ""; position: absolute; inset: -3.5px -1.5px; }
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .slots.mini { flex: 1 1 0; min-width: 0; gap: var(--pad-2xs); margin-top: 0; align-content: flex-start; }
-.slots.mini .slot { width: 32px; height: 20px; border-width: 2px; cursor: default; }
+.slots.mini .slot { width: 32px; height: 20px; margin: 0; border-width: 2px; cursor: default; }
 .sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }
 .sync.bad { color: var(--text-error); border-color: var(--outline-error); }
 
