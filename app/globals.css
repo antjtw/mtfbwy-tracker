@@ -216,7 +216,7 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .gm-card { background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy); border-radius: 8px; padding: var(--pad-xs) var(--pad-xs) var(--pad-sm) var(--pad-md); }
 .gm-head { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-2xs); padding-bottom: var(--pad-xs); }
 .gm-name { font: 700 19px/28px var(--font-body); text-transform: none; letter-spacing: 0; color: var(--text-default); }
-.gm-player { flex: none; font-size: 12px; line-height: 16px; color: var(--text-gold); background: var(--surface-gold-darker); border-radius: 24px; padding: 4px 12px; white-space: nowrap; }
+.gm-player { flex: none; } /* uses .tag (status badge style); gold fill so it stands off the card surface */
 .gm-track { padding-bottom: var(--pad-xs); }
 .gm-label { margin: 0; font: 400 16px/24px var(--font-body); color: var(--text-default); padding-bottom: var(--pad-xs); }
 .gm-row { display: flex; align-items: center; gap: var(--pad-2xs); }

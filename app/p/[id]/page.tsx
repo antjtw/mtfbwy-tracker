@@ -47,17 +47,17 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
     <main>
       <div className="col">
         <PageHeading title="Select a character">
-          <p className="lede">You’ve taken your first step into a larger world.</p>
+          <p className="lede">Welcome, {first}. You’ve taken your first step into a larger world.</p>
         </PageHeading>
         {main.length > 0 && (
           <section className="section">
-            <h2>{first}’s campaign characters</h2>
+            <h2>Campaign characters</h2>
             <CharList chars={main} />
           </section>
         )}
         {side.length > 0 && (
           <section className="section">
-            <h2>{first}’s side characters</h2>
+            <h2>Side characters</h2>
             <CharList chars={side} />
           </section>
         )}

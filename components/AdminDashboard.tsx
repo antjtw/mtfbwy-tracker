@@ -6,7 +6,6 @@ import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player, type TrackKey } from "@/lib/types";
 
-const ALL = "All";
 const OTHER = "Other";
 
 /** The GM dashboard lists willpower first (Figma "GM dashboard") */
@@ -31,7 +30,7 @@ function PlusIcon() {
 
 export function AdminDashboard({ initial, players }: { initial: Character[]; players: Player[] }) {
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
-  const [tab, setTab] = useState(ALL);
+  const [picked, setPicked] = useState<string | null>(null);
 
   // A character with several adventures is listed under each of them (same record, same slots)
   const tagsOf = (c: Character) => (c.adventures.length ? c.adventures : [OTHER]);
@@ -48,8 +47,11 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
   const playerName = (id: string) => players.find((p) => p.id === id)?.name ?? "";
 
   // Cards are listed alphabetically by character name
+  // Always one campaign or adventure at a time; opens on the first (Campaign 2)
+  const tab = picked && adventures.includes(picked) ? picked : adventures[0];
+
   const visible = chars
-    .filter((c) => tab === ALL || tagsOf(c).includes(tab))
+    .filter((c) => tagsOf(c).includes(tab))
     .sort((a, b) => a.name.localeCompare(b.name, "en-GB", { sensitivity: "base" }));
 
   return (
@@ -59,8 +61,8 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
       </PageHeading>
 
       <div className="tabs" role="group" aria-label="Filter by adventure">
-        {[ALL, ...adventures].map((a) => (
-          <button key={a} className="tab" aria-pressed={tab === a} onClick={() => setTab(a)}>{a}</button>
+        {adventures.map((a) => (
+          <button key={a} className="tab" aria-pressed={tab === a} onClick={() => setPicked(a)}>{a}</button>
         ))}
       </div>
 
@@ -69,7 +71,7 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
           <article className="gm-card" key={c.id} aria-labelledby={`gm-${c.id}`}>
             <div className="gm-head">
               <h2 className="gm-name" id={`gm-${c.id}`}>{c.name}</h2>
-              <span className="gm-player">{playerName(c.player_id)}</span>
+              <span className="tag gold gm-player">{playerName(c.player_id)}</span>
             </div>
             {GM_TRACKS.map((t) => {
               const max = c[`${t.key}_max`];
