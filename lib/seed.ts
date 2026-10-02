@@ -80,8 +80,8 @@ const WILDE = "wilde-wathne";
 
 const ROSTER: Character[] = [
   // James
-  c(JAMES, "Fenrir", { adventures: [C2], description: "A Pooba Jedi Knight", era: "Active in 140 BBY", slots: [8, 6, 0] }),
-  c(JAMES, "Tholo Endin", { adventures: [C3], description: "An enigmatic Ikkrukkian Force wielder", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
+  c(JAMES, "Fenrir", { adventures: [C2], description: "Jedi Initiate Pooba, Blademaster Sentinel, Jedi Knight", era: "Active in 140 BBY", slots: [8, 6, 0] }),
+  c(JAMES, "Tholo Endin", { adventures: [C3], description: "Abandoned Ikkrukkian, Cosmic Mystic, Smuggler", era: "Active in 7 ABY", slots: [6, 6, 3] }), // may be out of date after levelling
   c(JAMES, "Ji-Toh Codox", { adventures: [NEXU, C3], main: true, description: "A Cerean Jedi Survivor", era: "Active in 13 BBY" }),
   c(JAMES, "Sebastian Quickfin", { adventures: [STAR], description: "A Tynann Rebellion agent", era: "Active in 3 ABY" }),
   c(JAMES, "Vomdek Vus", { adventures: [STAR], description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
@@ -92,12 +92,12 @@ const ROSTER: Character[] = [
   c(JAMES, "Pamliven Roleb", { id: "pamlian-roleb", adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
 
   // Jake
-  c(JAKE, "Bowen Clandis", { adventures: [C2], description: "Pantoran", slots: [7, 7, 0] }),
-  c(JAKE, "Bromtek Raag", { adventures: [C3], description: "Aqualish", slots: [6, 6, 3] }),
+  c(JAKE, "Bowen Clandis", { adventures: [C2], description: "Jedi Initiate Pantoran, Guardian Devout, Force Scholar", slots: [7, 7, 0] }),
+  c(JAKE, "Bromtek Raag", { adventures: [C3], description: "Survivor Aqualish, Berserker Marauder, Freedom Fighter", slots: [6, 6, 3] }),
   c(JAKE, "Teri Zooq", { id: "terri-zooq", adventures: [NEXU], main: true, description: "Gand" }),
   c(JAKE, "Vezulok Khargon", { adventures: [NEXU, C3], main: true, description: "Barabel" }),
   c(JAKE, "Rayzer Botch", { adventures: [STAR, C3], description: "Tynann" }),
-  c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, description: "Rodian", slots: [7, 7, 5] }),
+  c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, description: "Abandoned Rodian, Artillerist Technologist, Smuggler", slots: [7, 7, 5] }),
   c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "Barabel" }),
   c(JAKE, "Cors 'Blitz' Ghrenald", { id: "cors-ghrenald", adventures: [RTS], description: "Human" }),
   c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "Anomid" }),
@@ -106,8 +106,8 @@ const ROSTER: Character[] = [
   c(JAKE, "Ulon Glost", { adventures: [NEXU], description: "Mustafarian" }),
 
   // Josh
-  c(JOSH, "Gadge Millet", { adventures: [C2], description: "Ikkrukian", slots: [6, 6, 3] }),
-  c(JOSH, "Fubbroonfal", { id: "fubbo", adventures: [C3], description: "Wookiee", slots: [7, 6, 4] }),
+  c(JOSH, "Gadge Millet", { adventures: [C2], description: "Force Sensitive Ikkrukkian, Striker Sentinel, Bounty Hunter", slots: [6, 6, 3] }),
+  c(JOSH, "Fubbroonfal", { id: "fubbo", adventures: [C3], description: "Tribal Wookiee, Operative Wayfarer, Freedom Fighter", slots: [7, 6, 4] }),
   c(JOSH, "Bingus-K’aar", { id: "bingus-kaar", adventures: [NEXU], main: true, description: "Tusken" }),
   c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zebrak" }),
   c(JOSH, "Battarux", { adventures: [RTS], description: "Dashade" }),
@@ -116,8 +116,8 @@ const ROSTER: Character[] = [
   c(JOSH, "Rosama Melmi", { adventures: [HEIST], description: "Human" }),
 
   // Matthew
-  c(MATT, "Ras Mithra", { adventures: [C2], description: "Pkorian", slots: [7, 8, 0] }),
-  c(MATT, "ECCO", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
+  c(MATT, "Ras Mithra", { adventures: [C2], description: "Jedi Initiate Pkorian, Embalmed Sorcerer, Jedi Knight", slots: [7, 8, 0] }),
+  c(MATT, "ECCO", { adventures: [C3], description: "Hardened Human, Safety Net Technologist, Droidsmith", slots: [6, 6, 3] }),
   c(MATT, "Kainard Plusttr", { adventures: [STAR], description: "Besalisk" }),
   c(MATT, "Tabitha Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
   c(MATT, "Tristan Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
@@ -128,15 +128,15 @@ const ROSTER: Character[] = [
   c(MATT, "Biz Ube Hurley", { adventures: [ARENA], description: "Bith" }),
 
   // Naoise
-  c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Class 2 Droid", slots: [7, 6, 0] }),
-  c(NAOISE, "Thalen Skellig", { adventures: [C3], description: "Human", slots: [7, 6, 4] }),
+  c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Abandoned Second Class Droid, Skeleton Key Technologist, DJ", slots: [7, 6, 0] }),
+  c(NAOISE, "Thalen Skellig", { adventures: [C3], description: "Jedi Initiate Human, Cosmic Mystic, Force Scholar", slots: [7, 6, 4] }),
   c(NAOISE, "Slakk Printall (Dago Lomek)", { id: "dago-lomek", adventures: [NEXU, C3], main: true, description: "Rodian" }),
   c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "Besalisk" }),
   c(NAOISE, "Viya Grah", { adventures: [RTS], description: "Nautolan" }),
 
   // Wilde
-  c(WILDE, "A13-XA", { adventures: [C2], description: "Class 3 Droid", slots: [7, 6, 3] }),
-  c(WILDE, "Rue Dahlia", { adventures: [C3], description: "Human", slots: [6, 6, 3] }),
+  c(WILDE, "A13-XA", { adventures: [C2], description: "Abandoned Third Class Droid, Polestar Technologist, Pilot", slots: [7, 6, 3] }),
+  c(WILDE, "Rue Dahlia", { adventures: [C3], description: "Hardened Human, Operative Wayfarer, Scholar", slots: [6, 6, 3] }),
   c(WILDE, "Dia Tarkona", { id: "dia-tarkdona", adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
   c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
