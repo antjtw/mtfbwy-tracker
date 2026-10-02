@@ -7,6 +7,8 @@ import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player, type TrackKey } from "@/lib/types";
 
 const OTHER = "Other";
+const NEXU = "Nexu Crew";
+const NEXU_SIDE = "Nexu Crew (side)";
 
 /** The GM dashboard lists willpower first (Figma "GM dashboard") */
 const GM_ORDER: TrackKey[] = ["wp", "hp", "ar"];
@@ -32,8 +34,10 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
   const [picked, setPicked] = useState<string | null>(null);
 
-  // A character with several adventures is listed under each of them (same record, same slots)
-  const tagsOf = (c: Character) => (c.adventures.length ? c.adventures : [OTHER]);
+  // A character with several adventures is listed under each of them (same record, same slots).
+  // Nexu Crew is split into its main crew and everyone else, so each tab stays manageable.
+  const tagsOf = (c: Character) =>
+    (c.adventures.length ? c.adventures : [OTHER]).map((a) => (a === NEXU && !c.is_main ? NEXU_SIDE : a));
 
   const adventures = useMemo(() => {
     const names = new Set(chars.flatMap(tagsOf));
