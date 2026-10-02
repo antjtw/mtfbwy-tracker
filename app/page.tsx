@@ -52,7 +52,7 @@ export default async function Home() {
           <PlayerList players={players.filter((p) => p.is_guest)} chars={chars} />
         </section>
         <p className="section">
-          <Link className="standalone" href={`/code?admin=1&next=${encodeURIComponent("/admin")}`}>Admin view</Link>
+          <Link className="standalone" href={`/code?admin=1&next=${encodeURIComponent("/admin")}`}>Games Master dashboard</Link>
         </p>
       </div>
     </main>
