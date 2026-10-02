@@ -13,7 +13,7 @@ export function Tracker({ initial }: { initial: Character }) {
     <>
       <PageHeading title={`Track ${ch.name}’s stats`}>
         <p className="lede">
-          Use this space to track {ch.name}’s health, armour and willpower, with the character sheet as a helpful reference.
+          Use this space to track {ch.name}’s willpower, health and armour, with the character sheet as a helpful reference.
         </p>
       </PageHeading>
 

@@ -37,9 +37,10 @@ export const MAX_SLOTS = 12;
 /** Adventures shown with a gold tag */
 export const CURRENT_ADVENTURES = ["Campaign 2", "Campaign 3"];
 
+/** Display order everywhere: willpower (spent most often), then hit points, then armour (not everyone has it) */
 export const TRACKS = [
-  { key: "hp", label: "Hit point slots", blurb: "Your physical health, toughness and vitality" },
   { key: "wp", label: "Willpower slots", blurb: "Your mental toughness, mana, determination" },
+  { key: "hp", label: "Hit point slots", blurb: "Your physical health, toughness and vitality" },
   { key: "ar", label: "Armour slots", blurb: "Determined by your armour score, provides protection" },
 ] as const;
 

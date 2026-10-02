@@ -4,15 +4,11 @@ import { useMemo, useState } from "react";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
-import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player, type TrackKey } from "@/lib/types";
+import { CURRENT_ADVENTURES, MAX_SLOTS, TRACKS, type Character, type Player } from "@/lib/types";
 
 const OTHER = "Other";
 const NEXU = "Nexu Crew";
 const NEXU_SIDE = "Nexu Crew (side)";
-
-/** The GM dashboard lists willpower first (Figma "GM dashboard") */
-const GM_ORDER: TrackKey[] = ["wp", "hp", "ar"];
-const GM_TRACKS = GM_ORDER.map((k) => TRACKS.find((t) => t.key === k)!);
 
 function MinusIcon() {
   return (
@@ -77,7 +73,7 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
               <h2 className="gm-name" id={`gm-${c.id}`}>{c.name}</h2>
               <span className="tag gold gm-player">{playerName(c.player_id)}</span>
             </div>
-            {GM_TRACKS.map((t) => {
+            {TRACKS.map((t) => {
               const max = c[`${t.key}_max`];
               const used = c[`${t.key}_used`];
               const set = (n: number) => patch(c.id, { [`${t.key}_max`]: n });
