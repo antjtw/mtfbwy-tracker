@@ -87,8 +87,8 @@ const ROSTER: Character[] = [
   c(JAMES, "Vomdek Vus", { adventures: [STAR], description: "A legendary Lasat war hero", era: "Active in 13 BBY" }),
   c(JAMES, "Tim", { adventures: [QOTJ], description: "A normal, Human man", era: "Active in 382 BBY" }),
   c(JAMES, "Eisor Trius", { adventures: [RTS], description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
-  c(JAMES, "Ashira Taal", { adventures: [RANCOR], description: "Twi’lek" }),
-  c(JAMES, "Kirk Dickson", { adventures: [ARENA], description: "Human" }),
+  c(JAMES, "Ashira Taal", { adventures: [RANCOR], description: "Force Sensitive Twi’lek, Skeleton Key Technologist / Shadowblade Sentinel, Slicer" }),
+  c(JAMES, "Kirk Dickson", { adventures: [ARENA], description: "Tribal Human, Tank Marauder, Freedom Fighter" }),
   c(JAMES, "Pamliven Roleb", { id: "pamlian-roleb", adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
 
   // Jake
@@ -101,8 +101,8 @@ const ROSTER: Character[] = [
   c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "Barabel" }),
   c(JAKE, "Cors 'Blitz' Ghrenald", { id: "cors-ghrenald", adventures: [RTS], description: "Human" }),
   c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "Anomid" }),
-  c(JAKE, "Orrin Vox", { adventures: [RANCOR], description: "Bith" }),
-  c(JAKE, "Wee Dunga Funq", { adventures: [ARENA], description: "Rodian" }),
+  c(JAKE, "Orrin Vox", { adventures: [RANCOR], description: "Everyman Bith, Artillerist Technologist, Freedom Fighter" }),
+  c(JAKE, "Wee Dunga Funq", { adventures: [ARENA], description: "Tribal Rodian, Gunslinger Wayfarer, Bounty Hunter" }),
   c(JAKE, "Ulon Glost", { adventures: [NEXU], description: "Mustafarian" }),
 
   // Josh
@@ -111,8 +111,8 @@ const ROSTER: Character[] = [
   c(JOSH, "Bingus-K’aar", { id: "bingus-kaar", adventures: [NEXU], main: true, description: "Tusken" }),
   c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zebrak" }),
   c(JOSH, "Battarux", { adventures: [RTS], description: "Dashade" }),
-  c(JOSH, "Drassk the Endurer", { adventures: [RANCOR], description: "Trandoshan" }),
-  c(JOSH, "Rodneh Cheekoo", { adventures: [ARENA], description: "Rodian" }),
+  c(JOSH, "Drassk the Endurer", { adventures: [RANCOR], description: "Survivor Trandoshan, Ravager Marauder, Gladiator" }),
+  c(JOSH, "Rodneh Cheekoo", { adventures: [ARENA], description: "Force Sensitive Rodian, Cosmic Mystic, Jedi Knight" }),
   c(JOSH, "Rosama Melmi", { adventures: [HEIST], description: "Human" }),
 
   // Matthew
@@ -122,10 +122,10 @@ const ROSTER: Character[] = [
   c(MATT, "Tabitha Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
   c(MATT, "Tristan Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
   c(MATT, "Kael", { adventures: [RTS], description: "Mon Calamari" }),
-  c(MATT, "Vesh Caldrin", { adventures: [RANCOR], description: "Kage" }),
+  c(MATT, "Vesh Caldrin", { adventures: [RANCOR], description: "Prospect Kage, Crusader Devout, Assassin" }),
   c(MATT, "Barbossa", { adventures: [HEIST], description: "Chironian" }),
   c(MATT, "Errol Reza", { adventures: [NEXU], description: "Kalleran" }),
-  c(MATT, "Biz Ube Hurley", { adventures: [ARENA], description: "Bith" }),
+  c(MATT, "Biz Ube Hurley", { adventures: [ARENA], description: "Abandoned Bith, Guardian Devout, Freedom Fighter" }),
 
   // Naoise
   c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Abandoned Second Class Droid, Skeleton Key Technologist, DJ", slots: [7, 6, 0] }),
@@ -140,7 +140,7 @@ const ROSTER: Character[] = [
   c(WILDE, "Dia Tarkona", { id: "dia-tarkdona", adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
   c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
-  c(WILDE, "Lucky Calder", { adventures: [RANCOR], description: "Human" }),
+  c(WILDE, "Lucky Calder", { adventures: [RANCOR], description: "Optimist Human, Gambler Wayfarer, Crime Lord" }),
   c(WILDE, "Kaja Verec", { id: "kaja-vel", adventures: [HEIST], description: "Kiffar" }),
   c(WILDE, "Tantoori Vozo", { adventures: [NEXU], description: "Nikto" }),
 
