@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 export type Role = "player" | "gm";
 
 const COOKIE = "mtfbwy_session";
-const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
+const MAX_AGE = 60 * 60 * 8; // 8 hours: entering a code gives access to every player for the session
 
 function secret() {
   const s = process.env.SESSION_SECRET;
@@ -57,6 +57,9 @@ export async function getRole(): Promise<Role | null> {
   const [role, exp, sig] = raw.split(".");
   if (!role || !exp || !sig) return null;
   if (!safeEqual(sig, sign(`${role}.${exp}`))) return null;
-  if (Number(exp) < Date.now() / 1000) return null;
+  const now = Date.now() / 1000;
+  if (Number(exp) < now) return null;
+  // Refuse cookies issued under the old 30-day lifetime (expiry further out than 8 hours allows)
+  if (Number(exp) > now + MAX_AGE + 60) return null;
   return role === "gm" || role === "player" ? role : null;
 }

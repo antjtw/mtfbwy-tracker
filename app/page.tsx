@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PageHeading } from "@/components/PageHeading";
+import { getRole } from "@/lib/auth";
 import { getStore } from "@/lib/store";
 import type { Character, Player, PlayerStatus } from "@/lib/types";
 
@@ -11,7 +12,7 @@ const STATUS: Record<PlayerStatus, { label: string; gold: boolean }> = {
   inactive: { label: "Inactive", gold: false },
 };
 
-function PlayerList({ players, chars }: { players: Player[]; chars: Character[] }) {
+function PlayerList({ players, chars, signedIn }: { players: Player[]; chars: Character[]; signedIn: boolean }) {
   const sorted = [...players].sort((a, b) => a.name.localeCompare(b.name, "en-GB"));
   return (
     <ul className="list">
@@ -21,7 +22,7 @@ function PlayerList({ players, chars }: { players: Player[]; chars: Character[] 
         const more = names.length > shown.length;
         return (
           <li key={p.id}>
-            <Link href={`/code?next=${encodeURIComponent(`/p/${p.id}`)}`} className="name">
+            <Link href={signedIn ? `/p/${p.id}` : `/code?next=${encodeURIComponent(`/p/${p.id}`)}`} className="name">
               {p.name}
             </Link>
             <span className={`tag ${STATUS[p.status].gold ? "gold" : ""}`}>{STATUS[p.status].label}</span>
@@ -35,7 +36,7 @@ function PlayerList({ players, chars }: { players: Player[]; chars: Character[] 
 
 export default async function Home() {
   const store = getStore();
-  const [players, chars] = await Promise.all([store.players(), store.characters()]);
+  const [players, chars, role] = await Promise.all([store.players(), store.characters(), getRole()]);
   return (
     <main>
       <div className="col">
@@ -45,14 +46,14 @@ export default async function Home() {
 
         <section className="section">
           <h2>Main players</h2>
-          <PlayerList players={players.filter((p) => !p.is_guest)} chars={chars} />
+          <PlayerList players={players.filter((p) => !p.is_guest)} chars={chars} signedIn={!!role} />
         </section>
         <section className="section">
           <h2>Guest players</h2>
-          <PlayerList players={players.filter((p) => p.is_guest)} chars={chars} />
+          <PlayerList players={players.filter((p) => p.is_guest)} chars={chars} signedIn={!!role} />
         </section>
         <p className="section">
-          <Link className="standalone" href={`/code?admin=1&next=${encodeURIComponent("/admin")}`}>Games Master dashboard</Link>
+          <Link className="standalone" href={role === "gm" ? "/admin" : `/code?admin=1&next=${encodeURIComponent("/admin")}`}>Games Master dashboard</Link>
         </p>
       </div>
     </main>
