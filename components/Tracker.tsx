@@ -71,7 +71,7 @@ function WillpowerPenalty({ used }: { used: number }) {
 
 const CONDITIONS = {
   unconscious: { title: "You’re unconscious", body: "All Willpower slots are marked, and you gain the unconscious condition." },
-  dying: { title: "You’re dying", body: "All hit point slots are marked, and you gain the dying condition." },
+  dying: { title: "You’re dying", body: "All Hit Point slots are marked, and you gain the dying condition." },
   dead: { title: "You’re dead", body: "Choose a death move as you become one with the Force." },
 } as const;
 
