@@ -24,7 +24,7 @@ export function Tracker({ initial }: { initial: Character }) {
           <section className="track" key={t.key}>
             <div className="track-head">
               <h2>{t.label}</h2>
-              <span className="count" aria-hidden>{used} / {max}</span>
+              <span className="count" aria-hidden>{max - used} / {max} left</span>
             </div>
             <p className="sub">{t.blurb}</p>
             <SlotGrid
