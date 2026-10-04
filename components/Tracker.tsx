@@ -18,6 +18,8 @@ export function Tracker({ initial }: { initial: Character }) {
         </p>
       </PageHeading>
 
+      <ConditionNotice ch={ch} />
+
       {TRACKS.map((t) => {
         const max = ch[`${t.key}_max`];
         const used = ch[`${t.key}_used`];
@@ -62,6 +64,48 @@ function WillpowerPenalty({ used }: { used: number }) {
       </div>
       <p className="sr-only" role="status">
         {penalty ? `Subtract ${penalty} from all action rolls using your dyad dice` : ""}
+      </p>
+    </>
+  );
+}
+
+const CONDITIONS = {
+  unconscious: { title: "You’re unconscious", body: "All Willpower slots are marked, and you gain the unconscious condition." },
+  dying: { title: "You’re dying", body: "All hit point slots are marked, and you gain the dying condition." },
+  dead: { title: "You’re dead", body: "Choose a death move as you become one with the Force." },
+} as const;
+
+type Condition = keyof typeof CONDITIONS;
+
+/** One notification at a time: both tracks fully marked = dead, otherwise unconscious (willpower) or dying (hit points). */
+function conditionOf(ch: Character): Condition | null {
+  const wpOut = ch.wp_max > 0 && ch.wp_used >= ch.wp_max;
+  const hpOut = ch.hp_max > 0 && ch.hp_used >= ch.hp_max;
+  return wpOut && hpOut ? "dead" : wpOut ? "unconscious" : hpOut ? "dying" : null;
+}
+
+/**
+ * Eases open/closed so the slots below glide rather than jump, and re-plays its entrance when the
+ * condition changes (Figma: "the notification closes and reloads in"). The visible card keeps its
+ * last condition while closing; a screen-reader-only alert carries the live state.
+ */
+function ConditionNotice({ ch }: { ch: Character }) {
+  const condition = conditionOf(ch);
+  const shown = useRef<Condition>("unconscious");
+  if (condition) shown.current = condition;
+  const c = CONDITIONS[shown.current];
+  return (
+    <>
+      <div className={`notice-wrap ${condition ? "open" : ""}`} aria-hidden="true">
+        <div className="notice-clip">
+          <div className="notice" key={shown.current}>
+            <strong>{c.title}</strong>
+            <span>{c.body}</span>
+          </div>
+        </div>
+      </div>
+      <p className="sr-only" role="alert">
+        {condition ? `${CONDITIONS[condition].title}. ${CONDITIONS[condition].body}` : ""}
       </p>
     </>
   );

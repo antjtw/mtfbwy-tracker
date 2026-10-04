@@ -204,6 +204,18 @@ button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
   button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Condition notification (Figma "Notification" on the stat tracker): sits between the heading and the tracks.
+   Pulls into the heading's 64/48 bottom space so it gets 32/24 above it, with 32/24 before the first track. */
+.notice-wrap { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 250ms ease-out, opacity 200ms ease-out, margin 250ms ease-out; }
+.notice-wrap.open { grid-template-rows: 1fr; opacity: 1; margin-top: calc(var(--pad-xl) - var(--pad-3xl)); }
+.notice-wrap + .sr-only + .track { margin-top: 0; transition: margin-top 250ms ease-out; }
+.notice-wrap.open + .sr-only + .track { margin-top: var(--pad-xl); }
+.notice-clip { min-height: 0; overflow: hidden; }
+.notice { display: flex; flex-direction: column; gap: var(--pad-3xs); background: var(--danger-bg); border: 1px solid var(--outline-error); border-radius: 8px; padding: var(--pad-xs) var(--pad-xs) var(--pad-sm) var(--pad-md); font-size: 19px; line-height: 28px; color: var(--text-error); animation: notice-in 250ms ease-out; }
+.notice strong { color: var(--text-default); font-weight: 700; }
+@keyframes notice-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .notice-wrap, .notice-wrap + .sr-only + .track { transition: none; } .notice { animation: none; } }
+
 /* Willpower penalty helper: the row eases open (grid 0fr -> 1fr) so content below glides down */
 .penalty-wrap { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 250ms ease-out, opacity 200ms ease-out, margin-top 250ms ease-out; }
 .penalty-wrap.open { grid-template-rows: 1fr; opacity: 1; margin-top: var(--pad-sm); }
