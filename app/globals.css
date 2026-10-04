@@ -204,10 +204,13 @@ button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
   button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-/* Willpower penalty helper: only takes space when there is a penalty (7+ slots marked) */
-.penalty { font-size: 19px; line-height: 28px; color: var(--text-gold); }
-.penalty:not(:empty) { margin-top: var(--pad-sm); }
+/* Willpower penalty helper: the row eases open (grid 0fr -> 1fr) so content below glides down */
+.penalty-wrap { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 250ms ease-out, opacity 200ms ease-out, margin-top 250ms ease-out; }
+.penalty-wrap.open { grid-template-rows: 1fr; opacity: 1; margin-top: var(--pad-sm); }
+.penalty { min-height: 0; overflow: hidden; font-size: 19px; line-height: 28px; color: var(--text-gold); }
 .penalty strong { font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .penalty-wrap { transition: none; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .slots.mini { flex: 1 1 0; min-width: 0; gap: var(--pad-2xs); margin-top: 0; align-content: flex-start; }
 .slots.mini .slot { width: 32px; height: 20px; margin: 0; border-width: 2px; cursor: default; }
 .sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
@@ -34,20 +35,34 @@ export function Tracker({ initial }: { initial: Character }) {
               used={used}
               onChange={(n) => patch(ch.id, { [`${t.key}_used`]: n })}
             />
-            {t.key === "wp" && (
-              // Always rendered so screen readers announce the penalty as it changes; empty (no space) at 0-6 marked
-              <p className="penalty" role="status">
-                {used > 6 && (
-                  <>
-                    Subtract <strong>{(used - 6) * 2} from all action rolls</strong> using your dyad dice
-                  </>
-                )}
-              </p>
-            )}
+            {t.key === "wp" && <WillpowerPenalty used={used} />}
           </section>
         );
       })}
       <SyncBadge sync={sync} />
+    </>
+  );
+}
+
+/**
+ * "Subtract N from all action rolls" once 7+ willpower slots are marked (N = 2 per slot past the sixth).
+ * The visible line eases open/closed (and keeps its last value while closing); a separate
+ * screen-reader-only status carries the live value so changes are announced.
+ */
+function WillpowerPenalty({ used }: { used: number }) {
+  const penalty = used > 6 ? (used - 6) * 2 : 0;
+  const shown = useRef(2);
+  if (penalty) shown.current = penalty;
+  return (
+    <>
+      <div className={`penalty-wrap ${penalty ? "open" : ""}`} aria-hidden="true">
+        <p className="penalty">
+          Subtract <strong>{shown.current} from all action rolls</strong> using your dyad dice
+        </p>
+      </div>
+      <p className="sr-only" role="status">
+        {penalty ? `Subtract ${penalty} from all action rolls using your dyad dice` : ""}
+      </p>
     </>
   );
 }
