@@ -34,6 +34,16 @@ export function Tracker({ initial }: { initial: Character }) {
               used={used}
               onChange={(n) => patch(ch.id, { [`${t.key}_used`]: n })}
             />
+            {t.key === "wp" && (
+              // Always rendered so screen readers announce the penalty as it changes; empty (no space) at 0-6 marked
+              <p className="penalty" role="status">
+                {used > 6 && (
+                  <>
+                    Subtract <strong>{(used - 6) * 2} from all action rolls</strong> using your dyad dice
+                  </>
+                )}
+              </p>
+            )}
           </section>
         );
       })}

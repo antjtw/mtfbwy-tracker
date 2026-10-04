@@ -204,6 +204,10 @@ button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
   button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Willpower penalty helper: only takes space when there is a penalty (7+ slots marked) */
+.penalty { font-size: 19px; line-height: 28px; color: var(--text-gold); }
+.penalty:not(:empty) { margin-top: var(--pad-sm); }
+.penalty strong { font-weight: 700; }
 .slots.mini { flex: 1 1 0; min-width: 0; gap: var(--pad-2xs); margin-top: 0; align-content: flex-start; }
 .slots.mini .slot { width: 32px; height: 20px; margin: 0; border-width: 2px; cursor: default; }
 .sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }
