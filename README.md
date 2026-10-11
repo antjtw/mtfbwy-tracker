@@ -35,6 +35,12 @@ Slot maximums are only set when a character is first added; after that the GM vi
 Import the repo, then add `PLAYER_CODES`, `GM_CODE`, `SESSION_SECRET` (`openssl rand -hex 32`),
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` as environment variables.
 
+## Keeping Supabase awake
+Free Supabase projects pause after 7 days without activity. `vercel.json` schedules a daily Vercel Cron
+call to `/api/keepalive` (09:00 UTC), which reads from the database to count as activity. Optionally set
+`CRON_SECRET` in Vercel (any random string) so only Vercel's scheduler can call it. Cron jobs only run on
+the production deployment; check Vercel → Settings → Cron Jobs.
+
 ## Fonts
 Stand-ins (Oswald, Barlow) load from Google Fonts. To use the licensed fonts, add `@font-face` rules for
 ITC Serif Gothic, FF DIN Pan-European and Droidobesh Depot with files in `public/fonts`; the CSS variables
