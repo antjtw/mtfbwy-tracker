@@ -136,17 +136,17 @@ function DespairArt({ value }: { value: number }) {
   );
 }
 
-/** Players' read-only bar: "DESPAIR  N / 12" */
+/** Players' read-only bar: "GM DESPAIR  N / 12" */
 export function DespairBar({ value, adventure }: { value: number; adventure: string }) {
   const v = clampDespair(value);
   return (
-    <section className={`despair despair-bar ${v >= 11 ? "despair-thick" : ""}`} style={levelStyle(v)} aria-label={`Despair for ${adventure}`}>
+    <section className={`despair despair-bar ${v >= 11 ? "despair-thick" : ""}`} style={levelStyle(v)} aria-label={`GM despair for ${adventure}`}>
       <DespairArt value={v} />
-      <h2 className="despair-title">Despair</h2>
+      <h2 className="despair-title">GM Despair</h2>
       <p className="despair-value" aria-hidden="true">
         {v} / {MAX_DESPAIR}
       </p>
-      <p className="sr-only" role="status">{`${v} of ${MAX_DESPAIR} despair`}</p>
+      <p className="sr-only" role="status">{`${v} of ${MAX_DESPAIR} GM despair`}</p>
     </section>
   );
 }
