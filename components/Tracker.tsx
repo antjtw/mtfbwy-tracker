@@ -1,14 +1,17 @@
 "use client";
 
 import { useRef } from "react";
+import { DespairBar, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
-import { TRACKS, type Character } from "@/lib/types";
+import { TRACKS, despairPool, type Character } from "@/lib/types";
 
-export function Tracker({ initial }: { initial: Character }) {
+export function Tracker({ initial, despair }: { initial: Character; despair: Record<string, number> }) {
   const { chars, patch, sync } = usePolledCharacters([initial], `/api/characters/${initial.id}`);
   const ch = chars[0] ?? initial;
+  const pool = despairPool(ch);
+  const { values } = usePolledDespair(despair);
 
   return (
     <>
@@ -17,6 +20,8 @@ export function Tracker({ initial }: { initial: Character }) {
           Use this space to track {ch.name}’s willpower, health and armour, with the character sheet as a helpful reference.
         </p>
       </PageHeading>
+
+      <DespairBar value={values[pool] ?? 0} adventure={pool} />
 
       <ConditionNotice ch={ch} />
 

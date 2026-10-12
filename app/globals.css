@@ -246,3 +246,35 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .stepper button:disabled { border-color: var(--outline-navy); color: var(--outline-navy); cursor: default; }
 @media (hover: hover) { .stepper button:not(:disabled):hover { background: var(--surface-gold-darker); } }
 .stepper output { width: 24px; text-align: center; font-size: 19px; line-height: 28px; font-weight: 700; color: var(--text-default); font-variant-numeric: tabular-nums; }
+
+/* Despair (Figma "Despair tracker"): colours per level come in as custom properties from components/Despair.tsx */
+.despair { position: relative; isolation: isolate; overflow: hidden; border-radius: 6px; border: 1px solid var(--despair-border); background: var(--despair-bg); box-shadow: var(--despair-shadow); color: var(--despair-text); transition: border-color 300ms ease-out, box-shadow 300ms ease-out, color 300ms ease-out; }
+.despair-art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.despair-title { color: inherit; letter-spacing: 0.04em; }
+.despair-value { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; color: inherit; }
+.despair-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-sm); min-height: 48px; padding: 9px 15px; margin-bottom: var(--pad-2xl); }
+.despair-bar.despair-thick { border-width: 1.5px; padding: 8.5px 14.5px; }
+.despair-bar .despair-value { font-size: 19px; line-height: 28px; }
+/* The despair bar sits between the heading and the first track */
+.despair-bar + .notice-wrap.open { margin-top: calc(var(--pad-xl) - var(--pad-2xl)); }
+
+.despair-card { display: flex; flex-direction: column; gap: var(--pad-sm); padding: var(--pad-md); margin-top: var(--pad-lg); }
+.despair-summary { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-sm); flex-wrap: wrap; }
+.despair-owner { margin: 0; font-size: 16px; line-height: 24px; color: inherit; }
+.despair-stepper { display: inline-flex; align-items: center; gap: var(--pad-xs); }
+.despair-stepper .despair-value { min-width: 4.5ch; text-align: center; font-size: 28px; line-height: 36px; }
+.despair-stepper button { position: relative; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border-radius: 28px; border: 1px solid #fd6e6e; background: #341720; color: #fd6e6e; cursor: pointer; }
+.despair-stepper button::before { content: ""; position: absolute; inset: -4px; } /* 44px target */
+.despair-stepper button:disabled { opacity: 0.4; cursor: default; }
+@media (hover: hover) { .despair-stepper button:not(:disabled):hover { background: #4d1a28; } }
+.despair-positions { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 6px; }
+.despair-position { position: relative; height: 32px; margin: 6px 0; padding: 0; border-radius: 3px; border: 1px solid var(--outline-navy); background: var(--surface-navy-darker); color: var(--text-subdued); font: 500 12px/16px var(--font-body); font-variant-numeric: tabular-nums; cursor: pointer; transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out; }
+.despair-position::before { content: ""; position: absolute; inset: -6px -3px; } /* 44px tall target */
+.despair-position[aria-pressed="true"] { background: #fd6e6e; border-color: #fd6e6e; color: var(--surface-navy-darker); }
+.despair-positions { margin: -6px 0; }
+.despair-legend { display: flex; justify-content: space-between; gap: var(--pad-sm); font-size: 12px; line-height: 16px; }
+.despair :focus-visible { outline: 2px solid var(--outline-gold); outline-offset: 2px; }
+@media (max-width: 768px) {
+  .despair-positions { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .despair, .despair-position { transition: none; } }

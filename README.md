@@ -8,6 +8,9 @@ devices (including the GM's admin view) pick them up within about two seconds.
 
 - **Player codes:** `PLAYER_CODES` (comma-separated, so you can hand out several and retire them individually).
 - **GM code:** `GM_CODE` unlocks `/admin`, where the GM sets each character's slot maximums (0 to 12) and sees live usage grouped by campaign.
+- **Despair:** one shared pool (0 to 12) per campaign or adventure. The GM sets it on `/admin` under the
+  adventure tabs; every character in that adventure sees it, read-only, above their willpower. A character in
+  several adventures sees the first current campaign's pool (`despairPool` in `lib/types.ts`).
 - Slots are stored as a count (`hp_used`, `hp_max` and so on). Tapping a slot ticks up to it, tapping the last ticked slot un-ticks it.
 
 ## Run locally

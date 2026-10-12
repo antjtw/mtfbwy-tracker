@@ -9,11 +9,11 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   if ((await getRole()) !== "gm") redirect(`/code?admin=1&next=${encodeURIComponent("/admin")}`);
   const store = getStore();
-  const [chars, players] = await Promise.all([store.characters(), store.players()]);
+  const [chars, players, despair] = await Promise.all([store.characters(), store.players(), store.despair()]);
   return (
     <main>
       <div className="col gm">
-        <AdminDashboard initial={chars.filter((c) => c.tracked)} players={players} />
+        <AdminDashboard initial={chars.filter((c) => c.tracked)} players={players} despair={despair} />
         <p className="section"><Link className="standalone" href="/">Back to players</Link></p>
       </div>
     </main>

@@ -9,6 +9,9 @@ export interface Store {
   characters(): Promise<Character[]>;
   character(id: string): Promise<Character | null>;
   update(id: string, patch: CharacterPatch): Promise<Character | null>;
+  /** Despair per campaign or adventure (missing pools read as 0) */
+  despair(): Promise<Record<string, number>>;
+  setDespair(adventure: string, value: number): Promise<number>;
 }
 
 // ---------- Supabase ----------
@@ -41,6 +44,24 @@ function supabaseStore(url: string, key: string): Store {
       if (error) throw error;
       return (data as Character) ?? null;
     },
+    async despair() {
+      const { data, error } = await db.from("despair").select("adventure, value");
+      if (error) {
+        // Table not created yet (migration not run): treat every pool as empty rather than break the page
+        if (error.code === "42P01" || error.code === "PGRST205") return {};
+        throw error;
+      }
+      return Object.fromEntries((data ?? []).map((r) => [r.adventure as string, r.value as number]));
+    },
+    async setDespair(adventure, value) {
+      const { data, error } = await db
+        .from("despair")
+        .upsert({ adventure, value, updated_at: new Date().toISOString() })
+        .select("value")
+        .single();
+      if (error) throw error;
+      return data.value as number;
+    },
   };
 }
 
@@ -51,6 +72,7 @@ const FILE = path.join(process.cwd(), ".data", "store.json");
 interface Data {
   players: Player[];
   characters: Character[];
+  despair?: Record<string, number>;
 }
 
 async function load(): Promise<Data> {
@@ -94,6 +116,19 @@ function fileStore(): Store {
         Object.assign(ch, patch);
         await save(data);
         return ch;
+      });
+      queue = run.catch(() => undefined);
+      return run;
+    },
+    async despair() {
+      return (await load()).despair ?? {};
+    },
+    setDespair(adventure, value) {
+      const run = queue.then(async () => {
+        const data = await load();
+        data.despair = { ...data.despair, [adventure]: value };
+        await save(data);
+        return value;
       });
       queue = run.catch(() => undefined);
       return run;

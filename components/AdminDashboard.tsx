@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { DespairEditor, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
@@ -26,8 +27,17 @@ function PlusIcon() {
   );
 }
 
-export function AdminDashboard({ initial, players }: { initial: Character[]; players: Player[] }) {
+export function AdminDashboard({
+  initial,
+  players,
+  despair,
+}: {
+  initial: Character[];
+  players: Player[];
+  despair: Record<string, number>;
+}) {
   const { chars, patch, sync } = usePolledCharacters(initial, "/api/characters");
+  const { values: despairs, set: setDespair, sync: despairSync } = usePolledDespair(despair);
   const [picked, setPicked] = useState<string | null>(null);
 
   // A character with several adventures is listed under each of them (same record, same slots).
@@ -50,6 +60,9 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
   // Always one campaign or adventure at a time; opens on the first (Campaign 2)
   const tab = picked && adventures.includes(picked) ? picked : adventures[0];
 
+  // Nexu Crew's side characters share the crew's despair
+  const pool = tab === NEXU_SIDE ? NEXU : tab;
+
   const visible = chars
     .filter((c) => tagsOf(c).includes(tab))
     .sort((a, b) => a.name.localeCompare(b.name, "en-GB", { sensitivity: "base" }));
@@ -65,6 +78,8 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
           <button key={a} className="tab" aria-pressed={tab === a} onClick={() => setPicked(a)}>{a}</button>
         ))}
       </div>
+
+      {tab && <DespairEditor value={despairs[pool] ?? 0} adventure={pool} onChange={(n) => setDespair(pool, n)} />}
 
       <div className="gm-cards">
         {visible.map((c) => (
@@ -107,7 +122,7 @@ export function AdminDashboard({ initial, players }: { initial: Character[]; pla
         ))}
       </div>
       {visible.length === 0 && <p className="muted">No characters in this adventure yet.</p>}
-      <SyncBadge sync={sync} />
+      <SyncBadge sync={sync === "synced" ? despairSync : sync} />
     </>
   );
 }

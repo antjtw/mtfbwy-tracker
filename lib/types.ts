@@ -50,3 +50,15 @@ export type TrackKey = (typeof TRACKS)[number]["key"];
 export type CharacterPatch = Partial<
   Pick<Character, "hp_used" | "hp_max" | "wp_used" | "wp_max" | "ar_used" | "ar_max">
 >;
+
+/** Despair is shared by everyone in a campaign or adventure, from 0 to 12 */
+export const MAX_DESPAIR = 12;
+export const NO_ADVENTURE = "Other";
+
+/**
+ * The despair pool a character draws on: the first current campaign they're in
+ * (so Nexu Crew regulars now in Campaign 3 see Campaign 3's), otherwise their first adventure.
+ */
+export function despairPool(c: Pick<Character, "adventures">): string {
+  return c.adventures.find((a) => CURRENT_ADVENTURES.includes(a)) ?? c.adventures[0] ?? NO_ADVENTURE;
+}
