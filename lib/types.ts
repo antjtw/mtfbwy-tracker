@@ -8,12 +8,23 @@ export interface Player {
   sort: number;
 }
 
+/** One Path a Hero follows, with the Archetypes taken within it and the levels in each (e.g. Sentinel: Blademaster 1) */
+export interface PathBuild {
+  path: string;
+  archetypes: { name: string; level: number }[];
+}
+
 export interface Character {
   id: string;
   player_id: string;
   name: string;
   description: string;
   era: string;
+  /** Hero build, shown under the tracker title. Blank where not recorded yet; the line just leaves those parts out. */
+  species: string;
+  origin: string;
+  career: string;
+  paths: PathBuild[];
   /**
    * Every adventure the character appears in. They show under each one (player list and admin
    * filters) but share a single set of slots, so usage carries across adventures.

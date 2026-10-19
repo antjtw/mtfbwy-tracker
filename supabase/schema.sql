@@ -13,6 +13,10 @@ create table if not exists characters (
   name        text not null,
   description text not null default '',
   era         text not null default '',
+  species     text not null default '',
+  origin      text not null default '',
+  career      text not null default '',
+  paths       jsonb not null default '[]'::jsonb, -- [{ "path": "Sentinel", "archetypes": [{ "name": "Blademaster", "level": 1 }] }]
   adventures  text[] not null default '{}',
   is_main     boolean not null default true,
   tracked     boolean not null default false,

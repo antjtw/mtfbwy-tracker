@@ -7,7 +7,7 @@ import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { TRACKS, despairPool, type Character } from "@/lib/types";
 
-export function Tracker({ initial, despair }: { initial: Character; despair: Record<string, number> }) {
+export function Tracker({ initial, despair, playerName }: { initial: Character; despair: Record<string, number>; playerName: string }) {
   const { chars, patch, sync } = usePolledCharacters([initial], `/api/characters/${initial.id}`);
   const ch = chars[0] ?? initial;
   const pool = despairPool(ch);
@@ -15,10 +15,8 @@ export function Tracker({ initial, despair }: { initial: Character; despair: Rec
 
   return (
     <>
-      <PageHeading title={`Track ${ch.name}’s stats`}>
-        <p className="lede">
-          Use this space to track {ch.name}’s willpower, health and armour, with the character sheet as a helpful reference.
-        </p>
+      <PageHeading title={ch.name} eyebrow={playerName} compact>
+        <CharacterBuild ch={ch} />
       </PageHeading>
 
       <DespairBar value={values[pool] ?? 0} adventure={pool} />
@@ -71,6 +69,35 @@ function WillpowerPenalty({ used }: { used: number }) {
         {penalty ? `Subtract ${penalty} from all action rolls using your dyad dice` : ""}
       </p>
     </>
+  );
+}
+
+/**
+ * Species, origin, Path (Archetype level) and career as one subdued line under the name, with gold
+ * bullets between (Figma "Stat tracker"). Parts that aren't recorded yet are left out. The bullets
+ * are drawn by CSS, so a screen reader hears a list with a spoken label for each part instead.
+ */
+function CharacterBuild({ ch }: { ch: Character }) {
+  const paths = (ch.paths ?? []).map((p) => ({
+    key: p.path,
+    text: `${p.path} (${p.archetypes.map((a) => `${a.name} ${a.level}`).join(", ")})`,
+  }));
+  const parts = [
+    ch.species && { key: "species", label: "Species", text: ch.species },
+    ch.origin && { key: "origin", label: "Origin", text: ch.origin },
+    ...paths.map((p) => ({ ...p, label: "Path" })),
+    ch.career && { key: "career", label: "Career", text: ch.career },
+  ].filter(Boolean) as { key: string; label: string; text: string }[];
+  if (!parts.length) return null;
+  return (
+    <ul className="build" aria-label="Character build">
+      {parts.map((p) => (
+        <li key={p.key}>
+          <span className="sr-only">{p.label}: </span>
+          {p.text}
+        </li>
+      ))}
+    </ul>
   );
 }
 

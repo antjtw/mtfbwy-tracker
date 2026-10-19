@@ -143,6 +143,12 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 .muted { color: var(--text-subdued); }
 
 .section { margin-top: var(--pad-2xl); }
+/* Character pages: a smaller title, then the build line */
+.page-heading.compact { margin-bottom: var(--pad-2xl); }
+.page-heading.compact h1 { font-size: var(--h-lg); line-height: var(--h-lg-lh); }
+.build { list-style: none; margin: 0; padding: 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.build li { display: inline; }
+.build li:not(:last-child)::after { content: "\2022"; margin: 0 5px; color: var(--text-gold); }
 .page-heading + .section { margin-top: 0; }
 
 /* Selection rows (players, characters) */

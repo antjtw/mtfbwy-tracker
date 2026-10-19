@@ -10,13 +10,13 @@ export default async function TrackerPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/c/${id}`)}`);
   const store = getStore();
-  const [ch, despair] = await Promise.all([store.character(id), store.despair()]);
+  const [ch, despair, players] = await Promise.all([store.character(id), store.despair(), store.players()]);
   if (!ch || !ch.tracked) notFound();
 
   return (
     <main>
       <div className="col tracker">
-        <Tracker initial={ch} despair={despair} />
+        <Tracker initial={ch} despair={despair} playerName={players.find((p) => p.id === ch.player_id)?.name ?? ""} />
         <p className="section"><Link className="standalone" href={`/p/${ch.player_id}`}>Back to characters</Link></p>
       </div>
     </main>
