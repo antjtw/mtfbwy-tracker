@@ -1,4 +1,5 @@
-import type { Character, PathBuild, Player } from "./types";
+import { BUILDS, NO_BUILD } from "./builds";
+import type { Character, Player } from "./types";
 
 /**
  * Roster seeded from Ant's dictated notes and the Notion player dashboards.
@@ -34,36 +35,6 @@ const HEIST = "Underworld Train Heist";
 const RANCOR = "Rancor Heist";
 const ARENA = "Grakkus Arena";
 
-// Origins as they appear at the start of a description, longest first so "Jedi Initiate" beats a shorter match
-const ORIGINS = ["Force Sensitive", "Jedi Initiate", "Abandoned", "Hardened", "Prospect", "Tribal", "Witchborn", "Survivor", "Everyman", "Optimist"];
-
-interface Build {
-  species: string;
-  origin: string;
-  career: string;
-  paths: PathBuild[];
-}
-
-/**
- * Reads the build out of a description written as "Origin Species, Archetype Path, Career"
- * (e.g. "Jedi Initiate Pooba, Blademaster Sentinel, Jedi Knight"; several paths are separated by " / "),
- * or a lone species ("Gand"). Anything else is left blank rather than guessed. Levels start at 1:
- * correct them with a \`paths\` override where a Hero has levelled.
- */
-function buildFrom(description: string): Build {
-  const blank: Build = { species: "", origin: "", career: "", paths: [] };
-  const parts = description.split(", ");
-  if (parts.length === 1 && /^[\p{L}’'-]+$/u.test(description)) return { ...blank, species: description };
-  if (parts.length !== 3) return blank;
-  const [first, middle, career] = parts;
-  const origin = ORIGINS.find((o) => first.startsWith(`${o} `)) ?? "";
-  const paths = middle.split(" / ").map((p) => {
-    const words = p.trim().split(" ");
-    return { path: words[words.length - 1], archetypes: [{ name: words.slice(0, -1).join(" "), level: 1 }] };
-  });
-  return { species: origin ? first.slice(origin.length + 1) : first, origin, career, paths };
-}
-
 let sortCounter = 0;
 
 function c(
@@ -75,8 +46,6 @@ function c(
     main?: boolean;
     description?: string;
     era?: string;
-    /** Overrides for the build read from the description (e.g. a levelled Hero) */
-    paths?: PathBuild[];
     slots?: Slots;
     /** Keeps the original database id (and tracker URL) when a character is renamed */
     id?: string;
@@ -84,15 +53,14 @@ function c(
 ): Character {
   const [hp, wp, ar] = opts.slots ?? TBC;
   const adventures = opts.adventures ?? [];
-  const build = buildFrom(opts.description ?? "");
+  const id = opts.id ?? name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   return {
-    id: opts.id ?? name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+    id,
     player_id,
     name,
     description: opts.description ?? "",
     era: opts.era ?? "",
-    ...build,
-    paths: opts.paths ?? build.paths,
+    ...(BUILDS[id] ?? NO_BUILD),
     adventures,
     tracked: true, // every character has a tracker; maximums are managed in the GM view
     is_main: opts.main ?? adventures.some((a) => MAIN_ADVENTURES.includes(a)),
