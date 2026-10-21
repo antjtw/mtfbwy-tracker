@@ -1,4 +1,5 @@
 import { BUILDS, NO_BUILD } from "./builds";
+import { describeBuild } from "./build";
 import type { Character, Player } from "./types";
 
 /**
@@ -54,13 +55,15 @@ function c(
   const [hp, wp, ar] = opts.slots ?? TBC;
   const adventures = opts.adventures ?? [];
   const id = opts.id ?? name.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const build = BUILDS[id] ?? NO_BUILD;
   return {
     id,
     player_id,
     name,
-    description: opts.description ?? "",
+    // Heroes with a build are described from it; everyone else keeps the written description
+    description: describeBuild(build) || (opts.description ?? ""),
     era: opts.era ?? "",
-    ...(BUILDS[id] ?? NO_BUILD),
+    ...build,
     adventures,
     tracked: true, // every character has a tracker; maximums are managed in the GM view
     is_main: opts.main ?? adventures.some((a) => MAIN_ADVENTURES.includes(a)),

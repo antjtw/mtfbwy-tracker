@@ -1,3 +1,4 @@
+import type { Build } from "./builds";
 import type { Character } from "./types";
 
 /** Era shown for a character with no build recorded, by the adventure they belong to */
@@ -43,4 +44,15 @@ export function buildParts(ch: Character): BuildPart[] {
     bareNexu && { key: "role", label: "Role", text: "Pod racer" },
     era && { key: "era", label: "Era", text: era },
   ].filter(Boolean) as BuildPart[];
+}
+
+/**
+ * The one-line description used on the character lists: "[Origin] [Species], [Archetype] [Path], [Career]"
+ * (e.g. "Jedi Initiate Pkorian, Embalmed Sorcerer, Jedi Knight"). More than one Path is separated by " / ",
+ * and parts that aren't recorded are left out. Empty when there's no build to describe.
+ */
+export function describeBuild(b: Build): string {
+  const who = [b.origin, b.species].filter(Boolean).join(" ");
+  const path = b.paths.map((p) => `${p.archetypes.map((a) => a.name).join(" / ")} ${p.path}`).join(" / ");
+  return b.origin || b.career || b.paths.length ? [who, path, b.career].filter(Boolean).join(", ") : "";
 }
