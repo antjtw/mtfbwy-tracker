@@ -92,7 +92,7 @@ const ROSTER: Character[] = [
   c(JAMES, "Eisor Trius", { adventures: [RTS], description: "An Iktotchi Nihil marauder", era: "Active in 231 BBY" }),
   c(JAMES, "Ashira Taal", { adventures: [RANCOR], description: "Force Sensitive Twi’lek, Skeleton Key Technologist / Shadowblade Sentinel, Slicer" }),
   c(JAMES, "Kirk Dickson", { adventures: [ARENA], description: "Tribal Human, Tank Marauder, Freedom Fighter" }),
-  c(JAMES, "Pamliven Roleb", { id: "pamlian-roleb", adventures: [HEIST], description: "A lawless Lasat on Coruscant", era: "Active in 16 BBY" }),
+  c(JAMES, "Pamliven Roleb", { id: "pamlian-roleb", adventures: [HEIST], description: "A lawless Lasat with a hidden truth", era: "Active in 16 BBY" }),
 
   // Jake
   c(JAKE, "Bowen Clandis", { adventures: [C2], description: "Jedi Initiate Pantoran, Guardian Devout, Force Scholar", slots: [7, 7, 0] }),
@@ -101,9 +101,9 @@ const ROSTER: Character[] = [
   c(JAKE, "Vezulok Khargon", { adventures: [NEXU, C3], main: true, description: "Barabel" }),
   c(JAKE, "Rayzer Botch", { adventures: [STAR, C3], description: "Tynann" }),
   c(JAKE, "Bolsa Roodah", { adventures: [C2], main: false, description: "Abandoned Rodian, Artillerist Technologist, Smuggler", slots: [7, 7, 5] }),
-  c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "Barabel" }),
+  c(JAKE, "Bezulok Fhargon", { adventures: [QOTJ], description: "A distant relative of a legendary Scholar" }),
   c(JAKE, "Cors 'Blitz' Ghrenald", { id: "cors-ghrenald", adventures: [RTS], description: "Human" }),
-  c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "Anomid" }),
+  c(JAKE, "Korpel Yurik", { adventures: [HEIST], description: "An Anomid with a hidden truth" }),
   c(JAKE, "Orrin Vox", { adventures: [RANCOR], description: "Everyman Bith, Artillerist Technologist, Freedom Fighter" }),
   c(JAKE, "Wee Dunga Funq", { adventures: [ARENA], description: "Tribal Rodian, Gunslinger Wayfarer, Bounty Hunter" }),
   c(JAKE, "Ulon Glost", { adventures: [NEXU], description: "Mustafarian" }),
@@ -112,11 +112,11 @@ const ROSTER: Character[] = [
   c(JOSH, "Gadge Millet", { adventures: [C2], description: "Force Sensitive Ikkrukkian, Striker Sentinel, Bounty Hunter", slots: [6, 6, 3] }),
   c(JOSH, "Fubbroonfal", { id: "fubbo", adventures: [C3], description: "Tribal Wookiee, Operative Wayfarer, Freedom Fighter", slots: [7, 6, 4] }),
   c(JOSH, "Bingus-K’aar", { id: "bingus-kaar", adventures: [NEXU], main: true, description: "Tusken" }),
-  c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "Zebrak" }),
+  c(JOSH, "Agen Ankor", { adventures: [QOTJ], description: "A long forgotten Zebrak Darksider" }),
   c(JOSH, "Battarux", { adventures: [RTS], description: "Dashade" }),
   c(JOSH, "Drassk the Endurer", { adventures: [RANCOR], description: "Survivor Trandoshan, Ravager Marauder, Gladiator" }),
   c(JOSH, "Rodneh Cheekoo", { adventures: [ARENA], description: "Force Sensitive Rodian, Cosmic Mystic, Jedi Knight" }),
-  c(JOSH, "Rosama Melmi", { adventures: [HEIST], description: "Human" }),
+  c(JOSH, "Rosama Melmi", { adventures: [HEIST], description: "A Human Undercity dweller with a hidden truth" }),
 
   // Matthew
   c(MATT, "Ras Mithra", { adventures: [C2], description: "Jedi Initiate Pkorian, Embalmed Sorcerer, Jedi Knight", slots: [7, 8, 0] }),
@@ -126,7 +126,7 @@ const ROSTER: Character[] = [
   c(MATT, "Tristan Topaz", { adventures: [NEXU, C3], main: true, description: "Human" }),
   c(MATT, "Kael", { adventures: [RTS], description: "Mon Calamari" }),
   c(MATT, "Vesh Caldrin", { adventures: [RANCOR], description: "Prospect Kage, Crusader Devout, Assassin" }),
-  c(MATT, "Barbossa", { adventures: [HEIST], description: "Chironian" }),
+  c(MATT, "Barbossa", { adventures: [HEIST], description: "A defiant Chironian outlaw with a hidden truth" }),
   c(MATT, "Errol Reza", { adventures: [NEXU], description: "Kalleran" }),
   c(MATT, "Biz Ube Hurley", { adventures: [ARENA], description: "Abandoned Bith, Guardian Devout, Freedom Fighter" }),
 
@@ -134,7 +134,7 @@ const ROSTER: Character[] = [
   c(NAOISE, "L1-M3", { adventures: [C2, C3], description: "Abandoned Second Class Droid, Skeleton Key Technologist, DJ", slots: [7, 6, 0] }),
   c(NAOISE, "Thalen Skellig", { adventures: [C3], description: "Jedi Initiate Human, Cosmic Mystic, Force Scholar", slots: [7, 6, 4] }),
   c(NAOISE, "Slakk Printall (Dago Lomek)", { id: "dago-lomek", adventures: [NEXU, C3], main: true, description: "Rodian" }),
-  c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "Besalisk" }),
+  c(NAOISE, "Tommy Gleb", { adventures: [QOTJ], description: "A legendary Besalisk pilot, gone too soon" }),
   c(NAOISE, "Viya Grah", { adventures: [RTS], description: "Nautolan" }),
 
   // Wilde
@@ -142,9 +142,9 @@ const ROSTER: Character[] = [
   c(WILDE, "Rue Dahlia", { adventures: [C3], description: "Hardened Human, Operative Wayfarer, Scholar", slots: [6, 6, 3] }),
   c(WILDE, "Dia Tarkona", { id: "dia-tarkdona", adventures: [STAR], description: "Twi’lek" }),
   c(WILDE, "Sol’ina", { adventures: [NEXU], main: true, description: "Togorian" }),
-  c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "Gand" }),
+  c(WILDE, "Mark Mantis", { adventures: [QOTJ], description: "A pilgrim" }),
   c(WILDE, "Lucky Calder", { adventures: [RANCOR], description: "Optimist Human, Gambler Wayfarer, Crime Lord" }),
-  c(WILDE, "Kaja Verec", { id: "kaja-vel", adventures: [HEIST], description: "Kiffar" }),
+  c(WILDE, "Kaja Verec", { id: "kaja-vel", adventures: [HEIST], description: "A fearsome Kiffar with a hidden truth" }),
   c(WILDE, "Tantoori Vozo", { adventures: [NEXU], description: "Nikto" }),
 
   // Guests
