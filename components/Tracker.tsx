@@ -1,18 +1,66 @@
 "use client";
 
-import { useRef } from "react";
-import { DespairBar, usePolledDespair } from "./Despair";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { DespairChip, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { buildParts } from "@/lib/build";
 import { TRACKS, despairPool, type Character } from "@/lib/types";
 
-export function Tracker({ initial, despair, playerName }: { initial: Character; despair: Record<string, number>; playerName: string }) {
+const TABS = [
+  { key: "slots", label: "Slots" },
+  { key: "stats", label: "Stats and abilities" },
+  { key: "inventory", label: "Inventory" },
+] as const;
+
+export type TabKey = (typeof TABS)[number]["key"];
+
+export function Tracker({
+  initial,
+  despair,
+  playerName,
+  initialTab = "slots",
+}: {
+  initial: Character;
+  despair: Record<string, number>;
+  playerName: string;
+  initialTab?: TabKey;
+}) {
   const { chars, patch, sync } = usePolledCharacters([initial], `/api/characters/${initial.id}`);
   const ch = chars[0] ?? initial;
   const pool = despairPool(ch);
   const { values } = usePolledDespair(despair);
+  const [tab, setTab] = useState<TabKey>(initialTab);
+  const id = useId();
+
+  // Keep the chosen tab in the address so a refresh or shared link lands on it
+  const choose = (key: TabKey) => {
+    setTab(key);
+    try {
+      const url = new URL(window.location.href);
+      if (key === "slots") url.searchParams.delete("tab");
+      else url.searchParams.set("tab", key);
+      window.history.replaceState(null, "", url);
+    } catch {
+      // Address bar not available: the tab still changes
+    }
+  };
+
+  // Arrow keys, Home and End move between tabs (one tab stop for the whole list)
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const i = TABS.findIndex((t) => t.key === tab);
+    const next =
+      e.key === "ArrowRight" ? (i + 1) % TABS.length
+      : e.key === "ArrowLeft" ? (i + TABS.length - 1) % TABS.length
+      : e.key === "Home" ? 0
+      : e.key === "End" ? TABS.length - 1
+      : -1;
+    if (next < 0) return;
+    e.preventDefault();
+    choose(TABS[next].key);
+    document.getElementById(`${id}-tab-${TABS[next].key}`)?.focus();
+  };
 
   return (
     <>
@@ -20,31 +68,65 @@ export function Tracker({ initial, despair, playerName }: { initial: Character; 
         <CharacterBuild ch={ch} />
       </PageHeading>
 
-      <DespairBar value={values[pool] ?? 0} adventure={pool} />
+      <div className="tabs-row">
+        <div className="tab-bar" role="tablist" aria-label={`${ch.name}’s sheet`} onKeyDown={onKeyDown}>
+          {TABS.map((t) => (
+            <button
+              key={t.key}
+              id={`${id}-tab-${t.key}`}
+              className="tab-item"
+              role="tab"
+              aria-selected={tab === t.key}
+              aria-controls={`${id}-panel-${t.key}`}
+              tabIndex={tab === t.key ? 0 : -1}
+              onClick={() => choose(t.key)}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <DespairChip value={values[pool] ?? 0} adventure={pool} />
+      </div>
 
-      <ConditionNotice ch={ch} />
+      <div id={`${id}-panel-slots`} role="tabpanel" aria-labelledby={`${id}-tab-slots`} hidden={tab !== "slots"}>
+        <ConditionNotice ch={ch} />
 
-      {TRACKS.map((t) => {
-        const max = ch[`${t.key}_max`];
-        const used = ch[`${t.key}_used`];
-        return (
-          <section className="track" key={t.key}>
-            <div className="track-head">
-              <h2>{t.label}</h2>
-              <span className="count" aria-hidden>{max - used} / {max} left</span>
-            </div>
-            <p className="sub">{t.blurb}</p>
-            <SlotGrid
-              penalties={t.key === "wp"}
-              label={t.label}
-              max={max}
-              used={used}
-              onChange={(n) => patch(ch.id, { [`${t.key}_used`]: n })}
-            />
-            {t.key === "wp" && <WillpowerPenalty used={used} />}
-          </section>
-        );
-      })}
+        {TRACKS.map((t) => {
+          const max = ch[`${t.key}_max`];
+          const used = ch[`${t.key}_used`];
+          return (
+            <section className="track" key={t.key}>
+              <div className="track-head">
+                <h2>{t.heading}</h2>
+                <span className="count" aria-hidden>{max - used} / {max} left</span>
+              </div>
+              <p className="sub">{t.blurb}</p>
+              <SlotGrid
+                penalties={t.key === "wp"}
+                label={t.label}
+                max={max}
+                used={used}
+                onChange={(n) => patch(ch.id, { [`${t.key}_used`]: n })}
+              />
+              {t.key === "wp" && <WillpowerPenalty used={used} />}
+            </section>
+          );
+        })}
+      </div>
+
+      {TABS.slice(1).map((t) => (
+        <div key={t.key} id={`${id}-panel-${t.key}`} role="tabpanel" aria-labelledby={`${id}-tab-${t.key}`} hidden={tab !== t.key}>
+          {/* Placeholder until the sheet is built */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="tab-placeholder"
+            src="/placeholders/tab-placeholder.jpg"
+            width={500}
+            height={281}
+            alt="Placeholder: Anakin Skywalker standing in drifting smoke"
+          />
+        </div>
+      ))}
       <SyncBadge sync={sync} />
     </>
   );

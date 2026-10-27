@@ -73,9 +73,9 @@ export function AdminDashboard({
         <p className="lede">Track every character at a glance, and unlock or lock their slots.</p>
       </PageHeading>
 
-      <div className="tabs" role="group" aria-label="Filter by adventure">
+      <div className="tab-bar tab-bar-filter" role="group" aria-label="Filter by adventure">
         {adventures.map((a) => (
-          <button key={a} className="tab" aria-pressed={tab === a} onClick={() => setPicked(a)}>{a}</button>
+          <button key={a} className="tab-item" aria-pressed={tab === a} onClick={() => setPicked(a)}>{a}</button>
         ))}
       </div>
 

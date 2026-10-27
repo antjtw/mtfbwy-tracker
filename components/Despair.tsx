@@ -5,7 +5,7 @@ import { MAX_DESPAIR } from "@/lib/types";
 import type { SyncState } from "./usePolledCharacters";
 
 /*
- * Despair trackers (Figma "Despair tracker", hero 2088:23249 and GM 2088:23870).
+ * GM despair editor (Figma "Despair tracker / GM editable", 2088:23870).
  * Every level from 0 to 12 has its own colours, sampled from the Figma variants, and from level 3
  * the "reactor" artwork builds up: radiance, then crystal facets, seams, stress fractures and a burst edge.
  */
@@ -136,18 +136,22 @@ function DespairArt({ value }: { value: number }) {
   );
 }
 
-/** Players' read-only bar: "GM DESPAIR  N / 12" */
-export function DespairBar({ value, adventure }: { value: number; adventure: string }) {
+/*
+ * The compact "GM" despair chip on the hero pages (Figma "Despair" 2112:3133): a flat fill and text colour per level.
+ * The Figma variants carry a glow on level 5 only, which looks unfinished, so it isn't applied here.
+ */
+const CHIP_FILL = ["#20252a", "#2f222a", "#441f2b", "#541d2c", "#601c2d", "#6e192d", "#7b172d", "#89162e", "#96132e", "#a3122f", "#b10f30", "#bd0e30", "#cc0b31"];
+const CHIP_TEXT = ["#a8b5c2", "#bcb2ba", "#ceafb6", "#ea98a5", "#ea98a5", "#f58d9b", "#f58d9b", "#ff9199", "#ffa4aa", "#ffb9be", "#ffcdd1", "#ffdfe2", "#f0f0f0"];
+
+/** Players' read-only chip: "GM  N". The announced text names the pool and says it out of twelve. */
+export function DespairChip({ value, adventure }: { value: number; adventure: string }) {
   const v = clampDespair(value);
   return (
-    <section className={`despair despair-bar ${v >= 11 ? "despair-thick" : ""}`} style={levelStyle(v)} aria-label={`GM despair for ${adventure}`}>
-      <DespairArt value={v} />
-      <h2 className="despair-title">GM Despair</h2>
-      <p className="despair-value" aria-hidden="true">
-        {v} / {MAX_DESPAIR}
-      </p>
-      <p className="sr-only" role="status">{`${v} of ${MAX_DESPAIR} GM despair`}</p>
-    </section>
+    <div className="despair-chip" style={{ "--chip-bg": CHIP_FILL[v], "--chip-text": CHIP_TEXT[v] } as CSSProperties}>
+      <span aria-hidden="true">GM</span>
+      <span className="despair-chip-value" aria-hidden="true">{v}</span>
+      <span className="sr-only" role="status">{`GM despair for ${adventure}: ${v} of ${MAX_DESPAIR}`}</span>
+    </div>
   );
 }
 

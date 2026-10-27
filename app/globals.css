@@ -144,7 +144,7 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 
 .section { margin-top: var(--pad-2xl); }
 /* Character pages: a smaller title, then the build line */
-.page-heading.compact { margin-bottom: var(--pad-2xl); }
+.page-heading.compact { margin-bottom: var(--pad-xl); } /* 32 (24 on mobile) before the tabs, as in Figma */
 .page-heading.compact h1 { font-size: var(--h-lg); line-height: var(--h-lg-lh); }
 .build { list-style: none; margin: 0; padding: 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
 .build li { display: inline; }
@@ -210,17 +210,16 @@ button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
   button.slot.used:hover { color: var(--text-gold); } /* keep the penalty number readable on the darker fill */
 }
 button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-/* Condition notification (Figma "Notification" on the stat tracker): sits between the heading and the tracks.
-   Pulls into the heading's 64/48 bottom space so it gets 32/24 above it, with 32/24 before the first track. */
+/* Condition notification (Figma "Notification" on the stat tracker): first thing in the Slots tab, with the
+   heading padding (20) before the first section whether or not it is showing. */
 .notice-wrap { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 250ms ease-out, opacity 200ms ease-out, margin 250ms ease-out; }
-.notice-wrap.open { grid-template-rows: 1fr; opacity: 1; margin-top: calc(var(--pad-xl) - var(--pad-3xl)); }
-.notice-wrap + .sr-only + .track { margin-top: 0; transition: margin-top 250ms ease-out; }
-.notice-wrap.open + .sr-only + .track { margin-top: var(--pad-xl); }
+.notice-wrap.open { grid-template-rows: 1fr; opacity: 1; }
+.notice-wrap + .sr-only + .track { margin-top: var(--pad-md); } /* heading padding above the first section, as in Figma */
 .notice-clip { min-height: 0; overflow: hidden; }
 .notice { display: flex; flex-direction: column; gap: var(--pad-3xs); background: var(--danger-bg); border: 1px solid var(--outline-error); border-radius: 8px; padding: var(--pad-xs) var(--pad-xs) var(--pad-sm) var(--pad-md); font-size: 19px; line-height: 28px; color: var(--text-error); animation: notice-in 250ms ease-out; }
 .notice strong { color: var(--text-default); font-weight: 700; }
 @keyframes notice-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .notice-wrap, .notice-wrap + .sr-only + .track { transition: none; } .notice { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .notice-wrap { transition: none; } .notice { animation: none; } }
 
 /* Willpower penalty helper: the row eases open (grid 0fr -> 1fr) so content below glides down */
 .penalty-wrap { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 250ms ease-out, opacity 200ms ease-out, margin-top 250ms ease-out; }
@@ -235,9 +234,6 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .sync.bad { color: var(--text-error); border-color: var(--outline-error); }
 
 /* Games Master dashboard (Figma "GM dashboard" + "character block") */
-.tabs { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); }
-.tab { min-height: var(--target); font: inherit; font-size: 16px; line-height: 24px; color: var(--text-subdued); background: transparent; border: 1px solid var(--outline-navy-subdued); border-radius: 24px; padding: 9px 16px; cursor: pointer; }
-.tab[aria-pressed="true"] { color: var(--text-gold); border-color: var(--outline-gold); }
 .gm-cards { display: flex; flex-direction: column; gap: var(--pad-lg); margin-top: var(--pad-lg); }
 .gm-card { background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy); border-radius: 8px; padding: var(--pad-xs) var(--pad-xs) var(--pad-sm) var(--pad-md); }
 .gm-head { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-2xs); padding-bottom: var(--pad-xs); }
@@ -258,11 +254,6 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .despair-art { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
 .despair-title { color: inherit; letter-spacing: 0.04em; }
 .despair-value { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; color: inherit; }
-.despair-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-sm); min-height: 48px; padding: 9px 15px; margin-bottom: var(--pad-2xl); }
-.despair-bar.despair-thick { border-width: 1.5px; padding: 8.5px 14.5px; }
-.despair-bar .despair-value { font-size: 19px; line-height: 28px; }
-/* The despair bar sits between the heading and the first track */
-.despair-bar + .notice-wrap.open { margin-top: calc(var(--pad-xl) - var(--pad-2xl)); }
 
 .despair-card { display: flex; flex-direction: column; gap: var(--pad-sm); padding: var(--pad-md); margin-top: var(--pad-lg); }
 .despair-summary { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-sm); flex-wrap: wrap; }
@@ -284,3 +275,23 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   .despair-positions { grid-template-columns: repeat(6, minmax(0, 1fr)); row-gap: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .despair, .despair-position { transition: none; } }
+
+/* Tabs (Figma "Tab bar"): a rounded container with a gold pill on the selected tab */
+.tab-bar { display: inline-flex; flex-wrap: wrap; gap: 4px; max-width: 100%; padding: 4px; background: var(--surface-navy-lighter); border-radius: 12px; }
+.tab-item { position: relative; min-height: 40px; padding: 8px 16px; font: 500 16px/24px var(--font-body); color: #fff; background: transparent; border: 0; border-radius: 8px; cursor: pointer; }
+.tab-item::before { content: ""; position: absolute; inset: -2px 0; } /* 44px target */
+.tab-item[aria-selected="true"], .tab-item[aria-pressed="true"] { color: var(--surface-navy-lighter); background: var(--outline-gold); }
+@media (hover: hover) { .tab-item:not([aria-selected="true"]):not([aria-pressed="true"]):hover { background: var(--outline-navy-subdued); } }
+.tab-item:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.tab-bar-filter { margin-bottom: var(--pad-xl); } /* 32 (24 on mobile) above the despair card */
+.despair-card { margin-top: 0; }
+
+/* Hero page: tabs with the compact GM despair chip beside them (below them on mobile) */
+.tabs-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; column-gap: var(--pad-xs); }
+.tabs-row .tab-bar { margin-bottom: var(--pad-sm); }
+.despair-chip { flex: none; min-width: 96px; min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: var(--pad-2xs); padding: 8px 16px; border-radius: 12px; background: var(--chip-bg); color: var(--chip-text); font: 500 16px/24px var(--font-body); transition: background-color 300ms ease-out, color 300ms ease-out; }
+.despair-chip-value { font: 700 19px/28px var(--font-body); font-variant-numeric: tabular-nums; }
+@media (max-width: 768px) { .despair-chip { flex: 1 1 100%; } }
+@media (prefers-reduced-motion: reduce) { .despair-chip { transition: none; } }
+.tab-placeholder { display: block; width: 100%; height: auto; border-radius: 8px; margin-top: var(--pad-md); }
+[role="tabpanel"][hidden] { display: none; }
