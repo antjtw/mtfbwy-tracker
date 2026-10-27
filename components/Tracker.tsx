@@ -118,15 +118,19 @@ export function Tracker({
 
       {TABS.slice(1).map((t) => (
         <div key={t.key} id={`${id}-panel-${t.key}`} role="tabpanel" aria-labelledby={`${id}-tab-${t.key}`} hidden={tab !== t.key}>
-          {/* Placeholder until the sheet is built */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="tab-placeholder"
-            src="/placeholders/tab-placeholder.jpg"
-            width={500}
-            height={281}
-            alt="Placeholder: Anakin Skywalker standing in drifting smoke"
-          />
+          {/* Placeholder until the sheet is built: the animation, or its still frame for people who reduce motion */}
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcSet="/placeholders/tab-placeholder.jpg" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className="tab-placeholder"
+              src="/placeholders/tab-placeholder.gif"
+              width={500}
+              height={281}
+              loading="lazy"
+              alt="Placeholder: Anakin Skywalker standing in drifting smoke"
+            />
+          </picture>
         </div>
       ))}
       <SyncBadge sync={sync} />
