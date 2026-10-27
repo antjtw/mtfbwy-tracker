@@ -139,16 +139,17 @@ function DespairArt({ value }: { value: number }) {
 /*
  * The compact "GM" despair chip on the hero pages (Figma "Despair" 2112:3133): a flat fill and text colour per level.
  * The Figma variants carry a glow on level 5 only, which looks unfinished, so it isn't applied here.
+ * Level 7's text is #ff98a0 rather than Figma's #ff9199, which measured 4.40:1 on its fill (4.62:1 now; AA needs 4.5:1).
  */
 const CHIP_FILL = ["#20252a", "#2f222a", "#441f2b", "#541d2c", "#601c2d", "#6e192d", "#7b172d", "#89162e", "#96132e", "#a3122f", "#b10f30", "#bd0e30", "#cc0b31"];
-const CHIP_TEXT = ["#a8b5c2", "#bcb2ba", "#ceafb6", "#ea98a5", "#ea98a5", "#f58d9b", "#f58d9b", "#ff9199", "#ffa4aa", "#ffb9be", "#ffcdd1", "#ffdfe2", "#f0f0f0"];
+const CHIP_TEXT = ["#a8b5c2", "#bcb2ba", "#ceafb6", "#ea98a5", "#ea98a5", "#f58d9b", "#f58d9b", "#ff98a0", "#ffa4aa", "#ffb9be", "#ffcdd1", "#ffdfe2", "#f0f0f0"];
 
 /** Players' read-only chip: "GM  N". The announced text names the pool and says it out of twelve. */
 export function DespairChip({ value, adventure }: { value: number; adventure: string }) {
   const v = clampDespair(value);
   return (
     <div className="despair-chip" style={{ "--chip-bg": CHIP_FILL[v], "--chip-text": CHIP_TEXT[v] } as CSSProperties}>
-      <span aria-hidden="true">GM</span>
+      <span className="despair-chip-label" aria-hidden="true">GM</span>
       <span className="despair-chip-value" aria-hidden="true">{v}</span>
       <span className="sr-only" role="status">{`GM despair for ${adventure}: ${v} of ${MAX_DESPAIR}`}</span>
     </div>

@@ -59,7 +59,9 @@ export function Tracker({
     if (next < 0) return;
     e.preventDefault();
     choose(TABS[next].key);
-    document.getElementById(`${id}-tab-${TABS[next].key}`)?.focus();
+    const el = document.getElementById(`${id}-tab-${TABS[next].key}`);
+    el?.focus();
+    el?.scrollIntoView({ block: "nearest", inline: "nearest" });
   };
 
   return (
@@ -69,7 +71,7 @@ export function Tracker({
       </PageHeading>
 
       <div className="tabs-row">
-        <div className="tab-bar" role="tablist" aria-label={`${ch.name}’s sheet`} onKeyDown={onKeyDown}>
+        <div className="tab-bar tab-bar-hero" role="tablist" aria-label={`${ch.name}’s sheet`} onKeyDown={onKeyDown}>
           {TABS.map((t) => (
             <button
               key={t.key}
