@@ -1,16 +1,18 @@
 "use client";
 
-import { useId, useRef, useState, type KeyboardEvent } from "react";
+import { Fragment, useId, useRef, useState, type KeyboardEvent } from "react";
 import { DespairChip, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { buildParts } from "@/lib/build";
+import { DAMAGE_SEVERITIES, applyDamage, damageThresholds, type Severity } from "@/lib/damage";
 import { TRACKS, despairPool, type Character } from "@/lib/types";
 
 const TABS = [
   { key: "slots", label: "Slots" },
-  { key: "stats", label: "Stats and abilities" },
+  { key: "stats", label: "Stats" },
+  { key: "abilities", label: "Abilities" },
   { key: "inventory", label: "Inventory" },
 ] as const;
 
@@ -32,7 +34,20 @@ export function Tracker({
   const pool = despairPool(ch);
   const { values } = usePolledDespair(despair);
   const [tab, setTab] = useState<TabKey>(initialTab);
+  const [damageMsg, setDamageMsg] = useState("");
   const id = useId();
+
+  // One press marks the next hit point slots for that severity (up to the unlocked maximum); it never toggles or heals
+  const takeDamage = (severity: Severity) => {
+    const r = applyDamage(ch.hp_used, ch.hp_max, severity);
+    if (r.marked === 0) {
+      setDamageMsg(ch.hp_max === 0 ? "No hit point slots are unlocked." : "No hit points left to mark.");
+      return;
+    }
+    patch(ch.id, { hp_used: r.used });
+    setDamageMsg(`${r.marked} hit ${r.marked === 1 ? "point" : "points"} marked; ${r.remaining} remaining.`);
+  };
+  const thresholds = damageThresholds(ch);
 
   // Keep the chosen tab in the address so a refresh or shared link lands on it
   const choose = (key: TabKey) => {
@@ -97,7 +112,31 @@ export function Tracker({
           const max = ch[`${t.key}_max`];
           const used = ch[`${t.key}_used`];
           return (
-            <section className="track" key={t.key}>
+            <Fragment key={t.key}>
+            {t.key === "hp" && (
+              <section className="track">
+                <h2>Damage thresholds</h2>
+                <p className="sub">Your ability to withstand damage</p>
+                <div className="damage-row">
+                  {DAMAGE_SEVERITIES.map((d) => (
+                    <button
+                      key={d.key}
+                      type="button"
+                      className="damage-card"
+                      aria-label={`${d.label} damage, threshold ${thresholds[d.key]}. Mark ${d.cost} hit ${d.cost === 1 ? "point" : "points"}.`}
+                      onClick={() => takeDamage(d.key)}
+                    >
+                      <span className="damage-label">{d.label}</span>
+                      <span className="damage-value">{thresholds[d.key]}</span>
+                      <span className="damage-action">Mark {d.cost} HP</span>
+                    </button>
+                  ))}
+                  <p className="damage-rule">If you take damage equal to twice your Massive Damage threshold minimum, you die instantly.</p>
+                </div>
+                <p className="sr-only" role="status">{damageMsg}</p>
+              </section>
+            )}
+            <section className="track">
               <div className="track-head">
                 <h2>{t.heading}</h2>
                 <span className="count" aria-hidden>{max - used} / {max} left</span>
@@ -112,8 +151,14 @@ export function Tracker({
               />
               {t.key === "wp" && <WillpowerPenalty used={used} />}
             </section>
+            </Fragment>
           );
         })}
+
+        {/* Coming back with the character editor */}
+        <p className="edit-link-wrap">
+          <a className="edit-link" role="link" aria-disabled="true">Edit character</a>
+        </p>
       </div>
 
       {TABS.slice(1).map((t) => (

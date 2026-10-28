@@ -197,7 +197,7 @@ h2 { font-family: var(--font-heading); font-weight: var(--weight-title); text-tr
 .track .sub { margin-top: var(--pad-3xs); }
 .count { font-size: 16px; font-weight: 700; color: var(--text-gold); font-variant-numeric: tabular-nums; }
 .slots { display: flex; flex-wrap: wrap; gap: var(--pad-3xs) var(--pad-xs); margin-top: calc(var(--pad-sm) - var(--pad-3xs)); }
-.slot { position: relative; flex: none; width: 64px; height: 36px; margin: var(--pad-3xs) 0; display: flex; align-items: center; justify-content: center; font: 700 16px/1 var(--font-body); color: var(--text-gold-subdued); border-radius: 4px; padding: 0; background: var(--surface-navy-darker); border: 1.5px solid var(--outline-navy); }
+.slot { position: relative; flex: none; width: 64px; height: 36px; margin: var(--pad-3xs) 0; display: flex; align-items: center; justify-content: center; font: 700 16px/1 var(--font-body); color: var(--text-gold-subdued); border-radius: 8px; padding: 0; background: var(--surface-navy-darker); border: 1.5px solid var(--outline-navy); }
 /* Tap target fills the 4px margin above and below: 64x44 (inset is from the padding box, inside the 1.5px border) */
 button.slot::before { content: ""; position: absolute; inset: -5.5px -1.5px; }
 .slot.avail { border-color: var(--outline-gold); cursor: pointer; }
@@ -229,7 +229,7 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .penalty-wrap { transition: none; } }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .slots.mini { flex: 1 1 0; min-width: 0; gap: var(--pad-2xs); margin-top: 0; align-content: flex-start; }
-.slots.mini .slot { width: 32px; height: 20px; margin: 0; border-width: 2px; cursor: default; }
+.slots.mini .slot { width: 32px; height: 20px; margin: 0; border-width: 2px; border-radius: 4px; cursor: default; }
 .sync { display: inline-block; margin-top: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); padding: 4px 10px; border-radius: 4px; }
 .sync.bad { color: var(--text-error); border-color: var(--outline-error); }
 
@@ -301,3 +301,20 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .despair-chip { transition: none; } }
 .tab-placeholder { display: block; width: 100%; height: auto; border-radius: 8px; margin-top: var(--pad-md); }
 [role="tabpanel"][hidden] { display: none; }
+
+/* Damage thresholds (Figma "Damage thresholds"): four buttons, each marking hit point slots */
+.damage-row { display: flex; flex-wrap: wrap; gap: var(--pad-xs); margin-top: var(--pad-sm); }
+.damage-card { box-sizing: border-box; flex: 1 1 80px; min-width: 80px; height: 96px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--pad-2xs); padding: var(--pad-2xs) 0; background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy); border-radius: var(--pad-xs); color: var(--text-default); text-align: center; cursor: pointer; font: inherit; }
+.damage-label { font: 500 16px/24px var(--font-body); }
+/* The number's box is trimmed to its capital letters (17px high), as in Figma; browsers without text-box trimming get the same 17px line */
+.damage-value { font: 700 24px/17px var(--font-heading); }
+@supports (text-box: trim-both cap alphabetic) { .damage-value { line-height: 32px; text-box: trim-both cap alphabetic; } }
+.damage-action { font: 500 12px/16px var(--font-body); }
+.damage-rule { flex: 1 0 100%; min-width: 0; margin: 0; font-size: 19px; line-height: 28px; color: var(--text-subdued); }
+@media (hover: hover) { .damage-card:hover { background: var(--surface-gold-darker); border-color: var(--outline-gold); } }
+.damage-card:active { background: var(--surface-gold-darker); }
+.damage-card:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* "Edit character": not available yet, so it reads as a disabled link */
+.edit-link-wrap { margin: var(--pad-2xl) 0 0; }
+.edit-link { font-size: 19px; line-height: 28px; color: var(--text-disabled); text-decoration: underline; cursor: not-allowed; }

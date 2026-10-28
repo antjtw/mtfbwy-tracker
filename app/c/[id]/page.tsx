@@ -23,7 +23,7 @@ export default async function TrackerPage({
   return (
     <main>
       <div className="col tracker">
-        <Tracker initialTab={tab === "stats" || tab === "inventory" ? tab : "slots"} initial={ch} despair={despair} playerName={players.find((p) => p.id === ch.player_id)?.name ?? ""} />
+        <Tracker initialTab={tab === "stats" || tab === "abilities" || tab === "inventory" ? tab : "slots"} initial={ch} despair={despair} playerName={players.find((p) => p.id === ch.player_id)?.name ?? ""} />
         <p className="section"><Link className="standalone" href={`/p/${ch.player_id}`}>Back to characters</Link></p>
       </div>
     </main>
