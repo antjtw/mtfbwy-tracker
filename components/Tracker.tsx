@@ -35,7 +35,19 @@ export function Tracker({
   const { values } = usePolledDespair(despair);
   const [tab, setTab] = useState<TabKey>(initialTab);
   const [damageMsg, setDamageMsg] = useState("");
+  const [flash, setFlash] = useState(0);
   const id = useId();
+
+  // Marking a slot pops a brief red glow around the page, and buzzes the phone where the browser allows it
+  // (Android browsers do; iPhones don't offer web pages any vibration). Unticking only gets the lighter buzz.
+  const feedback = (marking: boolean) => {
+    if (marking) setFlash((n) => n + 1);
+    try {
+      navigator.vibrate?.(marking ? 20 : 10);
+    } catch {
+      // No vibration available
+    }
+  };
 
   // One press marks the next hit point slots for that severity (up to the unlocked maximum); it never toggles or heals
   const takeDamage = (severity: Severity) => {
@@ -44,6 +56,7 @@ export function Tracker({
       setDamageMsg(ch.hp_max === 0 ? "No hit point slots are unlocked." : "No hit points left to mark.");
       return;
     }
+    feedback(true);
     patch(ch.id, { hp_used: r.used });
     setDamageMsg(`${r.marked} hit ${r.marked === 1 ? "point" : "points"} marked; ${r.remaining} remaining.`);
   };
@@ -147,7 +160,10 @@ export function Tracker({
                 label={t.label}
                 max={max}
                 used={used}
-                onChange={(n) => patch(ch.id, { [`${t.key}_used`]: n })}
+                onChange={(n) => {
+                  feedback(n > used);
+                  patch(ch.id, { [`${t.key}_used`]: n });
+                }}
               />
               {t.key === "wp" && <WillpowerPenalty used={used} />}
             </section>
@@ -179,6 +195,7 @@ export function Tracker({
         </div>
       ))}
       <SyncBadge sync={sync} />
+      {flash > 0 && <div className="mark-flash" key={flash} aria-hidden="true" />}
     </>
   );
 }

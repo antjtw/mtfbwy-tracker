@@ -318,3 +318,8 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 /* "Edit character": not available yet, so it reads as a disabled link */
 .edit-link-wrap { margin: var(--pad-2xl) 0 0; }
 .edit-link { font-size: 19px; line-height: 28px; color: var(--text-disabled); text-decoration: underline; cursor: not-allowed; }
+
+/* A fraction of a second of red around the page when a slot is marked (inner shadow #FD6E6E, 33%, 64px) */
+.mark-flash { position: fixed; inset: 0; z-index: 100; pointer-events: none; box-shadow: inset 0 0 64px rgba(253, 110, 110, 0.33); opacity: 0; animation: mark-flash 450ms ease-out; }
+@keyframes mark-flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .mark-flash { display: none; } }
