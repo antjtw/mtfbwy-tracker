@@ -38,10 +38,10 @@ export function Tracker({
   const [flash, setFlash] = useState(0);
   const id = useId();
 
-  // Marking a slot pops a brief red glow around the page, and buzzes the phone where the browser allows it
-  // (Android browsers do; iPhones don't offer web pages any vibration). Unticking only gets the lighter buzz.
-  const feedback = (marking: boolean) => {
-    if (marking) setFlash((n) => n + 1);
+  // Marking a hit point slot pops a brief red glow around the page. Any slot press buzzes the phone where the
+  // browser allows it (Android browsers do; iPhones don't offer web pages any vibration); unticking gets a lighter buzz.
+  const feedback = (marking: boolean, glow: boolean) => {
+    if (marking && glow) setFlash((n) => n + 1);
     try {
       navigator.vibrate?.(marking ? 20 : 10);
     } catch {
@@ -56,7 +56,7 @@ export function Tracker({
       setDamageMsg(ch.hp_max === 0 ? "No hit point slots are unlocked." : "No hit points left to mark.");
       return;
     }
-    feedback(true);
+    feedback(true, true);
     patch(ch.id, { hp_used: r.used });
     setDamageMsg(`${r.marked} hit ${r.marked === 1 ? "point" : "points"} marked; ${r.remaining} remaining.`);
   };
@@ -161,7 +161,7 @@ export function Tracker({
                 max={max}
                 used={used}
                 onChange={(n) => {
-                  feedback(n > used);
+                  feedback(n > used, t.key === "hp");
                   patch(ch.id, { [`${t.key}_used`]: n });
                 }}
               />
