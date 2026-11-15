@@ -11,7 +11,7 @@ export default async function NewCharacterPage({ params }: { params: Promise<{ i
   const { id } = await params;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/p/${id}/new`)}`);
   const store = getStore();
-  const [players, chars] = await Promise.all([store.players(), store.characters()]);
+  const [players, chars, allCards] = await Promise.all([store.players(), store.characters(), store.cards()]);
   const player = players.find((p) => p.id === id);
   if (!player) notFound();
   // Current campaigns first, then the rest alphabetically
@@ -23,7 +23,7 @@ export default async function NewCharacterPage({ params }: { params: Promise<{ i
       <div className="col wide">
         <div className="builder-col">
         <Suspense>
-          <Builder playerId={player.id} playerName={player.name} adventures={adventures} />
+          <Builder cards={allCards.filter((c) => c.tier === 0)} playerId={player.id} playerName={player.name} adventures={adventures} />
         </Suspense>
         </div>
       </div>

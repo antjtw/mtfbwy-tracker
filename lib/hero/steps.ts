@@ -1,4 +1,4 @@
-import { choiceKey, careerKey, originKey, pathKey, speciesKey, subspeciesKey, validateTraitArray } from "./engine";
+import { choiceKey, careerKey, computeHero, originKey, pathKey, speciesKey, subspeciesKey, TIER0_KEY, validateTraitArray } from "./engine";
 import { CAREER_BY_ID, ORIGIN_BY_ID, PATH_BY_ID, SPECIES_BY_ID } from "./data";
 import { type Choice, type Hero, type SkillName, SKILLS, type Source, TRAITS } from "./types";
 
@@ -8,6 +8,7 @@ export const STEPS = [
   { key: "origin", label: "Origin" },
   { key: "path", label: "Path" },
   { key: "career", label: "Career" },
+  { key: "powers", label: "Powers" },
   { key: "traits", label: "Traits" },
   { key: "identity", label: "Identity" },
   { key: "review", label: "Review" },
@@ -60,6 +61,11 @@ export function stepProblems(hero: Hero, step: StepKey): string[] {
     case "career": {
       const c = CAREER_BY_ID[hero.career.id];
       return c ? choiceProblems(hero, careerKey(c.id), c.choices) : ["Choose a career"];
+    }
+    case "powers": {
+      const need = computeHero(hero).powers.extraTier0Force;
+      const have = asArray(hero.choices[TIER0_KEY]).length;
+      return need > 0 && have !== need ? [`Choose ${need} extra Tier 0 Force power${need === 1 ? "" : "s"} (you have ${have})`] : [];
     }
     case "adventure":
       return [];

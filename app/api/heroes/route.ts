@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRole } from "@/lib/auth";
 import { computeHero } from "@/lib/hero/engine";
+import { sanitizeTier0 } from "@/lib/hero/powers";
 import { sanitizeHero } from "@/lib/hero/sanitize";
 import { characterFromHero } from "@/lib/hero/toCharacter";
 import { getStore } from "@/lib/store";
@@ -21,7 +22,8 @@ export async function POST(req: Request) {
   const adventure = typeof body.adventure === "string" ? body.adventure : "";
   if (adventure && !chars.some((c) => c.adventures.includes(adventure))) return NextResponse.json({ error: "unknown_adventure" }, { status: 400 });
 
-  const hero = sanitizeHero(body.hero);
+  const clean = sanitizeHero(body.hero);
+  const hero = clean && sanitizeTier0(clean, await store.cards());
   if (!hero) return NextResponse.json({ error: "invalid_hero" }, { status: 400 });
   const issues = computeHero(hero).issues;
   if (!hero.identity.name) issues.push({ code: "missing", message: "Give your Hero a name" });

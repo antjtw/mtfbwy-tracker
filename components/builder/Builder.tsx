@@ -8,9 +8,10 @@ import { CAREER_BLURBS, ORIGIN_BLURBS, SPECIES_BLURBS } from "@/lib/hero/data/bl
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "@/lib/hero/data/features";
 import { ARCHETYPE_FEATURES, archetypeKey, CAREERS, ORIGINS, PATHS, PATH_BY_ID, SPECIES, SPECIES_BY_ID, CAREER_BY_ID, ORIGIN_BY_ID } from "@/lib/hero/data";
 import { describeGrants, oneLine, playerNotes } from "@/lib/hero/describe";
-import { careerKey, choiceKey, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey } from "@/lib/hero/engine";
+import { careerKey, choiceKey, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey, TIER0_KEY } from "@/lib/hero/engine";
+import { tier0Pool } from "@/lib/hero/powers";
 import { STEPS, type StepKey, stepProblems } from "@/lib/hero/steps";
-import { type Hero, SKILLS, STEP_NAMES, TRAIT_NAMES, TRAITS, type Trait } from "@/lib/hero/types";
+import { type Card, type Hero, SKILLS, STEP_NAMES, TRAIT_NAMES, TRAITS, type Trait } from "@/lib/hero/types";
 import { CheckList, ChoiceFields, Gain, RadioList } from "./fields";
 import { Ledger } from "./Ledger";
 
@@ -30,16 +31,16 @@ interface EditMode {
   hero: Hero;
 }
 
-export function Builder({ playerId, playerName, adventures, edit }: { playerId: string; playerName: string; adventures: readonly string[]; edit?: EditMode }) {
+export function Builder({ playerId, playerName, adventures, edit, cards }: { playerId: string; playerName: string; adventures: readonly string[]; edit?: EditMode; cards: Card[] }) {
   const router = useRouter();
   const params = useSearchParams();
-  // Editing an existing Hero skips the adventure, which the tracker already has
-  const steps = useMemo(() => (edit ? STEPS.filter((s) => s.key !== "adventure") : STEPS), [edit]);
-  const step: StepKey = steps.find((s) => s.key === params.get("step"))?.key ?? steps[0].key;
-  const index = steps.findIndex((s) => s.key === step);
-
   const storageKey = edit ? `mtfbwy-edit-${edit.characterId}` : `mtfbwy-draft-${playerId}`;
   const [hero, setHero] = useState<Hero>(() => (edit ? { ...emptyHero(), ...edit.hero } : emptyHero()));
+  // Editing an existing Hero skips the adventure, which the tracker already has; Powers only appears when there's a pick to make
+  const extraPowers = useMemo(() => computeHero(hero).powers.extraTier0Force, [hero]);
+  const steps = useMemo(() => STEPS.filter((s) => !(edit && s.key === "adventure") && !(s.key === "powers" && extraPowers === 0)), [edit, extraPowers]);
+  const step: StepKey = steps.find((s) => s.key === params.get("step"))?.key ?? steps[0].key;
+  const index = steps.findIndex((s) => s.key === step);
   const [saved, setSaved] = useState<string[] | null>(null);
   const [adventure, setAdventure] = useState("");
   const [loaded, setLoaded] = useState(false);
@@ -157,6 +158,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
     origin: "Choose an origin",
     path: "Choose a path",
     career: "Choose a career",
+    powers: "Choose your powers",
     traits: "Assign your traits",
     identity: "Name your Hero",
     review: edit ? "Review and save" : "Review your Hero",
@@ -167,6 +169,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
     origin: "What you lived through before the story began.",
     path: "How you fight, and what you believe in. You’ll pick your archetype and two skills.",
     career: "The work that kept you alive. A skill you already have becomes Expertise.",
+    powers: "Your origin, path and career each open up an extra Tier 0 Force power. Basic Force powers come with you already.",
     traits: "Place the array +2, +1, +1, +0, +0, −1 across your six traits. Everything you’ve chosen so far is added on top.",
     identity: "Who is your Hero?",
     review: edit ? "Check everything, then save. You can save a half-finished Hero and come back to it." : "Check everything, then create your Hero and start tracking.",
@@ -315,6 +318,24 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               <p className="note">You already have {d.skills.filter((s) => s.sources.includes(career.name) && s.step === 3).map((s) => s.skill).join(", ")}, so {career.name} makes it Expertise.</p>
             )}
           </>
+        )}
+
+        {step === "powers" && (
+          <CheckList
+            legend="Extra Tier 0 Force powers"
+            name="tier0"
+            n={extraPowers}
+            value={Array.isArray(hero.choices[TIER0_KEY]) ? (hero.choices[TIER0_KEY] as string[]) : []}
+            onChange={(ids) => setChoice(TIER0_KEY, ids)}
+            hint="From your path, your archetype, or the general Force powers."
+            options={tier0Pool(hero, cards).map((c) => ({
+              id: c.id,
+              label: c.name,
+              hint: [c.willpowerCostText ? `Willpower ${c.willpowerCostText}` : "", c.actionRoll === "Yes" ? "Action roll" : "", c.sourceType === "tradition" ? "Force casting" : c.archetype || c.path].filter(Boolean).join(" · "),
+              blurb: c.content.split(/(?<=[.!?])\s/)[0],
+              text: c.content,
+            }))}
+          />
         )}
 
         {step === "traits" && <TraitStep hero={hero} d={d} setHero={setHero} />}

@@ -49,18 +49,18 @@ export function RadioList({ legend, name, options, value, onChange, hint, filter
           return [...new Set(shown.map(key))].map((g) => (
             <div key={g} className="choice-group">
               <h3 className="choice-letter">{g}</h3>
-              <div className="choice-list">{shown.filter((o) => key(o) === g).map((o) => <RadioCard key={o.id} o={o} name={name} value={value} onChange={onChange} />)}</div>
+              <div className="choice-list">{shown.filter((o) => key(o) === g).map((o) => <ChoiceCard key={o.id} o={o} name={name} checked={value === o.id} onChange={onChange} />)}</div>
             </div>
           ));
         })()
       ) : (
-        <div className="choice-list">{shown.map((o) => <RadioCard key={o.id} o={o} name={name} value={value} onChange={onChange} />)}</div>
+        <div className="choice-list">{shown.map((o) => <ChoiceCard key={o.id} o={o} name={name} checked={value === o.id} onChange={onChange} />)}</div>
       )}
     </fieldset>
   );
 }
 
-function RadioCard({ o, name, value, onChange }: { o: Option; name: string; value: string | undefined; onChange: (id: string) => void }) {
+function ChoiceCard({ o, name, type = "radio", checked, onChange }: { o: Option; name: string; type?: "radio" | "checkbox"; checked: boolean; onChange: (id: string) => void }) {
   const items = [...(o.blurb && o.hint ? [o.hint] : []), ...(o.more ?? [])];
   const features = o.features ?? [];
   const paragraphs = (o.text ?? "").split("\n").filter(Boolean);
@@ -70,7 +70,7 @@ function RadioCard({ o, name, value, onChange }: { o: Option; name: string; valu
   return (
     <div className={`choice-card ${o.disabled ? "disabled" : ""}`}>
       <label className="choice">
-        <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />
+        <input type={type} name={name} value={o.id} checked={checked} disabled={o.disabled} onChange={() => onChange(o.id)} />
         <span className="choice-body">
           <span className="choice-label">{o.label}</span>
           {(o.blurb ?? o.hint) && <span className="choice-meta">{o.blurb ?? o.hint}</span>}
@@ -112,33 +112,25 @@ function Tick() {
 }
 
 /** Pick exactly `n` from a list; once n are ticked the rest are unavailable until one is unticked */
-export function CheckList({ legend, name, options, value, n, onChange }: { legend: string; name: string; options: readonly Option[]; value: string[]; n: number; onChange: (ids: string[]) => void }) {
+export function CheckList({ legend, name, options, value, n, onChange, hint }: { legend: string; name: string; options: readonly Option[]; value: string[]; n: number; onChange: (ids: string[]) => void; hint?: string }) {
   return (
     <fieldset className="choice-set">
       <legend>{legend}</legend>
+      {hint && <p className="choice-hint">{hint}</p>}
       <p className="choice-hint" aria-live="polite">Chosen {value.length} of {n}</p>
       <div className="choice-list">
         {options.map((o) => {
           const on = value.includes(o.id);
           const full = value.length >= n && !on;
           return (
-            <div key={o.id} className={`choice-card ${full ? "disabled" : ""}`}>
-            <label className="choice">
-              <input
-                type="checkbox"
-                name={name}
-                value={o.id}
-                checked={on}
-                disabled={full}
-                onChange={() => onChange(on ? value.filter((v) => v !== o.id) : [...value, o.id])}
-              />
-              <span className="choice-body">
-                <span className="choice-label">{o.label}</span>
-                {o.hint && <span className="choice-meta">{o.hint}</span>}
-              </span>
-              <Tick />
-            </label>
-            </div>
+            <ChoiceCard
+              key={o.id}
+              o={{ ...o, disabled: o.disabled || full }}
+              name={name}
+              type="checkbox"
+              checked={on}
+              onChange={() => onChange(on ? value.filter((v) => v !== o.id) : [...value, o.id])}
+            />
           );
         })}
       </div>

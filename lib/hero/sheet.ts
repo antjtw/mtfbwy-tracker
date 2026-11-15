@@ -1,7 +1,7 @@
 import { ARCHETYPE_FEATURES, archetypeKey, PATH_BY_ID } from "./data";
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "./data/features";
 import { abilityKind, type AbilityKind } from "./abilityKind";
-import { computeHero } from "./engine";
+import { computeHero, TIER0_KEY } from "./engine";
 import { rollModifiers, type RollModMap } from "./rollModifiers";
 import type { Card, Hero, ProficiencyStep, Trait } from "./types";
 import { SKILLS, TRAITS } from "./types";
@@ -118,6 +118,29 @@ export function buildSheet(hero: Hero, cards: readonly Card[] = []): Sheet {
       kind: kind === "passive" && card.actionRoll === "Yes" ? "move" : kind,
       per: refreshOf(card.content),
     });
+  }
+
+  // The Basic power bundles come with your tradition, one ability per power; chosen Tier 0 powers sit beside them
+  const basicIds: Record<string, string> = { force: "force-casting.none.basic-force-powers", magick: "magick-casting.none.basic-magick-powers", tech: "tech-casting.none.basic-tech-powers" };
+  for (const t of d.powers.traditions) {
+    const bundle = cards.find((c) => c.id === basicIds[t]);
+    if (!bundle) continue;
+    for (const line of bundle.content.split("\n")) {
+      const m = line.match(/^([^:]{2,40}):\s*(.+)$/);
+      if (!m) continue;
+      const k = `card:${bundle.id}:${slug(m[1])}`;
+      if (seen.has(k)) continue;
+      seen.add(k);
+      abilities.push({ key: k, name: m[1].trim(), source: bundle.name, text: m[2].trim(), kind: abilityKind(m[1], m[2]), per: refreshOf(m[2]) });
+    }
+  }
+  const tier0 = hero.choices[TIER0_KEY];
+  for (const id of Array.isArray(tier0) ? tier0 : []) {
+    const card = cards.find((c) => c.id === id);
+    if (!card || seen.has(`card:${card.id}`)) continue;
+    seen.add(`card:${card.id}`);
+    const kind = abilityKind(card.name, card.content);
+    abilities.push({ key: `card:${card.id}`, name: card.name, source: "Tier 0 Force power", text: card.content, cost: card.willpowerCostText || undefined, kind: kind === "passive" && card.actionRoll === "Yes" ? "move" : kind, per: refreshOf(card.content) });
   }
 
   const resources: SheetResource[] = d.resources.map((r) => ({

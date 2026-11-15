@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRole } from "@/lib/auth";
 import { computeHero } from "@/lib/hero/engine";
+import { sanitizeTier0 } from "@/lib/hero/powers";
 import { sanitizeHeroEdit } from "@/lib/hero/sanitize";
 import { trackerPatch } from "@/lib/hero/toCharacter";
 import { getStore } from "@/lib/store";
@@ -19,7 +20,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!character || !stored) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const body = (await req.json().catch(() => ({}))) as { hero?: unknown };
-  const hero = sanitizeHeroEdit(body.hero, stored);
+  const edited = sanitizeHeroEdit(body.hero, stored);
+  const hero = edited && sanitizeTier0(edited, await store.cards());
   if (!hero) return NextResponse.json({ error: "invalid_hero" }, { status: 400 });
   if (!hero.identity.name) return NextResponse.json({ error: "incomplete", issues: [{ code: "missing", message: "Give your Hero a name" }] }, { status: 400 });
 

@@ -33,6 +33,9 @@ export const TRAIT_CAP = 7; // R-TR-3 / D10
 export const SLOT_CAP = 12;
 export const CARD_LEVELS: readonly number[] = [2, 3, 4, 6, 7, 8, 10, 11, 12];
 
+/** Where the extra Tier 0 Force power picks are kept in Hero.choices (card ids) */
+export const TIER0_KEY = "powers.tier0";
+
 export const STARTING_ARRAY: readonly number[] = [2, 1, 1, 0, 0, -1];
 
 export const tierOf = (level: number): 0 | 1 | 2 | 3 => (level <= 1 ? 0 : level <= 4 ? 1 : level <= 8 ? 2 : 3);
@@ -358,6 +361,11 @@ function build(hero: Hero, log: readonly LevelEntry[]): Built {
   let extraTier0Force = 0;
   for (const p of heldPaths) if ((p.id === "mystic" || p.id === "sentinel") && originForce) extraTier0Force++;
   if (career?.extraTier0Force && (originForce || heldPaths.some((p) => p.basicPowers === "force"))) extraTier0Force++;
+
+  const tier0Picks = asArray(hero.choices[TIER0_KEY]);
+  if (extraTier0Force > 0 && tier0Picks.length !== extraTier0Force) {
+    issues.push({ code: "choice", message: `Choose ${extraTier0Force} extra Tier 0 Force power${extraTier0Force === 1 ? "" : "s"} (you have ${tier0Picks.length})` });
+  }
 
   const resources = paths.map((p) => {
     const def = PATH_BY_ID[p.pathId];

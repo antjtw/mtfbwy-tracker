@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { choiceKey, computeHero, emptyHero, pathKey } from "./engine";
+import { choiceKey, computeHero, emptyHero, pathKey, TIER0_KEY } from "./engine";
 import { changesBetween, creationIssues, entryComplete, entryProblems, levelInfo, levelToWorkOn, sanitizeEntry, tierFor } from "./levelup";
 import type { Hero, LevelEntry } from "./types";
 
@@ -10,7 +10,7 @@ function mystic(log: LevelEntry[] = []): Hero {
   h.path = { id: "mystic", archetypeId: "cosmic" };
   h.career = { id: "jedi-knight" };
   h.traitArray = { STR: 0, AGI: 1, RES: 1, FOR: 2, INT: 0, PRE: -1 };
-  h.choices = { [choiceKey(pathKey("mystic"), "skills")]: ["Athletics", "Insight"] };
+  h.choices = { [choiceKey(pathKey("mystic"), "skills")]: ["Athletics", "Insight"], [TIER0_KEY]: ["a", "b"] };
   h.levelLog = log;
   return h;
 }

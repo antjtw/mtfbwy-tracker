@@ -1,5 +1,5 @@
 import { ARCHETYPE_FEATURES, PATH_BY_ID } from "./data";
-import { computeHero, tierOf } from "./engine";
+import { computeHero, TIER0_KEY, tierOf } from "./engine";
 import { type Card, type Derived, type Hero, type LevelEntry, type PendingCard, type Tradition } from "./types";
 
 /*
@@ -23,6 +23,8 @@ const TIER_FROM_LEVEL: Record<number, number> = { 0: 1, 1: 2, 2: 5, 3: 9 };
 /** Cards the Hero has: every chosen card, plus the Basic power bundles their traditions grant */
 export function ownedCardIds(hero: Hero, d: Derived, cards: readonly Card[]): Set<string> {
   const owned = new Set<string>(hero.levelLog.flatMap((e) => (e.cardId ? [e.cardId] : [])));
+  const extra = hero.choices[TIER0_KEY];
+  for (const id of Array.isArray(extra) ? extra : []) owned.add(id);
   const basic: Record<Tradition, string> = { force: "force-casting.none.basic-force-powers", magick: "magick-casting.none.basic-magick-powers", tech: "tech-casting.none.basic-tech-powers" };
   for (const t of d.powers.traditions) if (cards.some((c) => c.id === basic[t])) owned.add(basic[t]);
   return owned;

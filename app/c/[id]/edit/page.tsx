@@ -10,7 +10,7 @@ export default async function EditCharacterPage({ params }: { params: Promise<{ 
   const { id } = await params;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/c/${id}/edit`)}`);
   const store = getStore();
-  const [character, hero, players] = await Promise.all([store.character(id), store.hero(id), store.players()]);
+  const [character, hero, players, allCards] = await Promise.all([store.character(id), store.hero(id), store.players(), store.cards()]);
   if (!character || !hero) notFound();
   return (
     <main>
@@ -18,6 +18,7 @@ export default async function EditCharacterPage({ params }: { params: Promise<{ 
         <div className="builder-col">
         <Suspense>
           <Builder
+            cards={allCards.filter((c) => c.tier === 0)}
             playerId={character.player_id}
             playerName={players.find((p) => p.id === character.player_id)?.name ?? ""}
             adventures={[]}
