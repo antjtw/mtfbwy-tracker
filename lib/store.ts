@@ -2,6 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_CHARACTERS, SEED_PLAYERS } from "./seed";
+import type { Hero } from "./hero/types";
 import type { Character, CharacterPatch, Player } from "./types";
 
 export interface Store {
@@ -12,6 +13,9 @@ export interface Store {
   /** Despair per campaign or adventure (missing pools read as 0) */
   despair(): Promise<Record<string, number>>;
   setDespair(adventure: string, value: number): Promise<number>;
+  /** Saves a built Hero together with the tracker character made from it */
+  createHero(hero: Hero, character: Character): Promise<void>;
+  hero(characterId: string): Promise<Hero | null>;
 }
 
 // ---------- Supabase ----------
@@ -53,6 +57,23 @@ function supabaseStore(url: string, key: string): Store {
       }
       return Object.fromEntries((data ?? []).map((r) => [r.adventure as string, r.value as number]));
     },
+    async createHero(hero, character) {
+      const { error } = await db.from("characters").insert(character);
+      if (error) throw error;
+      const saved = await db.from("heroes").insert({ id: character.id, player_id: character.player_id, rules_version: hero.rulesVersion, data: hero });
+      if (saved.error) {
+        await db.from("characters").delete().eq("id", character.id); // don't leave a character with no Hero behind
+        throw saved.error;
+      }
+    },
+    async hero(characterId) {
+      const { data, error } = await db.from("heroes").select("data").eq("id", characterId).maybeSingle();
+      if (error) {
+        if (error.code === "42P01" || error.code === "PGRST205") return null;
+        throw error;
+      }
+      return (data?.data as Hero) ?? null;
+    },
     async setDespair(adventure, value) {
       const { data, error } = await db
         .from("despair")
@@ -73,6 +94,7 @@ interface Data {
   players: Player[];
   characters: Character[];
   despair?: Record<string, number>;
+  heroes?: Record<string, Hero>;
 }
 
 async function load(): Promise<Data> {
@@ -122,6 +144,20 @@ function fileStore(): Store {
     },
     async despair() {
       return (await load()).despair ?? {};
+    },
+    createHero(hero, character) {
+      const run = queue.then(async () => {
+        const data = await load();
+        if (data.characters.some((c) => c.id === character.id)) throw new Error("exists");
+        data.characters.push(character);
+        data.heroes = { ...data.heroes, [character.id]: hero };
+        await save(data);
+      });
+      queue = run.catch(() => undefined);
+      return run;
+    },
+    async hero(characterId) {
+      return (await load()).heroes?.[characterId] ?? null;
     },
     setDespair(adventure, value) {
       const run = queue.then(async () => {

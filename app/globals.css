@@ -323,3 +323,58 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .mark-flash { position: fixed; inset: 0; z-index: 100; pointer-events: none; box-shadow: inset 0 0 64px rgba(253, 110, 110, 0.33); opacity: 0; animation: mark-flash 450ms ease-out; }
 @keyframes mark-flash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .mark-flash { display: none; } }
+
+/* Character builder */
+.new-character { margin: 0 0 var(--pad-xl); }
+.step-count { margin: var(--pad-2xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.builder-form { display: flex; flex-direction: column; gap: var(--pad-lg); }
+.choice-set { border: 0; margin: 0; padding: 0; min-width: 0; }
+.choice-set legend { padding: 0; font: 850 19px/28px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-default); }
+.choice-hint { margin: var(--pad-3xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.choice-list { display: flex; flex-direction: column; gap: var(--pad-2xs); margin-top: var(--pad-xs); }
+.choice { display: flex; gap: var(--pad-xs); align-items: flex-start; min-height: var(--target); padding: var(--pad-2xs) var(--pad-xs); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; cursor: pointer; }
+.choice:has(input:checked) { border-color: var(--outline-gold); background: var(--surface-navy-lighter); }
+.choice:has(input:focus-visible) { outline: 2px solid #fff; outline-offset: 2px; }
+.choice.disabled { opacity: 0.5; cursor: default; }
+.choice input { flex: none; width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--outline-gold); }
+.choice-body { display: flex; flex-direction: column; min-width: 0; }
+.choice-label { font-size: 19px; line-height: 28px; color: var(--text-default); }
+.choice-meta { font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.gain { padding: var(--pad-sm) var(--pad-md); border: 1px solid var(--outline-gold-subdued); border-radius: 8px; }
+.gain h3 { margin: 0 0 var(--pad-2xs); font: 850 16px/24px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-gold); }
+.gain ul { margin: 0; padding-left: 20px; font-size: 16px; line-height: 24px; color: var(--text-default); }
+.read-more summary { cursor: pointer; color: var(--text-gold); font-size: 16px; line-height: 24px; padding: var(--pad-3xs) 0; }
+.read-more p { margin: var(--pad-2xs) 0 0; white-space: pre-line; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.note { margin: 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.err-text { margin: 0; color: var(--text-error); font-size: 16px; line-height: 24px; }
+.error-summary { margin-bottom: var(--pad-lg); padding: var(--pad-xs) var(--pad-md); background: var(--danger-bg); border: 1px solid var(--outline-error); border-radius: 8px; color: var(--text-error); font-size: 16px; line-height: 24px; }
+.error-summary strong { display: block; color: var(--text-default); }
+.error-summary ul { margin: var(--pad-3xs) 0 0; padding-left: 20px; }
+.error-summary:focus { outline: 2px solid #fff; outline-offset: 2px; }
+.field select, .field textarea { width: 100%; max-width: var(--input-max); background: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
+.field select { min-height: var(--target); }
+.field textarea { max-width: none; padding: var(--pad-xs); line-height: 28px; }
+.step-nav { display: flex; justify-content: space-between; gap: var(--pad-sm); margin-top: var(--pad-xs); }
+.btn.quiet { color: var(--text-subdued); border-color: var(--outline-navy); }
+.btn.quiet:hover { background: rgba(168, 181, 194, 0.08); }
+.trait-grid { display: flex; flex-direction: column; gap: var(--pad-xs); }
+.trait-row { display: grid; grid-template-columns: 1fr 96px 56px; grid-template-areas: "label select total" "bonus bonus bonus"; gap: var(--pad-3xs) var(--pad-sm); align-items: center; padding: var(--pad-xs); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; }
+.trait-row label { grid-area: label; font-size: 19px; line-height: 28px; }
+.trait-row .abbr { color: var(--text-subdued); font-size: 14px; }
+.trait-row select { grid-area: select; width: 96px; min-height: var(--target); background: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
+.trait-bonus { grid-area: bonus; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.trait-total { grid-area: total; text-align: right; font: 700 24px/32px var(--font-body); color: var(--text-gold); }
+.ledger { margin-top: var(--pad-2xl); border: 1px solid var(--outline-navy); border-radius: 8px; padding: var(--pad-xs) var(--pad-md); background: var(--surface-navy-lighter); }
+.ledger summary { cursor: pointer; font: 850 19px/28px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; min-height: 28px; }
+.ledger dl { margin: var(--pad-xs) 0 0; }
+.ledger-traits > div { display: grid; grid-template-columns: 1fr auto; gap: 0 var(--pad-sm); padding: var(--pad-3xs) 0; border-top: 1px solid var(--outline-navy-subdued); }
+.ledger-traits dt, .ledger-stats dt { font-size: 16px; line-height: 24px; color: var(--text-default); }
+.ledger-traits dd { margin: 0; display: flex; flex-direction: column; align-items: flex-end; }
+.ledger-traits strong { font: 700 19px/28px var(--font-body); color: var(--text-gold); }
+.ledger-src { font-size: 12px; line-height: 16px; color: var(--text-subdued); text-align: right; }
+.ledger-stats > div { display: flex; justify-content: space-between; gap: var(--pad-sm); padding: var(--pad-3xs) 0; border-top: 1px solid var(--outline-navy-subdued); }
+.ledger-stats dd { margin: 0; font-weight: 700; font-size: 16px; line-height: 24px; font-variant-numeric: tabular-nums; }
+.review-line { margin: 0 0 var(--pad-lg); font-size: 19px; line-height: 28px; color: var(--text-subdued); }
+.review-line strong { color: var(--text-default); }
+.plain-list { margin: var(--pad-xs) 0 0; padding-left: 20px; font-size: 16px; line-height: 24px; }
+.muted { color: var(--text-subdued); }
