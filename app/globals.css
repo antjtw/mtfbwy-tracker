@@ -359,7 +359,7 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .error-summary strong { display: block; color: var(--text-default); }
 .error-summary ul { margin: var(--pad-3xs) 0 0; padding-left: 20px; }
 .error-summary:focus { outline: 2px solid #fff; outline-offset: 2px; }
-.field select, .field textarea { width: 100%; max-width: var(--input-max); background: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
+.field select, .field textarea { width: 100%; max-width: var(--input-max); background-color: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
 .field select { min-height: var(--target); }
 .field textarea { max-width: none; padding: var(--pad-xs); line-height: 28px; }
 .step-nav { display: flex; justify-content: space-between; gap: var(--pad-sm); margin-top: var(--pad-xs); }
@@ -369,7 +369,7 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .trait-row { display: grid; grid-template-columns: 1fr 96px 56px; grid-template-areas: "label select total" "bonus bonus bonus"; gap: var(--pad-3xs) var(--pad-sm); align-items: center; padding: var(--pad-xs); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; }
 .trait-row label { grid-area: label; font-size: 19px; line-height: 28px; }
 .trait-row .abbr { color: var(--text-subdued); font-size: 14px; }
-.trait-row select { grid-area: select; width: 96px; min-height: var(--target); background: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
+.trait-row select { grid-area: select; width: 96px; min-height: var(--target); background-color: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
 .trait-bonus { grid-area: bonus; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
 .trait-total { grid-area: total; text-align: right; font: 700 24px/32px var(--font-body); color: var(--text-gold); }
 .ledger { margin-top: var(--pad-2xl); border: 1px solid var(--outline-navy); border-radius: 8px; padding: var(--pad-xs) var(--pad-md); background: var(--surface-navy-lighter); }
@@ -405,3 +405,23 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .card-meta dt { color: var(--text-subdued); }
 .card-meta dd { margin: 0; color: var(--text-default); }
 .card-meta > div { display: flex; gap: var(--pad-2xs); }
+
+/* Drop-downs look like text fields with a chevron. They stay native selects underneath, so keyboards, screen readers and phone pickers all work. */
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--page-bg);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23e1dfb8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px 20px;
+  padding-right: 44px !important;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 20px;
+}
+select:focus-visible { outline: 2px solid var(--outline-gold); outline-offset: 2px; }
+select:disabled { opacity: 0.5; cursor: default; }
+select option { background: var(--page-bg); color: var(--input-value); }
+.trait-row select { width: 112px; }
+.trait-row { grid-template-columns: 1fr 112px 56px; }
