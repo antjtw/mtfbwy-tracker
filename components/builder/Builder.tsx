@@ -15,14 +15,22 @@ import { Ledger } from "./Ledger";
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 const ARRAY_VALUES = [2, 1, 0, -1];
 
-export function Builder({ playerId, playerName, adventures }: { playerId: string; playerName: string; adventures: readonly string[] }) {
+interface EditMode {
+  characterId: string;
+  hero: Hero;
+}
+
+export function Builder({ playerId, playerName, adventures, edit }: { playerId: string; playerName: string; adventures: readonly string[]; edit?: EditMode }) {
   const router = useRouter();
   const params = useSearchParams();
-  const step: StepKey = STEPS.find((s) => s.key === params.get("step"))?.key ?? "adventure";
-  const index = STEPS.findIndex((s) => s.key === step);
+  // Editing an existing Hero skips the adventure, which the tracker already has
+  const steps = useMemo(() => (edit ? STEPS.filter((s) => s.key !== "adventure") : STEPS), [edit]);
+  const step: StepKey = steps.find((s) => s.key === params.get("step"))?.key ?? steps[0].key;
+  const index = steps.findIndex((s) => s.key === step);
 
-  const storageKey = `mtfbwy-draft-${playerId}`;
-  const [hero, setHero] = useState<Hero>(emptyHero);
+  const storageKey = edit ? `mtfbwy-edit-${edit.characterId}` : `mtfbwy-draft-${playerId}`;
+  const [hero, setHero] = useState<Hero>(() => (edit ? { ...emptyHero(), ...edit.hero } : emptyHero()));
+  const [saved, setSaved] = useState<string[] | null>(null);
   const [adventure, setAdventure] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [showProblems, setShowProblems] = useState(false);
@@ -36,14 +44,14 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
       const raw = sessionStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw) as { hero?: Hero; adventure?: string };
-        if (saved.hero) setHero({ ...emptyHero(), ...saved.hero });
+        if (saved.hero) setHero(edit ? { ...emptyHero(), ...saved.hero, startingLevel: edit.hero.startingLevel, levelLog: edit.hero.levelLog, imported: edit.hero.imported } : { ...emptyHero(), ...saved.hero });
         if (typeof saved.adventure === "string") setAdventure(saved.adventure);
       }
     } catch {
       // No storage available: the draft just lives in memory
     }
     setLoaded(true);
-  }, [storageKey]);
+  }, [storageKey, edit]);
   useEffect(() => {
     if (!loaded) return;
     try {
@@ -56,6 +64,7 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
   // Each step is its own screen: put focus on its heading so a screen reader starts there
   useEffect(() => {
     setShowProblems(false);
+    setSaved(null);
     const h1 = document.querySelector("h1");
     h1?.setAttribute("tabindex", "-1");
     h1?.focus();
@@ -77,7 +86,7 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
       setTimeout(() => summaryRef.current?.focus(), 0);
       return;
     }
-    go(STEPS[Math.min(index + 1, STEPS.length - 1)].key);
+    go(steps[Math.min(index + 1, steps.length - 1)].key);
   };
 
   async function create() {
@@ -92,6 +101,31 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
         return;
       }
       const body = (await res.json().catch(() => ({}))) as { issues?: { message: string }[] };
+      setSaveError(body.issues?.length ? body.issues.map((i) => i.message).join(". ") : "Couldn’t save your Hero. Try again.");
+    } catch {
+      setSaveError("Couldn’t reach the server. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function saveEdit() {
+    if (!edit) return;
+    setBusy(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/heroes/${edit.characterId}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ hero }) });
+      const body = (await res.json().catch(() => ({}))) as { complete?: boolean; issues?: { message: string }[] };
+      if (res.ok) {
+        try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
+        if (body.complete) {
+          router.push(`/c/${edit.characterId}`);
+          router.refresh();
+          return;
+        }
+        setSaved((body.issues ?? []).map((i) => i.message));
+        return;
+      }
       setSaveError(body.issues?.length ? body.issues.map((i) => i.message).join(". ") : "Couldn’t save your Hero. Try again.");
     } catch {
       setSaveError("Couldn’t reach the server. Check your connection and try again.");
@@ -115,7 +149,7 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
     career: "Choose a career",
     traits: "Assign your traits",
     identity: "Name your Hero",
-    review: "Review your Hero",
+    review: edit ? "Review and save" : "Review your Hero",
   };
   const lede: Record<StepKey, string> = {
     adventure: "Which story is this Hero part of? You can leave it for now and add it later.",
@@ -125,14 +159,14 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
     career: "The work that kept you alive. A skill you already have becomes Expertise.",
     traits: "Place the array +2, +1, +1, +0, +0, −1 across your six traits. Everything you’ve chosen so far is added on top.",
     identity: "Who is your Hero?",
-    review: "Check everything, then create your Hero and start tracking.",
+    review: edit ? "Check everything, then save. You can save a half-finished Hero and come back to it." : "Check everything, then create your Hero and start tracking.",
   };
 
   return (
     <>
       <PageHeading title={titles[step]}>
         <p className="lede">{lede[step]}</p>
-        <p className="step-count">Step {index + 1} of {STEPS.length}: {STEPS[index].label} · {playerName}</p>
+        <p className="step-count">Step {index + 1} of {steps.length}: {steps[index].label} · {playerName}</p>
       </PageHeading>
 
       {showProblems && problems.length > 0 && (
@@ -290,13 +324,23 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
           </>
         )}
 
-        {step === "review" && <Review hero={hero} d={d} adventure={adventure} />}
+        {step === "review" && <Review hero={hero} d={d} adventure={adventure} editing={!!edit} />}
 
         {saveError && <p className="err-text" role="alert">{saveError}</p>}
+        {saved && (
+          <div className="note" role="status">
+            <strong>Saved.</strong> {saved.length ? "Still to sort before this Hero is complete:" : ""}
+            <ul>{saved.map((m, n) => <li key={n}>{m}</li>)}</ul>
+          </div>
+        )}
 
         <div className="step-nav">
-          {index > 0 ? <button type="button" className="btn quiet" onClick={() => go(STEPS[index - 1].key)}>Back</button> : <span />}
-          {step === "review" ? (
+          {index > 0 ? <button type="button" className="btn quiet" onClick={() => go(steps[index - 1].key)}>Back</button> : <span />}
+          {step === "review" && edit ? (
+            <button type="button" className="btn" disabled={busy || !hero.identity.name.trim()} onClick={saveEdit}>
+              {busy ? "Saving…" : "Save changes"}
+            </button>
+          ) : step === "review" ? (
             <button type="button" className="btn" disabled={busy || d.issues.length > 0 || !hero.identity.name.trim()} onClick={create}>
               {busy ? "Creating…" : "Create Hero"}
             </button>
@@ -308,7 +352,7 @@ export function Builder({ playerId, playerName, adventures }: { playerId: string
 
       {step !== "review" && <Ledger d={d} />}
 
-      <p className="section"><Link className="standalone" href={`/p/${playerId}`}>Back to characters</Link></p>
+      <p className="section"><Link className="standalone" href={edit ? `/c/${edit.characterId}` : `/p/${playerId}`}>{edit ? "Back to the tracker" : "Back to characters"}</Link></p>
     </>
   );
 }
@@ -340,7 +384,7 @@ function TraitStep({ hero, d, setHero }: { hero: Hero; d: ReturnType<typeof comp
   );
 }
 
-function Review({ hero, d, adventure }: { hero: Hero; d: ReturnType<typeof computeHero>; adventure: string }) {
+function Review({ hero, d, adventure, editing }: { hero: Hero; d: ReturnType<typeof computeHero>; adventure: string; editing: boolean }) {
   const species = SPECIES_BY_ID[hero.species.id];
   const sub = species?.subspecies?.find((s) => s.id === hero.species.subspeciesId);
   const path = PATH_BY_ID[hero.path.id];
@@ -350,10 +394,10 @@ function Review({ hero, d, adventure }: { hero: Hero; d: ReturnType<typeof compu
       <p className="review-line">
         <strong>{hero.identity.name || "Unnamed Hero"}</strong>: {[sub ? `${species?.name} (${sub.name})` : species?.name, ORIGIN_BY_ID[hero.origin.id]?.name, `${path?.name} (${arch?.name} 1)`, CAREER_BY_ID[hero.career.id]?.name].filter(Boolean).join(" • ")}
       </p>
-      <p className="note">Adventure: {adventure || "None yet, add later"}</p>
+      {!editing && <p className="note">Adventure: {adventure || "None yet, add later"}</p>}
       {d.issues.length > 0 && (
         <div className="error-summary" role="alert">
-          <strong>Not ready yet</strong>
+          <strong>{editing ? "Still to sort" : "Not ready yet"}</strong>
           <ul>{d.issues.map((i, n) => <li key={n}>{i.message}</li>)}</ul>
         </div>
       )}
@@ -378,7 +422,7 @@ function Review({ hero, d, adventure }: { hero: Hero; d: ReturnType<typeof compu
           {d.features.map((f, i) => <li key={i}>{f.name} <span className="muted">({f.source})</span></li>)}
         </ul>
       </section>
-      <p className="note">Equipment and cards come next. Your Hero starts at level 1 with no armour.</p>
+      <p className="note">{editing ? "Equipment, cards and level-ups come next." : "Equipment and cards come next. Your Hero starts at level 1 with no armour."}</p>
     </>
   );
 }

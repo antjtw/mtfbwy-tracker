@@ -315,9 +315,9 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .damage-card:active { background: var(--surface-gold-darker); }
 .damage-card:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-/* "Edit character": not available yet, so it reads as a disabled link */
+/* "Edit character" */
 .edit-link-wrap { margin: var(--pad-2xl) 0 0; }
-.edit-link { font-size: 19px; line-height: 28px; color: var(--text-disabled); text-decoration: underline; cursor: not-allowed; }
+.edit-link { font-size: 19px; line-height: 28px; color: var(--text-default); text-decoration: underline; }
 
 /* A fraction of a second of red around the page when a slot is marked (inner shadow #FD6E6E, 33%, 64px) */
 .mark-flash { position: fixed; inset: 0; z-index: 100; pointer-events: none; box-shadow: inset 0 0 64px rgba(253, 110, 110, 0.33); opacity: 0; animation: mark-flash 450ms ease-out; }

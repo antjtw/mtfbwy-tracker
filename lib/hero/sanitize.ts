@@ -38,3 +38,13 @@ export function sanitizeHero(raw: unknown): Hero | null {
   };
   return h;
 }
+
+/** An edit keeps what the builder doesn't touch (level, level-up log, imported flag) from the stored Hero */
+export function sanitizeHeroEdit(raw: unknown, stored: Hero): Hero | null {
+  const h = sanitizeHero(raw);
+  if (!h) return null;
+  h.startingLevel = stored.startingLevel;
+  h.levelLog = stored.levelLog;
+  if (stored.imported) h.imported = true;
+  return h;
+}

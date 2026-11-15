@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Fragment, useId, useRef, useState, type KeyboardEvent } from "react";
 import { DespairChip, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
@@ -171,9 +172,8 @@ export function Tracker({
           );
         })}
 
-        {/* Coming back with the character editor */}
         <p className="edit-link-wrap">
-          <a className="edit-link" role="link" aria-disabled="true">Edit character</a>
+          <Link className="edit-link" href={`/c/${ch.id}/edit`}>Edit character</Link>
         </p>
       </div>
 

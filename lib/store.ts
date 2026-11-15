@@ -17,6 +17,8 @@ export interface Store {
   /** Saves a built Hero together with the tracker character made from it */
   createHero(hero: Hero, character: Character): Promise<void>;
   hero(characterId: string): Promise<Hero | null>;
+  /** Saves an edited Hero, and any change to its tracker character in the same go */
+  saveHero(characterId: string, hero: Hero, characterPatch?: Partial<Character>): Promise<void>;
   /** Every card, from the database when it has them, otherwise the bundled snapshot */
   cards(): Promise<Card[]>;
   /** Loads the bundled cards into the database (a no-op for the local file store). Returns how many are now there. */
@@ -107,6 +109,14 @@ function supabaseStore(url: string, key: string): Store {
         { onConflict: "id", ignoreDuplicates: true },
       );
       if (error) throw error;
+    },
+    async saveHero(characterId, hero, characterPatch) {
+      const { error } = await db.from("heroes").update({ rules_version: hero.rulesVersion, data: hero, updated_at: new Date().toISOString() }).eq("id", characterId);
+      if (error) throw error;
+      if (characterPatch) {
+        const res = await db.from("characters").update({ ...characterPatch, updated_at: new Date().toISOString() }).eq("id", characterId);
+        if (res.error) throw res.error;
+      }
     },
     async hero(characterId) {
       const { data, error } = await db.from("heroes").select("data").eq("id", characterId).maybeSingle();
@@ -200,6 +210,16 @@ function fileStore(): Store {
     },
     async hero(characterId) {
       return (await load()).heroes?.[characterId] ?? null;
+    },
+    saveHero(characterId, hero, characterPatch) {
+      const run = queue.then(async () => {
+        const data = await load();
+        data.heroes = { ...data.heroes, [characterId]: hero };
+        if (characterPatch) data.characters = data.characters.map((c) => (c.id === characterId ? { ...c, ...characterPatch } : c));
+        await save(data);
+      });
+      queue = run.catch(() => undefined);
+      return run;
     },
     async cards() {
       return BUNDLED_CARDS;
