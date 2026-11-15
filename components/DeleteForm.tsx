@@ -46,9 +46,9 @@ export function DeleteForm({ id, name, playerId }: { id: string; name: string; p
         <p className="choice-hint" id="delete-hint">{ready ? "That matches." : "Capital letters, exactly as shown."}</p>
       </div>
       {error && <p className="err-text" role="alert">{error}</p>}
-      <div className="step-nav">
+      <div className="delete-actions">
         <Link className="btn quiet" href={`/c/${id}/edit`}>Keep {name}</Link>
-        <button type="submit" className="btn danger" disabled={!ready || busy}>{busy ? "Deleting…" : "Delete character"}</button>
+        <button type="submit" className="btn ghost-danger" disabled={!ready || busy}>{busy ? "Deleting…" : "Delete character"}</button>
       </div>
     </form>
   );

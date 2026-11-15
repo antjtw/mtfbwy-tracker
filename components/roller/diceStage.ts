@@ -59,8 +59,7 @@ function buildCollider(FACES: FaceMap) {
   return bad ? new CANNON.ConvexPolyhedron({ vertices: verts, faces: faceIdx.map((f) => f.slice().reverse()) }) : shape;
 }
 
-/** `lite` skips glass transmission (heavy on phones); the look is otherwise the same */
-export async function createDiceStage(canvas: HTMLCanvasElement, opts: { lite?: boolean } = {}): Promise<DiceStage> {
+export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceStage> {
   const [FACES, glb] = await Promise.all([
     fetch("/dice/d12-faces.json").then((r) => r.json() as Promise<FaceMap>),
     new Promise<{ scene: THREE.Group }>((res, rej) => new GLTFLoader().load("/dice/d12.glb", res as never, undefined, rej)),
@@ -112,8 +111,8 @@ export async function createDiceStage(canvas: HTMLCanvasElement, opts: { lite?: 
   const glows: THREE.Mesh[] = [];
   function makeDie(kind: Kind, seed: number) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(bodyGeo!, kyberMaterial(kind, !!opts.lite, seed));
-    const num = new THREE.Mesh(numGeo!, numeralMaterial(kind));
+    const body = new THREE.Mesh(bodyGeo!, kyberMaterial(kind, seed));
+    const num = new THREE.Mesh(numGeo!, numeralMaterial());
     body.castShadow = true;
     g.add(body, num);
     scene.add(g);

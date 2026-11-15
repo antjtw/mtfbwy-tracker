@@ -561,3 +561,9 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .delete-form .field input { max-width: 240px; font-weight: 700; letter-spacing: 0.08em; }
 .deleted-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--pad-lg); }
 .deleted-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pad-md); margin: var(--pad-xs) 0 0; }
+.delete-actions { display: flex; flex-direction: column; gap: var(--pad-xs); margin-top: var(--pad-xs); }
+.delete-actions .btn { width: 100%; }
+/* The deferred choice: red text on nothing, filling with red when it is reached for */
+.btn.ghost-danger { background: transparent; border-color: transparent; color: var(--text-error); }
+@media (hover: hover) { .btn.ghost-danger:not(:disabled):hover { background: var(--danger-bg); border-color: var(--outline-error); } }
+.btn.ghost-danger:not(:disabled):focus-visible, .btn.ghost-danger:not(:disabled):active { background: var(--danger-bg); border-color: var(--outline-error); }

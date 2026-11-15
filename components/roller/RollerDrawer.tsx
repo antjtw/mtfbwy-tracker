@@ -87,9 +87,7 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, setWillpower, addDesp
       const probe = document.createElement("canvas");
       if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) throw new Error("no webgl");
       const { createDiceStage } = await import("./diceStage");
-      // Glass transmission is an extra render pass: phones and modest machines get the lighter crystal
-      const lite = (window as unknown as { __dyadLite?: boolean }).__dyadLite ?? (window.innerWidth <= 768 || (navigator.hardwareConcurrency ?? 8) <= 4 || ((navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 8) <= 4);
-      stage.current = await createDiceStage(canvasRef.current, { lite });
+      stage.current = await createDiceStage(canvasRef.current);
     } catch {
       stageFailed.current = true;
     }
