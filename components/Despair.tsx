@@ -291,5 +291,30 @@ export function usePolledDespair(initial: Record<string, number>, intervalMs = 2
     [refresh],
   );
 
-  return { values, set, sync };
+  /** Adds Despair from a roll. Shows it straight away, then settles on the server's figure. */
+  const add = useCallback(
+    async (body: { characterId: string; rollId: string; delta: number } & Record<string, unknown>, pool: string) => {
+      lastEdit.current = Date.now();
+      inFlight.current++;
+      setSync("saving");
+      setValues((vs) => ({ ...vs, [pool]: Math.min(MAX_DESPAIR, (vs[pool] ?? 0) + body.delta) }));
+      try {
+        const res = await fetch("/api/despair", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        if (!res.ok) throw new Error(String(res.status));
+        const out = (await res.json()) as { adventure: string; value: number; clamped: boolean; applied: boolean };
+        setValues((vs) => ({ ...vs, [out.adventure]: out.value }));
+        setSync("synced");
+        return out;
+      } catch {
+        setSync("offline");
+        return null;
+      } finally {
+        inFlight.current--;
+        lastEdit.current = Date.now();
+      }
+    },
+    [],
+  );
+
+  return { values, set, add, sync };
 }

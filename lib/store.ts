@@ -14,6 +14,8 @@ export interface Store {
   /** Despair per campaign or adventure (missing pools read as 0) */
   despair(): Promise<Record<string, number>>;
   setDespair(adventure: string, value: number): Promise<number>;
+  /** Adds to a pool (never above 12), once per roll id. A repeated roll id changes nothing. */
+  addDespair(roll: RollRecord): Promise<{ value: number; clamped: boolean; applied: boolean }>;
   /** Saves a built Hero together with the tracker character made from it */
   createHero(hero: Hero, character: Character): Promise<void>;
   hero(characterId: string): Promise<Hero | null>;
@@ -27,6 +29,20 @@ export interface Store {
   heroIds(): Promise<string[]>;
   /** Adds a Hero for an existing character, leaving any Hero already there alone */
   addHero(characterId: string, playerId: string, hero: Hero): Promise<void>;
+}
+
+/** A resolved roll, kept as the log and as the guard against adding Despair twice */
+export interface RollRecord {
+  rollId: string;
+  characterId: string;
+  adventure: string;
+  delta: number;
+  balance: number;
+  despair: number;
+  modifier: number;
+  penalty: number;
+  kind: string;
+  wpDelta: number;
 }
 
 // ---------- Supabase ----------
@@ -126,6 +142,25 @@ function supabaseStore(url: string, key: string): Store {
       }
       return (data?.data as Hero) ?? null;
     },
+    async addDespair(r) {
+      const { data, error } = await db.rpc("add_despair", {
+        p_roll_id: r.rollId, p_character_id: r.characterId, p_adventure: r.adventure, p_delta: r.delta,
+        p_balance: r.balance, p_despair: r.despair, p_modifier: r.modifier, p_penalty: r.penalty, p_kind: r.kind, p_wp_delta: r.wpDelta,
+      });
+      if (!error) {
+        const row = (Array.isArray(data) ? data[0] : data) as { value: number; clamped: boolean; applied: boolean };
+        return { value: row.value, clamped: row.clamped, applied: row.applied };
+      }
+      // The migration hasn't been run: add to the pool directly (not atomic, and a retry could add twice)
+      if (error.code !== "42883" && error.code !== "PGRST202" && error.code !== "42P01") throw error;
+      const cur = await db.from("despair").select("value").eq("adventure", r.adventure).maybeSingle();
+      if (cur.error) throw cur.error;
+      const before = (cur.data?.value as number | undefined) ?? 0;
+      const value = Math.min(12, before + r.delta);
+      const up = await db.from("despair").upsert({ adventure: r.adventure, value, updated_at: new Date().toISOString() });
+      if (up.error) throw up.error;
+      return { value, clamped: before + r.delta > 12, applied: true };
+    },
     async setDespair(adventure, value) {
       const { data, error } = await db
         .from("despair")
@@ -146,6 +181,7 @@ interface Data {
   players: Player[];
   characters: Character[];
   despair?: Record<string, number>;
+  rolls?: Record<string, RollRecord>;
   heroes?: Record<string, Hero>;
 }
 
@@ -236,6 +272,21 @@ function fileStore(): Store {
         if (data.heroes?.[characterId]) return;
         data.heroes = { ...data.heroes, [characterId]: hero };
         await save(data);
+      });
+      queue = run.catch(() => undefined);
+      return run;
+    },
+    addDespair(r) {
+      const run = queue.then(async () => {
+        const data = await load();
+        const seen = (data.rolls ??= {});
+        const before = data.despair?.[r.adventure] ?? 0;
+        if (seen[r.rollId]) return { value: before, clamped: false, applied: false };
+        seen[r.rollId] = r;
+        const value = Math.min(12, before + r.delta);
+        data.despair = { ...data.despair, [r.adventure]: value };
+        await save(data);
+        return { value, clamped: before + r.delta > 12, applied: true };
       });
       queue = run.catch(() => undefined);
       return run;

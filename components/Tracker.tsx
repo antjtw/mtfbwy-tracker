@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Fragment, useId, useRef, useState, type KeyboardEvent } from "react";
 import { DespairChip, usePolledDespair } from "./Despair";
+import { RollerDrawer } from "./roller/RollerDrawer";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { AbilitiesTab } from "./sheet/AbilitiesTab";
@@ -40,7 +41,7 @@ export function Tracker({
   const { chars, patch, sync } = usePolledCharacters([initial], `/api/characters/${initial.id}`);
   const ch = chars[0] ?? initial;
   const pool = despairPool(ch);
-  const { values } = usePolledDespair(despair);
+  const { values, add: addDespair } = usePolledDespair(despair);
   const [tab, setTab] = useState<TabKey>(initialTab);
   const [damageMsg, setDamageMsg] = useState("");
   const [flash, setFlash] = useState(0);
@@ -212,6 +213,13 @@ export function Tracker({
         </div>
       ))}
       <SyncBadge sync={sync} />
+      <RollerDrawer
+        characterId={ch.id}
+        wpUsed={ch.wp_used}
+        wpMax={ch.wp_max}
+        setWillpower={(n) => patch(ch.id, { wp_used: n })}
+        addDespair={(body) => addDespair(body, pool)}
+      />
       {flash > 0 && <div className="mark-flash" key={flash} aria-hidden="true" />}
     </>
   );

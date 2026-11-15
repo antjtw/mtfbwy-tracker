@@ -68,6 +68,10 @@
   --text-error: #fd6e6e;
   --danger-bg: #3f0a0a; /* spec: error surface */
   --input-value: #ffffff;
+  /* Balance has no token in the Figma file yet: these are a placeholder derived from the navy family. Replace with the real variables. */
+  --balance-border: #6f93c4;
+  --balance-surface: #1b2b42;
+  --balance-text: #b5cdee;
   --surface-game-advantage: #9ad7b0; /* Luminous: Surface/Game/Advantage */
   --surface-game-disadvantage: #d09999; /* Luminous: Surface/Game/Disadvantage */
 
@@ -498,3 +502,47 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .adv-mark.adv { color: var(--surface-game-advantage); }
 .adv-mark.dis { color: var(--surface-game-disadvantage); }
 .card-text { margin: var(--pad-2xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-default); }
+
+/* Dyad Dice roller */
+.dice-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 400ms ease; }
+.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; gap: var(--pad-3xs); min-width: 64px; min-height: 64px; padding: var(--pad-2xs) var(--pad-xs); flex-direction: column; background: var(--surface-navy-lighter); border: 2px solid var(--outline-gold); border-radius: 32px; color: var(--text-gold); font: 700 14px/16px var(--font-body); cursor: pointer; }
+@media (hover: hover) { .roller-trigger:hover { background: var(--surface-gold-darker); } }
+.roller-badge { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-error); border: 2px solid var(--page-bg); }
+.roller { position: fixed; z-index: 95; display: flex; flex-direction: column; background: var(--surface-navy-darker); border: 1px solid var(--outline-navy); color: var(--text-default); transition: transform 250ms ease, height 250ms ease; overflow: hidden; }
+@media (min-width: 769px) {
+  .roller { top: 0; right: 0; bottom: 0; width: 380px; border-width: 0 0 0 1px; transform: translateX(100%); }
+  .roller.open { transform: none; }
+  .roller-handle { display: none; }
+}
+@media (max-width: 768px) {
+  .roller { left: 0; right: 0; bottom: 0; height: 88vh; border-radius: 16px 16px 0 0; border-width: 1px 0 0; transform: translateY(100%); }
+  .roller.open { transform: none; }
+  .roller.open.peek { transform: translateY(65%); }
+  .roller-handle { width: 40px; height: 4px; margin: var(--pad-2xs) auto 0; border-radius: 2px; background: var(--outline-navy); }
+}
+@media (prefers-reduced-motion: reduce) { .roller, .dice-canvas { transition: none; } }
+.roller-head { display: flex; align-items: center; justify-content: space-between; padding: var(--pad-sm) var(--pad-md) var(--pad-2xs); }
+.roller-head h2 { margin: 0; font: 850 24px/32px var(--font-heading); text-transform: uppercase; }
+.roller-close { min-width: var(--target); min-height: var(--target); background: transparent; border: 0; color: var(--text-default); font-size: 32px; line-height: 1; cursor: pointer; }
+.roller-body { display: flex; flex-direction: column; gap: var(--pad-sm); padding: 0 var(--pad-md) var(--pad-xl); overflow-y: auto; }
+.roller-body .field input { max-width: 160px; }
+.roller-penalty { margin: 0; color: var(--text-error); font-size: 16px; line-height: 24px; }
+.roller-roll { align-self: flex-start; }
+.roller-readout { margin: 0; font-size: 24px; line-height: 32px; font-variant-numeric: tabular-nums; }
+.roller-readout b { color: var(--text-gold); }
+.die { display: inline-block; min-width: 40px; padding: 0 var(--pad-2xs); text-align: center; border-radius: 8px; border: 2px solid; font-weight: 700; }
+.die.balance { border-color: var(--balance-border); color: var(--balance-text); background: var(--balance-surface); }
+.die.despair { border-color: #ff3454; color: #ffa4aa; background: var(--danger-bg); }
+.roller-banner { min-height: 0; padding: 0; border-radius: 8px; }
+.roller-banner:not(:empty) { padding: var(--pad-sm) var(--pad-md); border: 1px solid var(--outline-navy); }
+.roller-banner.balance { border-color: var(--balance-border); background: var(--balance-surface); color: var(--balance-text); }
+.roller-banner.despair { border-color: #ff3454; background: var(--danger-bg); color: #ffa4aa; }
+.roller-banner p, .roller-banner ul { margin: 0; font-size: 16px; line-height: 24px; }
+.roller-banner ul { padding-left: 20px; }
+.roller-title { font: 850 19px/28px var(--font-heading) !important; text-transform: uppercase; letter-spacing: 0.04em; }
+.roller-applied { margin-top: var(--pad-2xs) !important; color: var(--text-default); }
+.roller-choices { display: flex; flex-direction: column; align-items: flex-start; gap: var(--pad-xs); }
+.roller-disregard { min-height: var(--target); padding: 0; background: transparent; border: 0; color: var(--text-subdued); font: inherit; font-size: 16px; text-decoration: underline; cursor: pointer; }
+.roller-log-title { margin: 0 0 var(--pad-3xs); font: 850 16px/24px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-gold); }
+.roller-log { margin: 0; padding-left: 20px; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.col.tracker { padding-bottom: 112px; }
