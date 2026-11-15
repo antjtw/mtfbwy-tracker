@@ -331,7 +331,7 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .choice-set { border: 0; margin: 0; padding: 0; min-width: 0; }
 .choice-set legend { padding: 0; font: 850 19px/28px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-default); }
 .choice-hint { margin: var(--pad-3xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
-.choice-list { display: flex; flex-direction: column; gap: var(--pad-2xs); margin-top: var(--pad-xs); }
+.choice-list { display: flex; flex-direction: column; gap: var(--pad-xs); margin-top: var(--pad-xs); }
 .choice-group { margin-top: var(--pad-md); }
 .choice-letter { margin: 0; font: 850 24px/32px var(--font-heading); color: var(--text-gold); }
 .choice-group .choice-list { margin-top: var(--pad-2xs); }
