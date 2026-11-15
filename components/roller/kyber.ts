@@ -9,7 +9,7 @@ import * as THREE from "three";
 export type Kind = "balance" | "despair";
 
 const PALETTE = {
-  balance: { deep: 0x061f96, mid: 0x1f6cf0, pale: 0x9fd4ff, core: 0x2aa8ff, rim: 0xcaf4ff, numeral: 0xe6f8ff, glow: 0x3d9bff, attenuation: 0x0a3fe0 },
+  balance: { deep: 0x05187a, mid: 0x1a56c8, pale: 0x78b0ec, core: 0x2a86d8, rim: 0xa0d4f0, numeral: 0xd8eefc, glow: 0x2f7fe0, attenuation: 0x0a3fe0 },
   despair: { deep: 0x5c040c, mid: 0xc4170d, pale: 0xff9c78, core: 0xff8a1f, rim: 0xfff0c8, numeral: 0xfff3dc, glow: 0xff5a2a, attenuation: 0xc8101c },
 } as const;
 
@@ -44,15 +44,15 @@ const EMISSIVE = /* glsl */ `
 {
   float kf = pow(1.0 - abs(dot(normalize(vViewPosition), normal)), 2.2);
   float core = pow(1.0 - kf, 3.0);
-  totalEmissiveRadiance += uCore * core * 0.4 * (0.6 + kG * 0.6);
-  totalEmissiveRadiance += uRim * kf * 0.4;
-  totalEmissiveRadiance += vec3(1.0) * kSpeck * 0.5 + uRim * kVein * 0.12;
+  totalEmissiveRadiance += uCore * core * 0.26 * (0.6 + kG * 0.6);
+  totalEmissiveRadiance += uRim * kf * 0.26;
+  totalEmissiveRadiance += vec3(1.0) * kSpeck * 0.3 + uRim * kVein * 0.12;
 }
 `;
 
 export function kyberMaterial(kind: Kind, lite: boolean, seed: number): THREE.Material {
   const c = PALETTE[kind];
-  const common = { color: 0xffffff, roughness: 0.16, metalness: 0, envMapIntensity: 0.4 };
+  const common = { color: 0xffffff, roughness: 0.16, metalness: 0, envMapIntensity: 0.28 };
   const mat = lite
     ? new THREE.MeshStandardMaterial(common)
     : new THREE.MeshPhysicalMaterial({ ...common, clearcoat: 0.6, clearcoatRoughness: 0.12, ior: 1.5, transmission: 0.25, thickness: 1.4, attenuationColor: new THREE.Color(c.attenuation), attenuationDistance: 0.9 });
@@ -71,7 +71,7 @@ export function kyberMaterial(kind: Kind, lite: boolean, seed: number): THREE.Ma
 }
 
 /** The numerals: separate mesh, strong emissive, so they stay readable whatever the body does */
-export const numeralMaterial = (kind: Kind) => new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: PALETTE[kind].numeral, emissiveIntensity: 2.4, roughness: 0.4 });
+export const numeralMaterial = (kind: Kind) => new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: PALETTE[kind].numeral, emissiveIntensity: 1.6, roughness: 0.4 });
 
 /** A soft coloured glow laid on the table under a die, so the crystal seems to light its surroundings */
 export function glowMesh(kind: Kind): THREE.Mesh {
@@ -87,7 +87,7 @@ export function glowMesh(kind: Kind): THREE.Mesh {
   ctx.fillRect(0, 0, size, size);
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(6, 6),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: PALETTE[kind].glow, transparent: true, opacity: 0.65, blending: THREE.AdditiveBlending, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: PALETTE[kind].glow, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending, depthWrite: false }),
   );
   m.rotation.x = -Math.PI / 2;
   m.position.y = 0.04;

@@ -69,9 +69,9 @@
   --danger-bg: #3f0a0a; /* spec: error surface */
   --input-value: #ffffff;
   /* Balance has no token in the Figma file yet: these are a placeholder derived from the navy family. Replace with the real variables. */
-  --balance-border: #6f93c4;
-  --balance-surface: #1b2b42;
-  --balance-text: #b5cdee;
+  --balance-border: #4f72a8;
+  --balance-surface: #172338;
+  --balance-text: #9fbbe0;
   --surface-game-advantage: #9ad7b0; /* Luminous: Surface/Game/Advantage */
   --surface-game-disadvantage: #d09999; /* Luminous: Surface/Game/Disadvantage */
 
