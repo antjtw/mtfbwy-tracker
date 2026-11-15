@@ -1,5 +1,6 @@
 import { ARCHETYPE_FEATURES, archetypeKey, PATH_BY_ID } from "./data";
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "./data/features";
+import { abilityKind, type AbilityKind } from "./abilityKind";
 import { computeHero } from "./engine";
 import type { Hero, ProficiencyStep, Trait } from "./types";
 import { SKILLS, TRAITS } from "./types";
@@ -16,6 +17,7 @@ export interface SheetAbility {
   name: string;
   source: string;
   text: string;
+  kind: AbilityKind;
   /** Present when the text says it can be used once per rest, session or the like */
   per?: Refresh;
 }
@@ -46,6 +48,7 @@ export interface Sheet {
   /** Metres, and the same distance in 1.5m grid squares */
   speed: { metres: number; squares: number; note: string };
   casting: { kind: string; modifier: number }[];
+  languages: string;
   resources: SheetResource[];
   abilities: SheetAbility[];
   used: Record<string, number>;
@@ -78,7 +81,7 @@ export function buildSheet(hero: Hero): Sheet {
     const k = `${slug(source)}:${slug(name)}`;
     if (seen.has(k)) return;
     seen.add(k);
-    abilities.push({ key: k, name, source, text, per: refreshOf(text) });
+    abilities.push({ key: k, name, source, text, kind: abilityKind(name, text), per: refreshOf(text) });
   };
   for (const f of SPECIES_FEATURES[hero.species.id] ?? []) add("Species", f.name, f.text);
   for (const f of ORIGIN_FEATURES[hero.origin.id] ?? []) add("Origin", f.name, f.text);
@@ -120,6 +123,7 @@ export function buildSheet(hero: Hero): Sheet {
     evasion: d.evasion,
     speed,
     casting: d.casting.map((c) => ({ kind: c.kind, modifier: c.modifier })),
+    languages: hero.identity.languages,
     resources,
     abilities,
     used: hero.play?.used ?? {},
