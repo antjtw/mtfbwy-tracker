@@ -3,7 +3,7 @@ import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "./data/featu
 import { abilityKind, type AbilityKind } from "./abilityKind";
 import { computeHero } from "./engine";
 import { rollModifiers, type RollModMap } from "./rollModifiers";
-import type { Hero, ProficiencyStep, Trait } from "./types";
+import type { Card, Hero, ProficiencyStep, Trait } from "./types";
 import { SKILLS, TRAITS } from "./types";
 
 /*
@@ -19,6 +19,8 @@ export interface SheetAbility {
   source: string;
   text: string;
   kind: AbilityKind;
+  /** Willpower cost, for cards */
+  cost?: string;
   /** Present when the text says it can be used once per rest, session or the like */
   per?: Refresh;
 }
@@ -72,7 +74,7 @@ export function refreshOf(text: string): Refresh | undefined {
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-export function buildSheet(hero: Hero): Sheet {
+export function buildSheet(hero: Hero, cards: readonly Card[] = []): Sheet {
   const d = computeHero(hero);
   const base = SPEED[hero.species.id] ?? { metres: 9, note: "Far to Close" };
   const speed = { ...base, squares: Math.round(base.metres / 1.5) };
@@ -97,6 +99,25 @@ export function buildSheet(hero: Hero): Sheet {
         if (a.level >= f.level) add(`${def?.name}, ${archName}`, f.name, f.text);
       }
     }
+  }
+
+  // Cards chosen at level-up, grouped with everything else by how they are used
+  for (const e of hero.levelLog) {
+    const card = e.cardId ? cards.find((c) => c.id === e.cardId) : undefined;
+    if (!card) continue;
+    const k = `card:${card.id}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    const kind = abilityKind(card.name, card.content);
+    abilities.push({
+      key: k,
+      name: card.name,
+      source: `Card, tier ${card.tier}${card.archetype ? `, ${card.archetype}` : ""}`,
+      text: card.content,
+      cost: card.willpowerCostText || undefined,
+      kind: kind === "passive" && card.actionRoll === "Yes" ? "move" : kind,
+      per: refreshOf(card.content),
+    });
   }
 
   const resources: SheetResource[] = d.resources.map((r) => ({

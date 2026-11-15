@@ -18,13 +18,13 @@ export default async function TrackerPage({
   const { tab } = await searchParams;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/c/${id}${tab ? `?tab=${encodeURIComponent(tab)}` : ""}`)}`);
   const store = getStore();
-  const [ch, despair, players, hero] = await Promise.all([store.character(id), store.despair(), store.players(), store.hero(id)]);
+  const [ch, despair, players, hero, cards] = await Promise.all([store.character(id), store.despair(), store.players(), store.hero(id), store.cards()]);
   if (!ch || !ch.tracked) notFound();
 
   return (
     <main>
       <div className="col tracker">
-        <Tracker initialTab={tab === "stats" || tab === "abilities" || tab === "inventory" ? tab : "slots"} initial={ch} despair={despair} playerName={players.find((p) => p.id === ch.player_id)?.name ?? ""} sheet={hero ? buildSheet(hero) : undefined} />
+        <Tracker initialTab={tab === "stats" || tab === "abilities" || tab === "inventory" ? tab : "slots"} initial={ch} despair={despair} playerName={players.find((p) => p.id === ch.player_id)?.name ?? ""} sheet={hero ? buildSheet(hero, cards) : undefined} />
         <p className="section"><Link className="standalone" href={`/p/${ch.player_id}`}>Back to characters</Link></p>
       </div>
     </main>

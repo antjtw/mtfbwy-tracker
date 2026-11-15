@@ -14,10 +14,12 @@ const OPTION_IDS: readonly ProgressionOptionId[] = [
 /** Problems with the Hero before any level-up: the creation choices are finished first */
 export const creationIssues = (hero: Hero) => computeHero(hero).issues.filter((i) => i.level === undefined);
 
-/** The level a Hero should work on next: the first earlier level still missing its picks, otherwise the next one up */
+/** The level a Hero should work on next: the first earlier level still missing its picks or its card, otherwise the next one up */
 export function levelToWorkOn(hero: Hero): number | null {
-  const first = hero.levelLog.findIndex((e) => !entryComplete(e));
-  if (first >= 0) return first + 2;
+  const firstPicks = hero.levelLog.findIndex((e) => !entryComplete(e));
+  const firstCard = computeHero(hero).pendingCards[0]?.level;
+  const first = Math.min(firstPicks >= 0 ? firstPicks + 2 : Infinity, firstCard ?? Infinity);
+  if (first !== Infinity) return first;
   const next = 1 + hero.levelLog.length + 1;
   return next > MAX_LEVEL ? null : next;
 }

@@ -45,11 +45,15 @@ export default async function LevelUpPage({ params, searchParams }: { params: Pr
       </main>
     );
   }
+  // Only the cards of paths this Hero follows can come up on a level
+  const slug = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  const followed = new Set(info.followed.map((f) => slug(f.pathName)));
+  const cards = (await store.cards()).filter((c) => c.sourceType === "path" && followed.has(slug(c.path)));
   return (
     <main>
       <div className="col wide"><div className="builder-col">
         <Suspense>
-          <LevelUp characterId={id} characterName={character.name} hero={hero} level={level} />
+          <LevelUp characterId={id} characterName={character.name} hero={hero} level={level} cards={cards} />
         </Suspense>
       </div></div>
     </main>

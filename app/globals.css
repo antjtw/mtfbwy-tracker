@@ -497,3 +497,4 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .adv-mark { display: inline-flex; line-height: 0; }
 .adv-mark.adv { color: var(--surface-game-advantage); }
 .adv-mark.dis { color: var(--surface-game-disadvantage); }
+.card-text { margin: var(--pad-2xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-default); }

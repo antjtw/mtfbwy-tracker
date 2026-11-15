@@ -70,7 +70,7 @@ export function AbilitiesTab({ sheet, play }: { sheet: Sheet; play: Play }) {
                         </label>
                       )}
                     </div>
-                    <p className="ability-source">{a.source}</p>
+                    <p className="ability-source">{a.source}{a.cost ? ` · Willpower ${a.cost}` : ""}</p>
                     <p>{a.text}</p>
                   </li>
                 );

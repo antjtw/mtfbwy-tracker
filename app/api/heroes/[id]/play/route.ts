@@ -12,7 +12,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const store = getStore();
   const hero = await store.hero(id);
   if (!hero) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  const sheet = buildSheet(hero);
+  const sheet = buildSheet(hero, await store.cards());
   const body = (await req.json().catch(() => ({}))) as { key?: unknown; value?: unknown; rest?: unknown };
   const used = { ...(hero.play?.used ?? {}) };
 

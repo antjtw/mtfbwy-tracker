@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getRole } from "@/lib/auth";
 import { computeHero } from "@/lib/hero/engine";
+import { cardProblems } from "@/lib/hero/cardEligibility";
 import { creationIssues, entryComplete, entryProblems, levelInfo, sanitizeEntry } from "@/lib/hero/levelup";
 import { trackerPatch } from "@/lib/hero/toCharacter";
 import { getStore } from "@/lib/store";
@@ -21,7 +22,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   const info = levelInfo(stored, level);
   if (!info) return NextResponse.json({ error: "invalid_level" }, { status: 400 });
   // Only the next level, or one that is still missing its picks
-  if (info.existing && entryComplete(info.existing)) return NextResponse.json({ error: "already_done" }, { status: 409 });
+  const cardOwed = computeHero(stored).pendingCards.some((p) => p.level === level);
+  if (info.existing && entryComplete(info.existing) && !cardOwed) return NextResponse.json({ error: "already_done" }, { status: 409 });
   if (creationIssues(stored).length) return NextResponse.json({ error: "unfinished", issues: creationIssues(stored) }, { status: 409 });
 
   const entry = sanitizeEntry(body.entry, level);
@@ -31,7 +33,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     entry.pathId = info.existing.pathId;
     entry.archetypeId = info.existing.archetypeId;
   }
-  const problems = entryProblems(info.base, entry);
+  // A level whose picks are already made keeps them; only its card is being filled in
+  if (info.existing && entryComplete(info.existing)) entry.picks = info.existing.picks;
+  const problems = [...entryProblems(info.base, entry), ...cardProblems(info.base, entry, await store.cards())];
   if (problems.length) return NextResponse.json({ error: "illegal", issues: problems.map((message) => ({ message })) }, { status: 400 });
 
   const hero = { ...stored, levelLog: [...stored.levelLog] };

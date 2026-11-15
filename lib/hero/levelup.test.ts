@@ -33,7 +33,7 @@ describe("level-up helpers", () => {
   });
 
   it("asks for the first level that is missing its picks", () => {
-    const h = mystic([L(2, { optionId: "hp_slot" }, { optionId: "wp_slot" }), L(3), L(4)]);
+    const h = mystic([{ ...L(2, { optionId: "hp_slot" }, { optionId: "wp_slot" }), cardId: "x" }, L(3), L(4)]);
     expect(entryComplete(h.levelLog[0])).toBe(true);
     expect(levelToWorkOn(h)).toBe(3);
   });

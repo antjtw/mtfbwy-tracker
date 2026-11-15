@@ -45,4 +45,22 @@ describe("sheet", () => {
     expect(m.skills.Insight.disadvantage).toEqual(["Optimistic Courage"]);
     expect(m.saves.AGI?.advantage).toEqual(["Agile"]);
   });
+
+  it("adds chosen cards to the abilities, grouped by how they're used", async () => {
+    const { BUNDLED_CARDS } = await import("./cards");
+    const h = emptyHero();
+    h.species = { id: "wookiee" };
+    h.origin = { id: "force-sensitive" };
+    h.path = { id: "mystic", archetypeId: "cosmic" };
+    h.career = { id: "jedi-knight" };
+    h.traitArray = { STR: 0, AGI: 1, RES: 1, FOR: 2, INT: 0, PRE: -1 };
+    h.choices = { [choiceKey(pathKey("mystic"), "skills")]: ["Athletics", "Insight"] };
+    const evade = BUNDLED_CARDS.find((c) => c.name === "Foreseen evade")!;
+    h.levelLog = [{ characterLevel: 2, pathId: "mystic", archetypeId: "cosmic", picks: [], cardId: evade.id }];
+    const s = buildSheet(h, BUNDLED_CARDS);
+    const a = s.abilities.find((x) => x.key === `card:${evade.id}`);
+    expect(a?.name).toBe("Foreseen evade");
+    expect(a?.kind).toBe("trigger");
+    expect(buildSheet(h).abilities.some((x) => x.key.startsWith("card:"))).toBe(false);
+  });
 });
