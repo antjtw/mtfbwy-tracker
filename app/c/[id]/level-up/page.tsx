@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { LevelUp } from "@/components/builder/LevelUp";
 import { PageHeading } from "@/components/PageHeading";
 import { getRole } from "@/lib/auth";
+import { ensureHero } from "@/lib/hero/ensure";
 import { creationIssues, levelInfo, levelToWorkOn } from "@/lib/hero/levelup";
 import { getStore } from "@/lib/store";
 
@@ -14,8 +15,21 @@ export default async function LevelUpPage({ params, searchParams }: { params: Pr
   const { level: levelParam } = await searchParams;
   if (!(await getRole())) redirect(`/code?next=${encodeURIComponent(`/c/${id}/level-up`)}`);
   const store = getStore();
-  const [character, hero] = await Promise.all([store.character(id), store.hero(id)]);
-  if (!character || !hero) notFound();
+  const character = await store.character(id);
+  if (!character) notFound();
+  const got = await ensureHero(store, character);
+  if ("error" in got) {
+    return (
+      <main>
+        <div className="col wide"><div className="builder-col">
+          <PageHeading title="Couldn’t open level up"><p className="lede">{character.name} doesn’t have a Hero yet and one couldn’t be created.</p></PageHeading>
+          <p className="err-text" role="alert">{got.error}</p>
+          <p className="section"><Link className="standalone" href={`/c/${id}`}>Back to the tracker</Link></p>
+        </div></div>
+      </main>
+    );
+  }
+  const hero = got.hero;
 
   const back = (
     <p className="section"><Link className="standalone" href={`/c/${id}`}>Back to the tracker</Link></p>

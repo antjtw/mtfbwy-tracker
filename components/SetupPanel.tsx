@@ -17,7 +17,7 @@ export function SetupPanel() {
       const text = res.ok
         ? action === "cards"
           ? `Done. ${body.cards} cards are in the database.`
-          : `Done. ${body.created} new Heroes built, ${body.alreadyHad} already had one.`
+          : `Done. ${body.created} new Heroes built, ${body.alreadyHad} already had one.${Array.isArray(body.failed) && body.failed.length ? ` Couldn’t build ${body.failed.length}: ${(body.failed as { name: string; message: string }[]).map((f) => `${f.name} (${f.message})`).join("; ")}` : ""}`
         : `Failed: ${body.message ?? body.error}${body.code ? ` (${body.code})` : ""}${body.hint ? `. ${body.hint}` : ""}`;
       setResults((r) => ({ ...r, [action]: { ok: res.ok, text } }));
     } catch {

@@ -18,8 +18,18 @@ export async function POST(req: Request) {
       const [chars, have] = await Promise.all([store.characters(), store.heroIds()]);
       const haveSet = new Set(have);
       const missing = chars.filter((c) => !haveSet.has(c.id));
-      for (const c of missing) await store.addHero(c.id, c.player_id, heroFromCharacter(c).hero);
-      return NextResponse.json({ created: missing.length, alreadyHad: chars.length - missing.length });
+      const failed: { name: string; message: string }[] = [];
+      let created = 0;
+      for (const c of missing) {
+        try {
+          await store.addHero(c.id, c.player_id, heroFromCharacter(c).hero);
+          created++;
+        } catch (e) {
+          const err = e as { message?: string; code?: string };
+          failed.push({ name: c.name, message: `${err.message ?? "unknown"}${err.code ? ` (${err.code})` : ""}` });
+        }
+      }
+      return NextResponse.json({ created, alreadyHad: chars.length - missing.length, failed });
     }
     return NextResponse.json({ error: "unknown_action" }, { status: 400 });
   } catch (e) {
