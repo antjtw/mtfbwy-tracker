@@ -7,6 +7,7 @@ import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { glowMesh, kyberMaterial, numeralMaterial, type Kind } from "./kyber";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -58,7 +59,8 @@ function buildCollider(FACES: FaceMap) {
   return bad ? new CANNON.ConvexPolyhedron({ vertices: verts, faces: faceIdx.map((f) => f.slice().reverse()) }) : shape;
 }
 
-export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceStage> {
+/** `lite` skips glass transmission (heavy on phones); the look is otherwise the same */
+export async function createDiceStage(canvas: HTMLCanvasElement, opts: { lite?: boolean } = {}): Promise<DiceStage> {
   const [FACES, glb] = await Promise.all([
     fetch("/dice/d12-faces.json").then((r) => r.json() as Promise<FaceMap>),
     new Promise<{ scene: THREE.Group }>((res, rej) => new GLTFLoader().load("/dice/d12.glb", res as never, undefined, rej)),
@@ -106,14 +108,18 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     numGeo = meshes[1].geometry;
   }
 
-  // Balance is blue, Despair is red; the numerals glow so they stay legible
-  function makeDie(hex: number, glow: number) {
+  // Kyber crystals: Balance blue, Despair red with an amber core. Numerals glow so they stay legible.
+  const glows: THREE.Mesh[] = [];
+  function makeDie(kind: Kind, seed: number) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(bodyGeo!, new THREE.MeshPhysicalMaterial({ color: hex, emissive: hex, emissiveIntensity: 0.55, metalness: 0, roughness: 0.28, envMapIntensity: 0.3 }));
-    const num = new THREE.Mesh(numGeo!, new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: glow, emissiveIntensity: 2.6, roughness: 0.4 }));
+    const body = new THREE.Mesh(bodyGeo!, kyberMaterial(kind, !!opts.lite, seed));
+    const num = new THREE.Mesh(numGeo!, numeralMaterial(kind));
     body.castShadow = true;
     g.add(body, num);
     scene.add(g);
+    const glow = glowMesh(kind);
+    scene.add(glow);
+    glows.push(glow);
     return g;
   }
 
@@ -123,8 +129,8 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   world.defaultContactMaterial.restitution = 0.32;
   const shape = buildCollider(FACES);
   const dice = [
-    { key: "balance", group: makeDie(0x0a3fe0, 0x9fd0ff), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
-    { key: "despair", group: makeDie(0xc8101c, 0xffb0a0), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
+    { key: "balance", group: makeDie("balance", 1.7), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
+    { key: "despair", group: makeDie("despair", 4.3), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
   ];
   dice.forEach((d) => world.addBody(d.body));
 
@@ -150,7 +156,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const height = Math.max(14, 5 / (tan * camera.aspect)); // at least about 10 world units visible across
+    const height = Math.max(22, 8 / (tan * camera.aspect)); // at least about 16 world units visible across, so the dice sit small on the sheet
     camera.position.set(0, height, 0);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
@@ -180,7 +186,8 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   }
 
   function sync() {
-    dice.forEach((d) => {
+    dice.forEach((d, i) => {
+      glows[i].position.set(d.body.position.x, 0.04, d.body.position.z);
       d.group.position.set(d.body.position.x, d.body.position.y, d.body.position.z);
       d.group.quaternion.set(d.body.quaternion.x, d.body.quaternion.y, d.body.quaternion.z, d.body.quaternion.w);
     });

@@ -505,8 +505,8 @@ select option { background: var(--page-bg); color: var(--input-value); }
 
 /* Dyad Dice roller */
 .dice-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 400ms ease; }
-.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; padding: 0; background: transparent; border: 0; color: var(--text-gold); cursor: pointer; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55)); }
-@media (hover: hover) { .roller-trigger:hover { color: #fff; } }
+.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; padding: 0; background: transparent; border: 0; cursor: pointer; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55)); }
+@media (hover: hover) { .roller-trigger:hover .roller-die { transform: scale(1.06); } }
 .roller-trigger:active .roller-die { transform: scale(0.94); }
 .roller-die { transition: transform 120ms ease; }
 @media (prefers-reduced-motion: reduce) { .roller-die { transition: none; } }

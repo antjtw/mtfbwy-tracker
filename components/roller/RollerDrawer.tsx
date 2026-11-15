@@ -87,7 +87,9 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, setWillpower, addDesp
       const probe = document.createElement("canvas");
       if (!(probe.getContext("webgl2") || probe.getContext("webgl"))) throw new Error("no webgl");
       const { createDiceStage } = await import("./diceStage");
-      stage.current = await createDiceStage(canvasRef.current);
+      // Glass transmission is an extra render pass: phones and modest machines get the lighter crystal
+      const lite = (window as unknown as { __dyadLite?: boolean }).__dyadLite ?? (window.innerWidth <= 768 || (navigator.hardwareConcurrency ?? 8) <= 4 || ((navigator as unknown as { deviceMemory?: number }).deviceMemory ?? 8) <= 4);
+      stage.current = await createDiceStage(canvasRef.current, { lite });
     } catch {
       stageFailed.current = true;
     }
@@ -200,10 +202,19 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, setWillpower, addDesp
         aria-controls="roller-drawer"
         onClick={() => setOpen(true)}
       >
-        <svg className="roller-die" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-          <polygon points="41.0,4.4 55.5,15.0 61.0,32.0 55.5,49.0 41.0,59.6 23.0,59.6 8.5,49.0 3.0,32.0 8.5,15.0 23.0,4.4" fill="currentColor" />
-          <polygon points="32.0,18.0 45.3,27.7 40.2,43.3 23.8,43.3 18.7,27.7" fill="none" stroke="var(--page-bg)" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M32.0 18.0L41.0 4.4M45.3 27.7L55.5 15.0M40.2 43.3L55.5 49.0M23.8 43.3L23.0 59.6M18.7 27.7L3.0 32.0" stroke="var(--page-bg)" strokeWidth="2" strokeLinecap="round" fill="none" />
+        {/* The d12 from the design file, face on: light while idle, dark with a light outline while the drawer is open */}
+        <svg className="roller-die" width="48" height="50" viewBox={open ? "22 0 32 33" : "0 0 32 33"} aria-hidden="true" focusable="false">
+{open ? (
+          <>
+            <path d="M47.4928 3.39858L53.3596 11.3986V21.2873L47.4928 29.2873L37.9996 32.343L28.5065 29.2873L22.6396 21.2873L22.6396 11.3986L28.5065 3.39858L37.9996 0.342957L47.4928 3.39858Z" fill="#161B20" fillRule="evenodd" clipRule="evenodd" />
+            <path d="M38.0493 0.19046L47.5425 3.24612L47.5913 3.26175L47.6226 3.30374L53.52 11.3457V21.3399L47.6226 29.3819L47.5913 29.4239L47.5425 29.4395L38.0493 32.4951L37.9995 32.5108L37.9507 32.4951L28.4575 29.4395L28.4087 29.4239L28.3774 29.3819L22.48 21.3399L22.48 11.3457L28.3774 3.30374L28.4087 3.26175L28.4575 3.24612L37.9507 0.19046L37.9995 0.174835L38.0493 0.19046ZM32.064 24.7871L28.8364 29.2256L37.9995 32.1748L47.1626 29.2256L43.938 24.7871L32.064 24.7871ZM22.8003 21.2344L28.5493 29.0762L31.8032 24.5977L28.1333 13.3037L22.8003 11.5713L22.8003 21.2344ZM47.8657 13.3047L44.1958 24.5977L47.4487 29.0752L53.1997 21.2344V11.5713L47.8657 13.3047ZM28.4487 13.2393L32.0972 24.4678L43.9028 24.4678L47.5503 13.2393L37.9995 6.30081L28.4487 13.2393ZM38.1606 6.02151L47.7661 13.001L53.0708 11.2764L47.394 3.53421L38.1606 0.562531V6.02151ZM28.605 3.53421L22.9272 11.2764L28.2329 13L37.8403 6.02054V0.561554L28.605 3.53421Z" fill="#C6D3D7" stroke="#C6D3D7" strokeWidth="0.333333" />
+          </>
+        ) : (
+          <>
+            <path d="M25.4928 3.39864L31.3596 11.3986L31.3596 21.2874L25.4928 29.2874L15.9996 32.343L6.50652 29.2874L0.639648 21.2874L0.639648 11.3986L6.50652 3.39864L15.9996 0.343018L25.4928 3.39864Z" fill="#DAE7EB" fillRule="evenodd" clipRule="evenodd" />
+            <path d="M16.0488 0.190521L25.542 3.24619L25.5908 3.26181L25.6221 3.3038L31.5195 11.3458L31.5195 21.3399L25.6221 29.3819L25.5908 29.4239L25.542 29.4395L16.0488 32.4952L15.999 32.5108L15.9502 32.4952L6.45703 29.4395L6.4082 29.4239L6.37695 29.3819L0.479492 21.3399L0.479492 11.3458L6.37695 3.3038L6.4082 3.26181L6.45703 3.24619L15.9502 0.190521L15.999 0.174896L16.0488 0.190521ZM10.0635 24.7872L6.83594 29.2257L15.999 32.1749L25.1621 29.2257L21.9375 24.7872L10.0635 24.7872ZM0.799805 21.2345L6.54883 29.0763L9.80273 24.5977L6.13281 13.3038L0.799805 11.5714L0.799805 21.2345ZM25.8652 13.3048L22.1953 24.5977L25.4482 29.0753L31.1992 21.2345L31.1992 11.5714L25.8652 13.3048ZM6.44824 13.2393L10.0967 24.4679L21.9023 24.4679L25.5498 13.2393L15.999 6.30087L6.44824 13.2393ZM16.1602 6.02158L25.7656 13.0011L31.0713 11.2774L25.3936 3.53427L16.1602 0.562592V6.02158ZM6.60449 3.53427L0.926758 11.2765L6.23242 13.0001L15.8398 6.0206V0.561615L6.60449 3.53427Z" fill="#798693" stroke="#798693" strokeWidth="0.333333" />
+          </>
+        )}
         </svg>
         {(awaiting || (roll?.pending && !open)) && <span className="roller-badge" aria-hidden="true" />}
         {awaiting && <span className="sr-only">A roll is waiting for you to say whether it succeeded</span>}
