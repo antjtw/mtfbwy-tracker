@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import { choiceKey } from "@/lib/hero/engine";
 import { ALL_SKILLS } from "@/lib/hero/steps";
 import { type Choice, type Hero, type SkillName, TRAIT_NAMES, TRAITS } from "@/lib/hero/types";
@@ -16,14 +16,28 @@ export interface Option {
 }
 
 /** One-of-many as native radios: keyboard and screen reader behaviour comes for free */
-export function RadioList({ legend, name, options, value, onChange, hint }: { legend: string; name: string; options: readonly Option[]; value: string | undefined; onChange: (id: string) => void; hint?: string }) {
+export function RadioList({ legend, name, options, value, onChange, hint, filterable }: { legend: string; name: string; options: readonly Option[]; value: string | undefined; onChange: (id: string) => void; hint?: string; filterable?: boolean }) {
   const hintId = useId();
+  const filterId = useId();
+  const [query, setQuery] = useState("");
+  // Every word has to match somewhere in the name, summary or detail; the chosen option always stays in view
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const shown = filterable && words.length
+    ? options.filter((o) => o.id === value || words.every((w) => [o.label, o.hint, ...(o.more ?? [])].join(" ").toLowerCase().includes(w)))
+    : options;
   return (
     <fieldset className="choice-set" aria-describedby={hint ? hintId : undefined}>
       <legend>{legend}</legend>
       {hint && <p className="choice-hint" id={hintId}>{hint}</p>}
+      {filterable && (
+        <div className="field choice-filter">
+          <label htmlFor={filterId}>Filter {legend.toLowerCase()}</label>
+          <input id={filterId} type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, trait or skill, e.g. STR or Stealth" autoComplete="off" />
+          <p className="choice-hint" aria-live="polite">{words.length ? (shown.length ? `Showing ${shown.length} of ${options.length}` : "Nothing matches") : `${options.length} to choose from`}</p>
+        </div>
+      )}
       <div className="choice-list">
-        {options.map((o) => (
+        {shown.map((o) => (
           <div key={o.id} className={`choice-card ${o.disabled ? "disabled" : ""}`}>
             <label className="choice">
               <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />

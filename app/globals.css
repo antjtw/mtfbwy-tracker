@@ -344,7 +344,9 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .choice-more summary { cursor: pointer; color: var(--text-gold); font-size: 16px; line-height: 24px; }
 .choice-more ul { margin: var(--pad-2xs) 0 0; padding-left: 18px; font-size: 16px; line-height: 24px; color: var(--text-default); }
 .choice-more li + li { margin-top: var(--pad-3xs); }
-.builder-col { max-width: 720px; }
+.builder-col { max-width: 720px; margin: 0 auto; }
+.choice-filter { margin-top: var(--pad-xs); }
+.choice-filter input { max-width: none; }
 .choice-body { display: flex; flex-direction: column; min-width: 0; }
 .choice-label { font-size: 19px; line-height: 28px; color: var(--text-default); }
 .choice-meta { font-size: 14px; line-height: 20px; color: var(--text-subdued); }

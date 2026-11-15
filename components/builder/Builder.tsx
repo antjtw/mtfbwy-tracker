@@ -200,8 +200,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
             <RadioList
               legend="Species"
               name="species"
+              filterable
               value={hero.species.id}
-              options={SPECIES.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...(s.notes ?? [])] }))}
+              options={[...SPECIES].sort((a, b) => a.name.localeCompare(b.name)).map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...(s.notes ?? [])] }))}
               onChange={(id) => patch((h) => ({ ...h, species: { id }, choices: dropChoices(h, "species:", "subspecies:") }))}
             />
             {species?.subspecies && (
@@ -224,8 +225,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
             <RadioList
               legend="Origin"
               name="origin"
+              filterable
               value={hero.origin.id}
-              options={ORIGINS.map((o) => ({ id: o.id, label: o.name, hint: oneLine(o), more: describeGrants(o.grants) }))}
+              options={[...ORIGINS].sort((a, b) => a.name.localeCompare(b.name)).map((o) => ({ id: o.id, label: o.name, hint: oneLine(o), more: describeGrants(o.grants) }))}
               onChange={(id) => patch((h) => ({ ...h, origin: { id }, choices: dropChoices(h, "origin:") }))}
             />
             {origin && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={originKey(origin.id)} choices={origin.choices} />}
@@ -286,8 +288,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
             <RadioList
               legend="Career"
               name="career"
+              filterable
               value={hero.career.id}
-              options={CAREERS.map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · "), more: [...describeGrants(c.grants), `Tool proficiency: ${c.tool}`, `Starting equipment: ${c.equipment}`, ...c.fixedKit, `${c.pack} pack`, ...(c.notes ? [c.notes] : [])] }))}
+              options={[...CAREERS].sort((a, b) => a.name.localeCompare(b.name)).map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · "), more: [...describeGrants(c.grants), `Tool proficiency: ${c.tool}`, `Starting equipment: ${c.equipment}`, ...c.fixedKit, `${c.pack} pack`, ...(c.notes ? [c.notes] : [])] }))}
               onChange={(id) => patch((h) => ({ ...h, career: { id }, choices: dropChoices(h, "career:") }))}
             />
             {career && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={careerKey(career.id)} choices={career.choices} />}
