@@ -15,6 +15,14 @@ import { Ledger } from "./Ledger";
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 const ARRAY_VALUES = [2, 1, 0, -1];
 
+const pathMore = (p: (typeof PATHS)[number]) => [
+  `Saving roll proficiency: ${p.saves.map((t) => TRAIT_NAMES[t]).join(" and ")}`,
+  `Weapon proficiency: ${p.weaponProficiency}`,
+  ...(p.casting ? [`${p.casting.kind} (${TRAIT_NAMES[p.casting.trait]} + proficiency)`] : []),
+  ...(p.resource.kind === "die" ? [`${p.resource.name}: 1d4`] : p.resource.kind === "fury" ? ["Fury: +2 damage, 2 uses"] : p.resource.kind === "assess" ? ["Assess stances"] : []),
+  `Archetypes: ${p.archetypes.filter((a) => !a.locked).map((a) => a.name).join(", ")}`,
+];
+
 interface EditMode {
   characterId: string;
   hero: Hero;
@@ -193,7 +201,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Species"
               name="species"
               value={hero.species.id}
-              options={SPECIES.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s) }))}
+              options={SPECIES.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...(s.notes ?? [])] }))}
               onChange={(id) => patch((h) => ({ ...h, species: { id }, choices: dropChoices(h, "species:", "subspecies:") }))}
             />
             {species?.subspecies && (
@@ -201,7 +209,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
                 legend={species.subspeciesLabel ?? "Kind"}
                 name="subspecies"
                 value={hero.species.subspeciesId}
-                options={species.subspecies.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s) }))}
+                options={species.subspecies.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), more: describeGrants(s.grants) }))}
                 onChange={(id) => patch((h) => ({ ...h, species: { ...h.species, subspeciesId: id }, choices: dropChoices(h, "subspecies:") }))}
               />
             )}
@@ -217,7 +225,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Origin"
               name="origin"
               value={hero.origin.id}
-              options={ORIGINS.map((o) => ({ id: o.id, label: o.name, hint: oneLine(o) }))}
+              options={ORIGINS.map((o) => ({ id: o.id, label: o.name, hint: oneLine(o), more: describeGrants(o.grants) }))}
               onChange={(id) => patch((h) => ({ ...h, origin: { id }, choices: dropChoices(h, "origin:") }))}
             />
             {origin && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={originKey(origin.id)} choices={origin.choices} />}
@@ -231,7 +239,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Path"
               name="path"
               value={hero.path.id}
-              options={PATHS.map((p) => ({ id: p.id, label: p.name, hint: `${p.traits.map((t) => TRAIT_NAMES[t]).join(" and ")} · ${p.casting?.kind ?? (p.resource.kind === "fury" ? "Fury" : "")}`.replace(/ · $/, "") }))}
+              options={PATHS.map((p) => ({ id: p.id, label: p.name, hint: `${p.traits.map((t) => TRAIT_NAMES[t]).join(" and ")} · ${p.casting?.kind ?? (p.resource.kind === "fury" ? "Fury" : "")}`.replace(/ · $/, ""), more: pathMore(p) }))}
               onChange={(id) => patch((h) => ({ ...h, path: { id, archetypeId: "" }, choices: dropChoices(h, "path:") }))}
             />
             {path && (
@@ -279,7 +287,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Career"
               name="career"
               value={hero.career.id}
-              options={CAREERS.map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · ") }))}
+              options={CAREERS.map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · "), more: [...describeGrants(c.grants), `Tool proficiency: ${c.tool}`, `Starting equipment: ${c.equipment}`, ...c.fixedKit, `${c.pack} pack`, ...(c.notes ? [c.notes] : [])] }))}
               onChange={(id) => patch((h) => ({ ...h, career: { id }, choices: dropChoices(h, "career:") }))}
             />
             {career && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={careerKey(career.id)} choices={career.choices} />}

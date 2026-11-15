@@ -20,10 +20,12 @@ export default async function NewCharacterPage({ params }: { params: Promise<{ i
   );
   return (
     <main>
-      <div className="col">
+      <div className="col wide">
+        <div className="builder-col">
         <Suspense>
           <Builder playerId={player.id} playerName={player.name} adventures={adventures} />
         </Suspense>
+        </div>
       </div>
     </main>
   );

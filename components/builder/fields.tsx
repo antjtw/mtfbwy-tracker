@@ -11,6 +11,8 @@ export interface Option {
   hint?: string;
   disabled?: boolean;
   reason?: string;
+  /** Fuller detail, opened in place under the card */
+  more?: readonly string[];
 }
 
 /** One-of-many as native radios: keyboard and screen reader behaviour comes for free */
@@ -22,14 +24,22 @@ export function RadioList({ legend, name, options, value, onChange, hint }: { le
       {hint && <p className="choice-hint" id={hintId}>{hint}</p>}
       <div className="choice-list">
         {options.map((o) => (
-          <label key={o.id} className={`choice ${o.disabled ? "disabled" : ""}`}>
-            <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />
-            <span className="choice-body">
-              <span className="choice-label">{o.label}</span>
-              {o.hint && <span className="choice-meta">{o.hint}</span>}
-              {o.disabled && o.reason && <span className="choice-meta">{o.reason}</span>}
-            </span>
-          </label>
+          <div key={o.id} className={`choice-card ${o.disabled ? "disabled" : ""}`}>
+            <label className="choice">
+              <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />
+              <span className="choice-body">
+                <span className="choice-label">{o.label}</span>
+                {o.hint && <span className="choice-meta">{o.hint}</span>}
+                {o.disabled && o.reason && <span className="choice-meta">{o.reason}</span>}
+              </span>
+            </label>
+            {o.more && o.more.length > 0 && (
+              <details className="choice-more">
+                <summary>More info<span className="sr-only"> about {o.label}</span></summary>
+                <ul>{o.more.map((m, i) => <li key={i}>{m}</li>)}</ul>
+              </details>
+            )}
+          </div>
         ))}
       </div>
     </fieldset>
@@ -47,7 +57,8 @@ export function CheckList({ legend, name, options, value, n, onChange }: { legen
           const on = value.includes(o.id);
           const full = value.length >= n && !on;
           return (
-            <label key={o.id} className={`choice ${full ? "disabled" : ""}`}>
+            <div key={o.id} className={`choice-card ${full ? "disabled" : ""}`}>
+            <label className="choice">
               <input
                 type="checkbox"
                 name={name}
@@ -61,6 +72,7 @@ export function CheckList({ legend, name, options, value, n, onChange }: { legen
                 {o.hint && <span className="choice-meta">{o.hint}</span>}
               </span>
             </label>
+            </div>
           );
         })}
       </div>

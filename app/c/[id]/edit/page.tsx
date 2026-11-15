@@ -14,7 +14,8 @@ export default async function EditCharacterPage({ params }: { params: Promise<{ 
   if (!character || !hero) notFound();
   return (
     <main>
-      <div className="col">
+      <div className="col wide">
+        <div className="builder-col">
         <Suspense>
           <Builder
             playerId={character.player_id}
@@ -23,6 +24,7 @@ export default async function EditCharacterPage({ params }: { params: Promise<{ 
             edit={{ characterId: id, hero }}
           />
         </Suspense>
+        </div>
       </div>
     </main>
   );
