@@ -531,9 +531,9 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .roller-body .field input { max-width: 160px; }
 .roller-penalty { margin: 0; color: var(--text-error); font-size: 16px; line-height: 24px; }
 .roller-roll { align-self: flex-start; }
-.roller-readout { margin: 0; font-size: 24px; line-height: 32px; font-variant-numeric: tabular-nums; }
+.roller-readout { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pad-2xs); margin: 0; font-size: 24px; line-height: 32px; font-variant-numeric: tabular-nums; }
 .roller-readout b { color: var(--text-gold); }
-.die { display: inline-block; min-width: 40px; padding: 0 var(--pad-2xs); text-align: center; border-radius: 8px; border: 2px solid; font-weight: 700; }
+.die { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 var(--pad-2xs); text-align: center; border-radius: 8px; border: 2px solid; font-weight: 700; }
 .die.balance { border-color: var(--balance-border); color: var(--balance-text); background: var(--balance-surface); }
 .die.despair { border-color: #ff3454; color: #ffa4aa; background: var(--danger-bg); }
 .roller-banner { min-height: 0; padding: 0; border-radius: 8px; }

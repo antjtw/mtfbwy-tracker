@@ -249,8 +249,12 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, setWillpower, addDesp
 
           {shown && (
             <p className="roller-readout" aria-label="The roll">
-              <span className="die balance">{shown.balance}</span> + <span className="die despair">{shown.despair}</span>
-              {modNum || penalty ? <> {modNum ? sign(modNum) : ""}{penalty ? ` − ${penalty}` : ""}</> : null} = <b>{shown.balance + shown.despair + modNum - penalty}</b>
+              <span className="die balance">{shown.balance}</span>
+              <span>+</span>
+              <span className="die despair">{shown.despair}</span>
+              {modNum || penalty ? <span>{modNum ? sign(modNum) : ""}{penalty ? ` − ${penalty}` : ""}</span> : null}
+              <span>=</span>
+              <b>{shown.balance + shown.despair + modNum - penalty}</b>
             </p>
           )}
 
