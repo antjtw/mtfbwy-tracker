@@ -24,14 +24,14 @@ export function ProfMark({ step }: { step: ProficiencyStep }) {
   );
 }
 
-/** A small diamond with an A or a D: Advantage in the design system's green, Disadvantage in its red. Names where it comes from. */
+/** A small hexagon with an A or a D: Advantage in the design system's green, Disadvantage in its red. Names where it comes from. */
 export function AdvMark({ kind, sources }: { kind: "A" | "D"; sources: string[] }) {
   const word = kind === "A" ? "Advantage" : "Disadvantage";
   const text = `${word} from ${sources.join(", ")}`;
   return (
     <span className={`adv-mark ${kind === "A" ? "adv" : "dis"}`} title={text}>
       <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
-        <path d="M11 1.5 20.5 11 11 20.5 1.5 11z" fill="currentColor" />
+        <path d="M11 1.5 19.2 6.25v9.5L11 20.5l-8.2-4.75v-9.5z" fill="currentColor" />
         <text x="11" y="15" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--page-bg)">{kind}</text>
       </svg>
       <span className="sr-only">{text}</span>
