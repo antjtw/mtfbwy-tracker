@@ -349,8 +349,18 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .choice-card:has(input:checked) .choice-meta { color: var(--text-default); }
 .choice-more { padding: 0 var(--pad-md) var(--pad-xs); }
 .choice-more summary { cursor: pointer; color: var(--text-gold); font-size: 16px; line-height: 24px; }
-.choice-more ul { margin: var(--pad-2xs) 0 0; padding-left: 18px; font-size: 16px; line-height: 24px; color: var(--text-default); }
-.choice-more li + li { margin-top: var(--pad-3xs); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); margin: var(--pad-2xs) 0 0; padding: 0; list-style: none; }
+.chip { display: inline-flex; align-items: center; gap: var(--pad-3xs); padding: 4px 12px; border: 1px solid var(--outline-navy); border-radius: 16px; background: var(--page-bg); color: var(--text-default); font: inherit; font-size: 16px; line-height: 24px; }
+.chip-button { border-color: var(--outline-gold-subdued); color: var(--text-gold); cursor: pointer; }
+@media (hover: hover) { .chip-button:hover { background: var(--surface-gold-darker); } }
+.chip-button[aria-expanded="true"] { background: var(--outline-gold); border-color: var(--outline-gold); color: var(--surface-navy-lighter); }
+.chip-button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.chip-caret { transition: transform 0.15s; }
+.chip-button[aria-expanded="true"] .chip-caret { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { .chip-caret { transition: none; } }
+.choice-card:has(input:checked) .chip { background: var(--surface-navy-darker); }
+.chip-detail { margin: var(--pad-xs) 0 0; padding: var(--pad-xs) var(--pad-sm); border-left: 3px solid var(--outline-gold); background: rgba(0, 0, 0, 0.18); font-size: 16px; line-height: 24px; color: var(--text-default); }
+.chip-detail strong { display: block; color: var(--text-gold); }
 .builder-col { max-width: 720px; margin: 0 auto; }
 .choice-filter { margin-top: var(--pad-xs); }
 .choice-filter input { max-width: none; }

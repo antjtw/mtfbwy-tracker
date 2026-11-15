@@ -4,6 +4,7 @@
  */
 export const SPECIES_BLURBS: Record<string, string> = {
   "aqualish": "Aqualish are sentient humanoids, recognisable by their dense fur, powerful builds, and distinctive black eyes. Cultural and biological divergence has produced several subspecies, each adapted to different environments and ways of life.",
+  "barabel": "Imposing saurians that imposed prodigious physical strength, a mouth brimmed with needle-sharp teeth and thick, armoured scales.",
   "bith": "Large headed aliens with a knack for science and music, the Bith were a peaceful, intelligent race.",
   "cerean": "Mammalian humanoids with massive coned craniums that contained complex binary brains.",
   "gand": "Insectoid findsmen from a mist-shrouded world, armoured in chitin and famously hard to surprise. Some Gand breathe ammonia and wear respirators off-world; others have no lungs at all.",
@@ -17,6 +18,9 @@ export const SPECIES_BLURBS: Record<string, string> = {
   "tusken": "Nomadic people of Tatooine's Dune Sea, wrapped head to toe in cloth and tradition. Tuskens never unmask before others, and few outsiders have ever seen the face beneath the wrappings.",
   "twilek": "Tall, thin humanoids with skin pigment that spans a wide variety of colours. Their most distinctive feature is a pair of shapely prehensile head-tails known as lekku.",
   "wookiee": "Shaggy giants from an arboreal world, the tall and commanding Wookiee species is an impressive sight to even the most jaded spacer. Despite their fearsome and savage countenance, Wookiees are intelligent, sophisticated, loyal and trusting.",
+  "evereni": "A nomadic species of slate-grey humanoids with pitch-black eyes, scattered across the galaxy after the storms that destroyed their homeworld. Centuries of survival have honed them into masters of deception, but a quiet few still hold to the old name Evereni — caretakers.",
+  "ikkrukkian": "Ikkrukkians, also known as Ikkrukki, were a sentient species native to the Mid Rim planet Ikkrukk.",
+  "pooba": "Towering, blue-furred sentients with snarling speech and oversized ears. A Pooba youngling stands barely knee-high, but a fully-grown adult can rise above three metres — gentle of heart, fearsome of voice.",
   "tynnan": "Furred, bucktoothed semi-aquatic mammalians with sleek pelts and broad snouts. Tynnans are jovial, curious, and deceptively shrewd. Their poor eyesight is more than made up for by an extraordinary sense of smell — Tynnan trackers are quietly prized across the galaxy.",
   "vintian": "To most species, a Vintian looks like a tall, dark, flinty boulder. To a Vintian, every other species looks alarmingly soft. They speak slowly, in a tongue that cannot be pronounced by anything with a mouth, and they make extraordinary navigators.",
   "droid-2": "The engineering specialists of the galaxy — short, sturdy droids built to keep starships flying and complex systems running. Their domes spin, their voices chirp in Binary, and they are quietly indispensable to any crew. Astromechs are second class droids.",

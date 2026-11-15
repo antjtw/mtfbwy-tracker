@@ -13,8 +13,10 @@ export interface Option {
   reason?: string;
   /** A line of flavour shown under the name; where there isn't one, the summary of what it gives is shown instead */
   blurb?: string;
-  /** Fuller detail, opened in place under the card */
+  /** What it gives, as short items shown as lozenges once the card is opened */
   more?: readonly string[];
+  /** Named abilities with rules text; each opens in place when pressed */
+  features?: readonly { name: string; text: string }[];
 }
 
 /** One-of-many as native radios: keyboard and screen reader behaviour comes for free */
@@ -54,7 +56,11 @@ export function RadioList({ legend, name, options, value, onChange, hint, filter
 }
 
 function RadioCard({ o, name, value, onChange }: { o: Option; name: string; value: string | undefined; onChange: (id: string) => void }) {
-  const detail = [...(o.blurb && o.hint ? [o.hint] : []), ...(o.more ?? [])];
+  const items = [...(o.blurb && o.hint ? [o.hint] : []), ...(o.more ?? [])];
+  const features = o.features ?? [];
+  const [open, setOpen] = useState<string | null>(null);
+  const detailId = useId();
+  const shownFeature = features.find((f) => f.name === open);
   return (
     <div className={`choice-card ${o.disabled ? "disabled" : ""}`}>
       <label className="choice">
@@ -66,10 +72,23 @@ function RadioCard({ o, name, value, onChange }: { o: Option; name: string; valu
         </span>
         <Tick />
       </label>
-      {detail.length > 0 && (
-        <details className="choice-more">
+      {(items.length > 0 || features.length > 0) && (
+        <details className="choice-more" onToggle={(e) => !e.currentTarget.open && setOpen(null)}>
           <summary>What you get<span className="sr-only"> from {o.label}</span></summary>
-          <ul>{detail.map((m, i) => <li key={i}>{m}</li>)}</ul>
+          <ul className="chips" aria-label={`What ${o.label} gives`}>
+            {items.map((m, i) => <li key={`i${i}`} className="chip">{m}</li>)}
+            {features.map((f) => (
+              <li key={f.name}>
+                <button type="button" className="chip chip-button" aria-expanded={open === f.name} aria-controls={detailId} onClick={() => setOpen(open === f.name ? null : f.name)}>
+                  {f.name}
+                  <svg className="chip-caret" aria-hidden="true" width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 8l5 5 5-5" /></svg>
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div id={detailId} aria-live="polite">
+            {shownFeature && <p className="chip-detail"><strong>{shownFeature.name}</strong> {shownFeature.text}</p>}
+          </div>
         </details>
       )}
     </div>
