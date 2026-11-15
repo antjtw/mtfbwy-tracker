@@ -19,8 +19,8 @@ describe("sheet", () => {
     h.career = { id: "smuggler" };
     h.traitArray = { STR: 2, AGI: 0, RES: 1, FOR: 0, INT: 0, PRE: -1 };
     const s = buildSheet(h);
-    expect(s.passives.map((p) => p.name)).toEqual(["Perception", "Insight", "Force"]);
-    expect(s.passives[2].value).toBe(12 + s.traits.find((t) => t.trait === "FOR")!.modifier);
+    expect(s.passives.map((p) => p.name)).toEqual(["Insight", "Force", "Perception"]);
+    expect(s.passives[1].value).toBe(12 + s.traits.find((t) => t.trait === "FOR")!.modifier);
     expect(s.speed.metres).toBe(9);
     expect(s.skills).toHaveLength(18);
     const charm = s.abilities.find((a) => a.name === "Deceptive Charm");

@@ -40,10 +40,11 @@ export interface Sheet {
   traits: { trait: Trait; modifier: number }[];
   saves: { trait: Trait; modifier: number; proficient: boolean }[];
   skills: { skill: string; trait: Trait; modifier: number; step: ProficiencyStep; sources: string[] }[];
-  passives: { name: string; value: number }[];
+  passives: { name: string; trait: Trait; value: number }[];
   proficiencyBonus: number;
   evasion: number;
-  speed: { metres: number; note: string };
+  /** Metres, and the same distance in 1.5m grid squares */
+  speed: { metres: number; squares: number; note: string };
   casting: { kind: string; modifier: number }[];
   resources: SheetResource[];
   abilities: SheetAbility[];
@@ -67,7 +68,8 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 
 export function buildSheet(hero: Hero): Sheet {
   const d = computeHero(hero);
-  const speed = SPEED[hero.species.id] ?? { metres: 9, note: "Far to Close" };
+  const base = SPEED[hero.species.id] ?? { metres: 9, note: "Far to Close" };
+  const speed = { ...base, squares: Math.round(base.metres / 1.5) };
   const mod = (t: Trait) => d.traits[t];
 
   const abilities: SheetAbility[] = [];
@@ -110,9 +112,9 @@ export function buildSheet(hero: Hero): Sheet {
     saves: d.saves,
     skills: SKILLS.map(({ name }) => d.skills.find((s) => s.skill === name)!).map((s) => ({ skill: s.skill, trait: s.trait, modifier: s.modifier, step: s.step, sources: s.sources })),
     passives: [
-      { name: "Perception", value: 12 + (d.skills.find((s) => s.skill === "Perception")?.modifier ?? 0) },
-      { name: "Insight", value: 12 + (d.skills.find((s) => s.skill === "Insight")?.modifier ?? 0) },
-      { name: "Force", value: 12 + mod("FOR") },
+      { name: "Insight", trait: "PRE", value: 12 + (d.skills.find((s) => s.skill === "Insight")?.modifier ?? 0) },
+      { name: "Force", trait: "FOR", value: 12 + mod("FOR") },
+      { name: "Perception", trait: "PRE", value: 12 + (d.skills.find((s) => s.skill === "Perception")?.modifier ?? 0) },
     ],
     proficiencyBonus: d.proficiencyBonus,
     evasion: d.evasion,

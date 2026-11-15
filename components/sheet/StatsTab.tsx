@@ -1,21 +1,25 @@
 "use client";
 
 import { type Sheet, type SheetResource } from "@/lib/hero/sheet";
-import { TRAIT_NAMES, TRAITS, type ProficiencyStep, type Trait } from "@/lib/hero/types";
+import { TRAIT_NAMES, type ProficiencyStep } from "@/lib/hero/types";
 import type { Play } from "./usePlay";
 import { RestButtons, UseBoxes } from "./AbilitiesTab";
 
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 export const STEP_LABEL = ["Untrained", "Trained", "Proficient", "Expertise"] as const;
 
-/** Untrained is an empty ring, trained half full, proficient full, expertise full with a second ring */
+/** Untrained is an empty ring in the secondary colour, trained a half-filled circle, proficient a filled circle, expertise a diamond */
 export function ProfMark({ step }: { step: ProficiencyStep }) {
   return (
     <svg className={`prof-mark step-${step}`} width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-      <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" strokeWidth="1.75" />
-      {step === 1 && <path d="M10 3a7 7 0 0 0 0 14z" fill="currentColor" />}
-      {step >= 2 && <circle cx="10" cy="10" r="7" fill="currentColor" />}
-      {step === 3 && <circle cx="10" cy="10" r="9.25" fill="none" stroke="currentColor" strokeWidth="1.25" />}
+      {step === 3 ? (
+        <path d="M10 1.5 18.5 10 10 18.5 1.5 10z" fill="currentColor" />
+      ) : (
+        <>
+          <circle cx="10" cy="10" r="7" fill={step === 2 ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.75" />
+          {step === 1 && <path d="M10 3a7 7 0 0 0 0 14z" fill="currentColor" />}
+        </>
+      )}
     </svg>
   );
 }
@@ -31,7 +35,6 @@ function Stat({ label, value, note }: { label: string; value: string | number; n
 }
 
 export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Play; characterId: string }) {
-  const byTrait = (t: Trait) => sheet.skills.filter((s) => s.trait === t);
   const spendable = sheet.resources.filter((r) => r.spendable);
   const dice = sheet.resources.filter((r) => !r.spendable);
   return (
@@ -51,38 +54,24 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
         </dl>
       </section>
 
-      <section className="track" aria-labelledby="stats-numbers">
-        <h2 id="stats-numbers">Key numbers</h2>
-        <dl className="stat-row">
-          <Stat label="Level" value={sheet.level} />
-          <Stat label="Proficiency bonus" value={sign(sheet.proficiencyBonus)} />
+      <section className="track" aria-labelledby="stats-movement">
+        <h2 id="stats-movement">Movement</h2>
+        <dl className="stat-row three">
           <Stat label="Evasion" value={sheet.evasion} />
           <Stat label="Speed" value={`${sheet.speed.metres}m`} note={sheet.speed.note} />
+          <Stat label="Grid" value={sheet.speed.squares} note="1.5m squares" />
         </dl>
       </section>
 
-      <section className="track" aria-labelledby="stats-passives">
-        <h2 id="stats-passives">Passives</h2>
-        <dl className="stat-row">
-          {sheet.passives.map((p) => (
-            <Stat key={p.name} label={`Passive ${p.name}`} value={p.value} />
-          ))}
-        </dl>
+      <section className="track" aria-labelledby="stats-bonuses">
+        <h2 id="stats-bonuses">Bonuses</h2>
+        <ul className="row-list">
+          <li><span>Level</span><b className="mod-chip">{sheet.level}</b></li>
+          <li><span>Proficiency bonus</span><b className="mod-chip">{sign(sheet.proficiencyBonus)}</b></li>
+          {dice.map((r) => <li key={r.key}><span>{r.name}</span><b className="mod-chip">{r.count}d4</b></li>)}
+          {sheet.casting.map((c) => <li key={c.kind}><span>{c.kind}</span><b className="mod-chip">{sign(c.modifier)}</b></li>)}
+        </ul>
       </section>
-
-      {(sheet.casting.length > 0 || dice.length > 0) && (
-        <section className="track" aria-labelledby="stats-casting">
-          <h2 id="stats-casting">Casting and dice</h2>
-          <dl className="stat-row">
-            {sheet.casting.map((c) => (
-              <Stat key={c.kind} label={c.kind} value={sign(c.modifier)} />
-            ))}
-            {dice.map((r) => (
-              <Stat key={r.key} label={r.name} value={`${r.count}d4`} />
-            ))}
-          </dl>
-        </section>
-      )}
 
       {spendable.length > 0 && (
         <section className="track" aria-labelledby="stats-uses">
@@ -99,12 +88,13 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
 
       <section className="track" aria-labelledby="stats-saves">
         <h2 id="stats-saves">Saving rolls</h2>
-        <ul className="prof-list">
+        <ul className="prof-list compact">
           {sheet.saves.map((s) => (
             <li key={s.trait}>
               <ProfMark step={s.proficient ? 2 : 0} />
-              <span className="prof-name">{TRAIT_NAMES[s.trait]}<span className="sr-only">, {s.proficient ? "proficient" : "not proficient"}</span></span>
-              <strong>{sign(s.modifier)}</strong>
+              <span className="prof-trait" aria-hidden="true">{s.trait}</span>
+              <span className="sr-only">{TRAIT_NAMES[s.trait]}, {s.proficient ? "proficient" : "not proficient"}</span>
+              <b className="mod-chip">{sign(s.modifier)}</b>
             </li>
           ))}
         </ul>
@@ -117,20 +107,29 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
             <li key={l}><ProfMark step={i as ProficiencyStep} />{l}</li>
           ))}
         </ul>
-        {TRAITS.filter((t) => byTrait(t).length > 0).map((t) => (
-          <div key={t} className="skill-group">
-            <h3>{TRAIT_NAMES[t]} <span className="muted">({t})</span></h3>
-            <ul className="prof-list">
-              {byTrait(t).map((s) => (
-                <li key={s.skill}>
-                  <ProfMark step={s.step} />
-                  <span className="prof-name">{s.skill}<span className="sr-only">, {STEP_LABEL[s.step].toLowerCase()}</span></span>
-                  <strong>{sign(s.modifier)}</strong>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <ul className="prof-list">
+          {[...sheet.skills].sort((a, b) => a.skill.localeCompare(b.skill)).map((s) => (
+            <li key={s.skill}>
+              <ProfMark step={s.step} />
+              <span className="prof-trait" aria-hidden="true">{s.trait}</span>
+              <span className="prof-name">{s.skill}<span className="sr-only">, {TRAIT_NAMES[s.trait]}, {STEP_LABEL[s.step].toLowerCase()}</span></span>
+              <b className="mod-chip">{sign(s.modifier)}</b>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="track" aria-labelledby="stats-passives">
+        <h2 id="stats-passives">Passive skills</h2>
+        <ul className="prof-list">
+          {sheet.passives.map((p) => (
+            <li key={p.name}>
+              <span className="prof-trait" aria-hidden="true">{p.trait}</span>
+              <span className="prof-name">{p.name}<span className="sr-only">, passive</span></span>
+              <b className="mod-chip">{p.value}</b>
+            </li>
+          ))}
+        </ul>
       </section>
       {play.error && <p className="err-text" role="alert">{play.error}</p>}
     </div>

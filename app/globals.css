@@ -462,15 +462,19 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .stat-note { order: 2; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
 .prof-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: var(--pad-3xs) var(--pad-lg); }
 @media (min-width: 640px) { .prof-list { grid-template-columns: 1fr 1fr; } }
+.prof-list.compact .prof-trait { flex: 1; }
 .prof-list li { display: flex; align-items: center; gap: var(--pad-xs); min-height: 36px; padding: 0 var(--pad-xs); border-bottom: 1px solid var(--outline-navy-subdued); }
 .prof-name { flex: 1; font-size: 19px; line-height: 28px; }
-.prof-list strong { font: 700 19px/28px var(--font-body); font-variant-numeric: tabular-nums; color: var(--text-default); }
+.prof-list.compact { grid-template-columns: 1fr 1fr; }
+.prof-trait { flex: none; min-width: 36px; font: 850 16px/24px var(--font-heading); letter-spacing: 0.04em; color: var(--text-subdued); }
+.mod-chip { display: inline-block; min-width: 52px; padding: 2px 10px; border-radius: 6px; background: var(--surface-navy-lighter); text-align: right; font: 700 19px/28px var(--font-body); font-variant-numeric: tabular-nums; color: var(--text-default); }
+.stat-row.three { grid-template-columns: repeat(3, 1fr); }
+.row-list { list-style: none; margin: 0; padding: 0; }
+.row-list li { display: flex; align-items: center; justify-content: space-between; gap: var(--pad-sm); min-height: 44px; border-bottom: 1px solid var(--outline-navy-subdued); font-size: 19px; line-height: 28px; }
 .prof-mark { flex: none; color: var(--text-gold); }
 .prof-mark.step-0 { color: var(--text-subdued); }
 .prof-key { list-style: none; display: flex; flex-wrap: wrap; gap: var(--pad-2xs) var(--pad-md); margin: 0 0 var(--pad-sm); padding: 0; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
 .prof-key li { display: inline-flex; align-items: center; gap: var(--pad-3xs); }
-.skill-group { margin-top: var(--pad-md); }
-.skill-group h3 { margin: 0 0 var(--pad-3xs); font: 850 16px/24px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-gold); }
 .use-row { margin-bottom: var(--pad-sm); }
 .use-name { margin: 0 0 var(--pad-2xs); font-size: 19px; line-height: 28px; }
 .use-boxes { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); }
