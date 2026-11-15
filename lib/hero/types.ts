@@ -154,8 +154,8 @@ export interface Hero {
   origin: { id: string };
   path: { id: string; archetypeId: string };
   career: { id: string };
-  /** The array +2, +1, +1, +0, +0, -1 spread over the traits */
-  traitArray: Record<Trait, number>;
+  /** The array +2, +1, +1, +0, +0, -1 spread over the traits; null until a trait has been given its value */
+  traitArray: Record<Trait, number | null>;
   /** Answers to Source choices, keyed `${sourceId}.${choiceId}`; skills are arrays, trait picks strings, text strings */
   choices: Record<string, string | string[]>;
   levelLog: LevelEntry[];

@@ -19,6 +19,12 @@ export interface Store {
   /** Saves a built Hero together with the tracker character made from it */
   createHero(hero: Hero, character: Character): Promise<void>;
   hero(characterId: string): Promise<Hero | null>;
+  /** Moves a character, with its Hero, into the deleted list. Nothing is lost: the full record is kept for the GM. */
+  deleteCharacter(id: string, by: string): Promise<DeletedCharacter | null>;
+  deletedCharacters(): Promise<DeletedCharacter[]>;
+  deletedCharacter(id: string): Promise<DeletedCharacter | null>;
+  /** Puts a deleted character, and its Hero, back as they were */
+  restoreCharacter(id: string): Promise<"restored" | "exists" | "not_found">;
   /** Saves an edited Hero, and any change to its tracker character in the same go */
   saveHero(characterId: string, hero: Hero, characterPatch?: Partial<Character>): Promise<void>;
   /** Every card, from the database when it has them, otherwise the bundled snapshot */
@@ -29,6 +35,17 @@ export interface Store {
   heroIds(): Promise<string[]>;
   /** Adds a Hero for an existing character, leaving any Hero already there alone */
   addHero(characterId: string, playerId: string, hero: Hero): Promise<void>;
+}
+
+/** Everything about a deleted character, enough to put it back exactly as it was */
+export interface DeletedCharacter {
+  id: string;
+  player_id: string;
+  name: string;
+  deleted_at: string;
+  deleted_by: string;
+  character: Character;
+  hero: Hero | null;
 }
 
 /** A resolved roll, kept as the log and as the guard against adding Despair twice */
@@ -134,6 +151,49 @@ function supabaseStore(url: string, key: string): Store {
         if (res.error) throw res.error;
       }
     },
+    async deleteCharacter(id, by) {
+      const [c, h] = await Promise.all([db.from("characters").select("*").eq("id", id).maybeSingle(), db.from("heroes").select("data").eq("id", id).maybeSingle()]);
+      if (c.error) throw c.error;
+      if (!c.data) return null;
+      const record = { id, player_id: c.data.player_id as string, name: c.data.name as string, deleted_by: by, character: c.data, hero: (h.data?.data as Hero | undefined) ?? null };
+      // Keep the record first: if it can't be kept, nothing is deleted
+      const kept = await db.from("deleted_characters").upsert(record).select("*").single();
+      if (kept.error) throw kept.error;
+      const del = await db.from("characters").delete().eq("id", id); // the Hero goes with it
+      if (del.error) throw del.error;
+      return kept.data as DeletedCharacter;
+    },
+    async deletedCharacters() {
+      const { data, error } = await db.from("deleted_characters").select("*").order("deleted_at", { ascending: false });
+      if (error) {
+        if (error.code === "42P01" || error.code === "PGRST205") return [];
+        throw error;
+      }
+      return data as DeletedCharacter[];
+    },
+    async deletedCharacter(id) {
+      const { data, error } = await db.from("deleted_characters").select("*").eq("id", id).maybeSingle();
+      if (error) throw error;
+      return (data as DeletedCharacter) ?? null;
+    },
+    async restoreCharacter(id) {
+      const rec = await this.deletedCharacter(id);
+      if (!rec) return "not_found";
+      const exists = await db.from("characters").select("id").eq("id", id).maybeSingle();
+      if (exists.data) return "exists";
+      const c = await db.from("characters").insert(rec.character);
+      if (c.error) throw c.error;
+      if (rec.hero) {
+        const h = await db.from("heroes").insert({ id, player_id: rec.player_id, rules_version: rec.hero.rulesVersion, data: rec.hero });
+        if (h.error) {
+          await db.from("characters").delete().eq("id", id); // don't leave half of it back
+          throw h.error;
+        }
+      }
+      const gone = await db.from("deleted_characters").delete().eq("id", id);
+      if (gone.error) throw gone.error;
+      return "restored";
+    },
     async hero(characterId) {
       const { data, error } = await db.from("heroes").select("data").eq("id", characterId).maybeSingle();
       if (error) {
@@ -182,6 +242,7 @@ interface Data {
   characters: Character[];
   despair?: Record<string, number>;
   rolls?: Record<string, RollRecord>;
+  deleted?: DeletedCharacter[];
   heroes?: Record<string, Hero>;
 }
 
@@ -240,6 +301,42 @@ function fileStore(): Store {
         data.characters.push(character);
         data.heroes = { ...data.heroes, [character.id]: hero };
         await save(data);
+      });
+      queue = run.catch(() => undefined);
+      return run;
+    },
+    deleteCharacter(id, by) {
+      const run = queue.then(async () => {
+        const data = await load();
+        const c = data.characters.find((x) => x.id === id);
+        if (!c) return null;
+        const rec: DeletedCharacter = { id, player_id: c.player_id, name: c.name, deleted_at: new Date().toISOString(), deleted_by: by, character: c, hero: data.heroes?.[id] ?? null };
+        data.deleted = [rec, ...(data.deleted ?? []).filter((x) => x.id !== id)];
+        data.characters = data.characters.filter((x) => x.id !== id);
+        if (data.heroes) delete data.heroes[id];
+        await save(data);
+        return rec;
+      });
+      queue = run.catch(() => undefined);
+      return run;
+    },
+    async deletedCharacters() {
+      return (await load()).deleted ?? [];
+    },
+    async deletedCharacter(id) {
+      return ((await load()).deleted ?? []).find((x) => x.id === id) ?? null;
+    },
+    restoreCharacter(id) {
+      const run = queue.then(async (): Promise<"restored" | "exists" | "not_found"> => {
+        const data = await load();
+        const rec = (data.deleted ?? []).find((x) => x.id === id);
+        if (!rec) return "not_found";
+        if (data.characters.some((x) => x.id === id)) return "exists";
+        data.characters.push(rec.character);
+        if (rec.hero) data.heroes = { ...data.heroes, [id]: rec.hero };
+        data.deleted = (data.deleted ?? []).filter((x) => x.id !== id);
+        await save(data);
+        return "restored";
       });
       queue = run.catch(() => undefined);
       return run;

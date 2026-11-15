@@ -60,7 +60,7 @@ export function emptyHero(): Hero {
     origin: { id: "" },
     path: { id: "", archetypeId: "" },
     career: { id: "" },
-    traitArray: { STR: 0, AGI: 0, RES: 0, FOR: 0, INT: 0, PRE: 0 },
+    traitArray: { STR: null, AGI: null, RES: null, FOR: null, INT: null, PRE: null },
     choices: {},
     levelLog: [],
     identity: { name: "", backstory: "", languages: "", notes: "" },
@@ -68,8 +68,9 @@ export function emptyHero(): Hero {
 }
 
 /** R-TR-1: the array must be used exactly once, in any order */
-export function validateTraitArray(arr: Record<Trait, number>): boolean {
-  const got = TRAITS.map((t) => arr[t]).sort((a, b) => a - b);
+export function validateTraitArray(arr: Record<Trait, number | null>): boolean {
+  if (TRAITS.some((t) => arr[t] === null || arr[t] === undefined)) return false;
+  const got = TRAITS.map((t) => arr[t] as number).sort((a, b) => a - b);
   const want = [...STARTING_ARRAY].sort((a, b) => a - b);
   return got.length === want.length && got.every((v, i) => v === want[i]);
 }
@@ -163,7 +164,7 @@ function build(hero: Hero, log: readonly LevelEntry[]): Built {
   // ---- Trait ledger
   const traitLedger = Object.fromEntries(TRAITS.map((t) => [t, [] as LedgerRow[]])) as Record<Trait, LedgerRow[]>;
   if (!validateTraitArray(hero.traitArray)) issues.push({ code: "array", message: "Use each value in the starting array once" });
-  for (const t of TRAITS) traitLedger[t].push({ source: "Starting array", amount: hero.traitArray[t], level: 1 });
+  for (const t of TRAITS) traitLedger[t].push({ source: "Starting array", amount: hero.traitArray[t] ?? 0, level: 1 });
   for (const k of [...keyed, careerKeyed]) {
     for (const g of grantsBy.get(k.key) ?? []) {
       if (g.type === "trait_increase") traitLedger[g.trait].push({ source: k.name, amount: g.amount, level: 1 });
@@ -512,4 +513,37 @@ export function multiPathCandidates(hero: Hero): { path: PathDef; eligible: bool
 
 function hasOpenMultiPath(d: Derived) {
   return Object.values(PATH_BY_ID).some((p) => !d.paths.some((x) => x.pathId === p.id) && p.traits.every((t) => d.traits[t] >= 1));
+}
+
+/** The starting array values not yet given to a trait (each of +2, +1, +1, +0, +0, -1 once) */
+export function arrayLeft(arr: Record<Trait, number | null>, except?: Trait): number[] {
+  const left = [...STARTING_ARRAY];
+  for (const t of TRAITS) {
+    if (t === except) continue;
+    const v = arr[t];
+    const i = v === null || v === undefined ? -1 : left.indexOf(v);
+    if (i >= 0) left.splice(i, 1);
+  }
+  return left;
+}
+
+/**
+ * Tidies a trait array that isn't a proper spread (an older Hero with every trait at +0, say): keeps what fits the array
+ * and clears the rest, or clears everything when nothing was really chosen.
+ */
+export function cleanTraitArray(arr: Record<Trait, number | null>): Record<Trait, number | null> {
+  if (validateTraitArray(arr)) return arr;
+  const vals = TRAITS.map((t) => arr[t]);
+  if (vals.every((v) => v === vals[0])) return { STR: null, AGI: null, RES: null, FOR: null, INT: null, PRE: null };
+  const out = { STR: null, AGI: null, RES: null, FOR: null, INT: null, PRE: null } as Record<Trait, number | null>;
+  const left = [...STARTING_ARRAY];
+  for (const t of TRAITS) {
+    const v = arr[t];
+    const i = v === null || v === undefined ? -1 : left.indexOf(v);
+    if (i >= 0) {
+      out[t] = v as number;
+      left.splice(i, 1);
+    }
+  }
+  return out;
 }

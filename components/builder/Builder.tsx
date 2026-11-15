@@ -8,7 +8,7 @@ import { CAREER_BLURBS, ORIGIN_BLURBS, SPECIES_BLURBS } from "@/lib/hero/data/bl
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "@/lib/hero/data/features";
 import { ARCHETYPE_FEATURES, archetypeKey, CAREERS, ORIGINS, PATHS, PATH_BY_ID, SPECIES, SPECIES_BY_ID, CAREER_BY_ID, ORIGIN_BY_ID } from "@/lib/hero/data";
 import { describeGrants, oneLine, playerNotes } from "@/lib/hero/describe";
-import { careerKey, choiceKey, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey, TIER0_KEY } from "@/lib/hero/engine";
+import { arrayLeft, careerKey, choiceKey, cleanTraitArray, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey, TIER0_KEY } from "@/lib/hero/engine";
 import { tier0Pool } from "@/lib/hero/powers";
 import { STEPS, type StepKey, stepProblems } from "@/lib/hero/steps";
 import { type Card, type Hero, SKILLS, STEP_NAMES, TRAIT_NAMES, TRAITS, type Trait } from "@/lib/hero/types";
@@ -16,7 +16,6 @@ import { CheckList, ChoiceFields, Gain, RadioList } from "./fields";
 import { Ledger } from "./Ledger";
 
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
-const ARRAY_VALUES = [2, 1, 0, -1];
 
 const pathMore = (p: (typeof PATHS)[number]) => [
   `Saving roll proficiency: ${p.saves.map((t) => TRAIT_NAMES[t]).join(" and ")}`,
@@ -35,7 +34,7 @@ export function Builder({ playerId, playerName, adventures, edit, cards }: { pla
   const router = useRouter();
   const params = useSearchParams();
   const storageKey = edit ? `mtfbwy-edit-${edit.characterId}` : `mtfbwy-draft-${playerId}`;
-  const [hero, setHero] = useState<Hero>(() => (edit ? { ...emptyHero(), ...edit.hero } : emptyHero()));
+  const [hero, setHero] = useState<Hero>(() => (edit ? { ...emptyHero(), ...edit.hero, traitArray: cleanTraitArray(edit.hero.traitArray) } : emptyHero()));
   // Editing an existing Hero skips the adventure, which the tracker already has; Powers only appears when there's a pick to make
   const extraPowers = useMemo(() => computeHero(hero).powers.extraTier0Force, [hero]);
   const steps = useMemo(() => STEPS.filter((s) => !(edit && s.key === "adventure") && !(s.key === "powers" && extraPowers === 0)), [edit, extraPowers]);
@@ -55,7 +54,7 @@ export function Builder({ playerId, playerName, adventures, edit, cards }: { pla
       const raw = sessionStorage.getItem(storageKey);
       if (raw) {
         const saved = JSON.parse(raw) as { hero?: Hero; adventure?: string };
-        if (saved.hero) setHero(edit ? { ...emptyHero(), ...saved.hero, startingLevel: edit.hero.startingLevel, levelLog: edit.hero.levelLog, imported: edit.hero.imported } : { ...emptyHero(), ...saved.hero });
+        if (saved.hero) setHero(edit ? { ...emptyHero(), ...saved.hero, traitArray: cleanTraitArray(saved.hero.traitArray ?? emptyHero().traitArray), startingLevel: edit.hero.startingLevel, levelLog: edit.hero.levelLog, imported: edit.hero.imported } : { ...emptyHero(), ...saved.hero, traitArray: cleanTraitArray(saved.hero.traitArray ?? emptyHero().traitArray) });
         if (typeof saved.adventure === "string") setAdventure(saved.adventure);
       }
     } catch {
@@ -390,32 +389,38 @@ export function Builder({ playerId, playerName, adventures, edit, cards }: { pla
       {step !== "review" && <Ledger d={d} />}
 
       <p className="section"><Link className="standalone" href={edit ? `/c/${edit.characterId}` : `/p/${playerId}`}>{edit ? "Back to the tracker" : "Back to characters"}</Link></p>
+      {edit && <p className="danger-zone"><Link className="danger-link" href={`/c/${edit.characterId}/delete`}>Delete this character</Link></p>}
     </>
   );
 }
 
 function TraitStep({ hero, d, setHero }: { hero: Hero; d: ReturnType<typeof computeHero>; setHero: (fn: (h: Hero) => Hero) => void }) {
-  const placed = TRAITS.map((t) => hero.traitArray[t]);
-  const left = [2, 1, 1, 0, 0, -1].slice();
-  for (const v of placed) {
-    const i = left.indexOf(v);
-    if (i >= 0) left.splice(i, 1);
-  }
+  const left = arrayLeft(hero.traitArray);
   const bonus = (t: Trait) => d.traitLedger[t].filter((r) => r.source !== "Starting array").reduce((n, r) => n + r.amount, 0);
+  // One of each value in the array: a value another trait has taken isn't offered here, and a trait can be cleared to hand its value back
   return (
     <>
       <p className="note" aria-live="polite">To place: {left.length ? left.map(sign).join(", ") : "nothing, all placed"}</p>
       <div className="trait-grid">
-        {TRAITS.map((t) => (
-          <div className="trait-row" key={t}>
-            <label htmlFor={`trait-${t}`}>{TRAIT_NAMES[t]} <span className="abbr">({t})</span></label>
-            <select id={`trait-${t}`} value={hero.traitArray[t]} onChange={(e) => setHero((h) => ({ ...h, traitArray: { ...h.traitArray, [t]: Number(e.target.value) } }))}>
-              {ARRAY_VALUES.map((v) => <option key={v} value={v}>{sign(v)}</option>)}
-            </select>
-            <span className="trait-bonus">{bonus(t) ? `${sign(bonus(t))} from your choices` : "no bonuses"}</span>
-            <strong className="trait-total" aria-label={`${TRAIT_NAMES[t]} total ${sign(d.traits[t])}`}>{sign(d.traits[t])}</strong>
-          </div>
-        ))}
+        {TRAITS.map((t) => {
+          const own = hero.traitArray[t];
+          const offered = [...new Set(arrayLeft(hero.traitArray, t))].sort((a, b) => b - a);
+          return (
+            <div className="trait-row" key={t}>
+              <label htmlFor={`trait-${t}`}>{TRAIT_NAMES[t]} <span className="abbr">({t})</span></label>
+              <select
+                id={`trait-${t}`}
+                value={own ?? ""}
+                onChange={(e) => setHero((h) => ({ ...h, traitArray: { ...h.traitArray, [t]: e.target.value === "" ? null : Number(e.target.value) } }))}
+              >
+                <option value="">Choose</option>
+                {offered.map((v) => <option key={v} value={v}>{sign(v)}</option>)}
+              </select>
+              <span className="trait-bonus">{bonus(t) ? `${sign(bonus(t))} from your choices` : "no bonuses"}</span>
+              <strong className="trait-total" aria-label={`${TRAIT_NAMES[t]} total ${sign(d.traits[t])}`}>{sign(d.traits[t])}</strong>
+            </div>
+          );
+        })}
       </div>
     </>
   );

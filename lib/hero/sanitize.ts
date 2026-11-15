@@ -19,7 +19,7 @@ export function sanitizeHero(raw: unknown): Hero | null {
   h.career = { id: str(r.career?.id, 60) };
   for (const t of TRAITS) {
     const v = r.traitArray?.[t];
-    h.traitArray[t] = Number.isInteger(v) ? v : 0;
+    h.traitArray[t] = Number.isInteger(v) ? v : null;
   }
   const choices: Hero["choices"] = {};
   if (r.choices && typeof r.choices === "object") {
