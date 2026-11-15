@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getRole } from "@/lib/auth";
 import { heroFromCharacter } from "@/lib/hero/legacy";
+import { applyMigrations, listMigrations } from "@/lib/migrate";
+import { withDatabase } from "@/lib/pgExecutor";
 import { BUNDLED_CARDS } from "@/lib/hero/cards";
 import { getStore } from "@/lib/store";
 
@@ -30,6 +32,12 @@ export async function POST(req: Request) {
         }
       }
       return NextResponse.json({ created, alreadyHad: chars.length - missing.length, failed });
+    }
+    if (action === "migrate") {
+      if (!process.env.DATABASE_URL) return NextResponse.json({ error: "no_database_url", message: "DATABASE_URL isn’t set on the server yet." }, { status: 500 });
+      const files = await listMigrations();
+      const result = await withDatabase((exec) => applyMigrations(exec, files));
+      return NextResponse.json(result);
     }
     return NextResponse.json({ error: "unknown_action" }, { status: 400 });
   } catch (e) {

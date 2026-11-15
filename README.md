@@ -48,3 +48,9 @@ the production deployment; check Vercel → Settings → Cron Jobs.
 Stand-ins (Oswald, Barlow) load from Google Fonts. To use the licensed fonts, add `@font-face` rules for
 ITC Serif Gothic, FF DIN Pan-European and Droidobesh Depot with files in `public/fonts`; the CSS variables
 in `app/globals.css` already list them first.
+
+## Database changes
+
+New SQL goes in `supabase/migrations/` as a dated file. Write it so it is safe to run twice (`create table if not exists`, `create or replace function`).
+
+Once `DATABASE_URL` is set in Vercel (Supabase > Project Settings > Database > Connection string > URI, session pooler), the GM can press **Update the database** on `/admin/setup` after a deploy. It runs each new file once and remembers which it has run. Files dated before 2026-11-15 were run by hand and are noted as done without being run. Without `DATABASE_URL`, paste the new file into the Supabase SQL editor instead.
