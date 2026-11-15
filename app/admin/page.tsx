@@ -14,7 +14,8 @@ export default async function AdminPage() {
     <main>
       <div className="col gm">
         <AdminDashboard initial={chars.filter((c) => c.tracked)} players={players} despair={despair} />
-        <p className="section"><Link className="standalone" href="/">Back to players</Link></p>
+        <p className="section"><Link className="standalone" href="/admin/setup">Database set-up</Link></p>
+        <p><Link className="standalone" href="/">Back to players</Link></p>
       </div>
     </main>
   );

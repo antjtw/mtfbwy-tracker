@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_CHARACTERS, SEED_PLAYERS } from "./seed";
-import { BUNDLED_CARDS, cardFromRow, type CardRow } from "./hero/cards";
+import { BUNDLED_CARDS, cardFromRow, cardToRow, type CardRow } from "./hero/cards";
 import type { Card, Hero } from "./hero/types";
 import type { Character, CharacterPatch, Player } from "./types";
 
@@ -19,6 +19,12 @@ export interface Store {
   hero(characterId: string): Promise<Hero | null>;
   /** Every card, from the database when it has them, otherwise the bundled snapshot */
   cards(): Promise<Card[]>;
+  /** Loads the bundled cards into the database (a no-op for the local file store). Returns how many are now there. */
+  saveCards(cards: Card[]): Promise<number>;
+  /** Ids of characters that already have a Hero */
+  heroIds(): Promise<string[]>;
+  /** Adds a Hero for an existing character, leaving any Hero already there alone */
+  addHero(characterId: string, playerId: string, hero: Hero): Promise<void>;
 }
 
 // ---------- Supabase ----------
@@ -73,6 +79,34 @@ function supabaseStore(url: string, key: string): Store {
       const { data, error } = await db.from("cards").select("*").order("sort");
       if (error || !data?.length) return BUNDLED_CARDS; // table not created or not loaded yet
       return (data as CardRow[]).map(cardFromRow);
+    },
+    async saveCards(cards) {
+      const rows = cards.map(cardToRow);
+      for (let i = 0; i < rows.length; i += 100) {
+        const { error } = await db.from("cards").upsert(rows.slice(i, i + 100));
+        if (error) throw error;
+      }
+      const { data, error } = await db.from("cards").select("id");
+      if (error) throw error;
+      const keep = new Set(rows.map((r) => r.id));
+      const stale = (data ?? []).map((r) => r.id as string).filter((id) => !keep.has(id));
+      for (let i = 0; i < stale.length; i += 50) {
+        const del = await db.from("cards").delete().in("id", stale.slice(i, i + 50));
+        if (del.error) throw del.error;
+      }
+      return rows.length;
+    },
+    async heroIds() {
+      const { data, error } = await db.from("heroes").select("id");
+      if (error) throw error;
+      return (data ?? []).map((r) => r.id as string);
+    },
+    async addHero(characterId, playerId, hero) {
+      const { error } = await db.from("heroes").upsert(
+        { id: characterId, player_id: playerId, rules_version: hero.rulesVersion, data: hero },
+        { onConflict: "id", ignoreDuplicates: true },
+      );
+      if (error) throw error;
     },
     async hero(characterId) {
       const { data, error } = await db.from("heroes").select("data").eq("id", characterId).maybeSingle();
@@ -169,6 +203,22 @@ function fileStore(): Store {
     },
     async cards() {
       return BUNDLED_CARDS;
+    },
+    async saveCards(cards) {
+      return cards.length;
+    },
+    async heroIds() {
+      return Object.keys((await load()).heroes ?? {});
+    },
+    addHero(characterId, _playerId, hero) {
+      const run = queue.then(async () => {
+        const data = await load();
+        if (data.heroes?.[characterId]) return;
+        data.heroes = { ...data.heroes, [characterId]: hero };
+        await save(data);
+      });
+      queue = run.catch(() => undefined);
+      return run;
     },
     setDespair(adventure, value) {
       const run = queue.then(async () => {

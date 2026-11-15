@@ -43,3 +43,23 @@ export function cardFromRow(r: CardRow): Card {
 
 /** Where a card sits, for filters and headings: "Sentinel · Blademaster", "Force casting", "Vanguard" */
 export const cardGroup = (c: Card) => [c.sourceType === "tradition" ? c.sourceName : c.path || c.sourceName, c.archetype].filter(Boolean).join(" · ");
+
+export function cardToRow(c: Card): CardRow & { rules_version: string } {
+  return {
+    id: c.id,
+    source_type: c.sourceType,
+    source_name: c.sourceName,
+    path: c.path,
+    archetype: c.archetype,
+    tier: c.tier,
+    name: c.name,
+    content: c.content,
+    prerequisite_text: c.prerequisiteText,
+    prerequisite: c.prerequisite ?? null,
+    action_roll: c.actionRoll,
+    willpower_cost: c.willpowerCost,
+    willpower_cost_note: c.willpowerCostText,
+    sort: c.sort,
+    rules_version: "1.2.0",
+  };
+}

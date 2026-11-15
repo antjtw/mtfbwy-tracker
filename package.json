@@ -10,8 +10,7 @@
     "test": "vitest run",
     "seed": "tsx --env-file=.env.local scripts/seed.ts",
     "seed:sql": "tsx scripts/seed-sql.ts",
-    "cards:ingest": "tsx scripts/cards-ingest.ts",
-    "heroes:legacy": "tsx scripts/legacy-heroes-sql.ts"
+    "cards:ingest": "tsx scripts/cards-ingest.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
