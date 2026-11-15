@@ -123,12 +123,14 @@ export function LevelUp({ characterId, characterName, hero, level, cards }: { ch
       return [];
     }
     if (step === "card") return cardProblems(info.base, entry, cards);
+    // The options step only asks about the options; the card comes on its own step
+    if (step === "picks") return entryProblems(info.base, entry);
     return [...entryProblems(info.base, entry), ...cardProblems(info.base, entry, cards)];
   })();
 
   const withEntry = useMemo(() => (entry ? computeHero({ ...info.base, levelLog: [...info.base.levelLog, entry] }) : null), [entry, info.base]);
 
-  const go = (key: StepKey) => router.push(`?step=${key}`);
+  const go = (key: StepKey) => router.push(`?level=${level}&step=${key}`);
   const next = (e: React.FormEvent) => {
     e.preventDefault();
     // The picks step only asks for picks when you're advancing an archetype
