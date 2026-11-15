@@ -46,5 +46,6 @@ export function sanitizeHeroEdit(raw: unknown, stored: Hero): Hero | null {
   h.startingLevel = stored.startingLevel;
   h.levelLog = stored.levelLog;
   if (stored.imported) h.imported = true;
+  if (stored.play) h.play = stored.play;
   return h;
 }

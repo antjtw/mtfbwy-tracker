@@ -446,3 +446,42 @@ select:disabled { opacity: 0.5; cursor: default; }
 select option { background: var(--page-bg); color: var(--input-value); }
 .trait-row select { width: 112px; }
 .trait-row { grid-template-columns: 1fr 112px 56px; }
+
+/* Character sheet tabs (Stats, Abilities) */
+.sheet { display: flex; flex-direction: column; gap: var(--pad-xl); padding-top: var(--pad-md); }
+.sheet .track { margin: 0; }
+.sheet .track h2 { margin: 0 0 var(--pad-xs); }
+.unfinished { padding: var(--pad-xs) var(--pad-sm); border: 1px solid var(--outline-gold-subdued); border-radius: 8px; }
+.stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--pad-xs); margin: 0; }
+@media (min-width: 520px) { .stat-row { grid-template-columns: repeat(4, 1fr); } }
+.stat-row.traits { grid-template-columns: repeat(3, 1fr); }
+@media (min-width: 640px) { .stat-row.traits { grid-template-columns: repeat(6, 1fr); } }
+.stat-tile { display: flex; flex-direction: column; gap: 2px; padding: var(--pad-xs) var(--pad-sm); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; min-width: 0; }
+.stat-tile dt { order: 1; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.stat-tile dd { order: 0; margin: 0; font: 700 28px/36px var(--font-body); color: var(--text-gold); font-variant-numeric: tabular-nums; }
+.stat-note { order: 2; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.prof-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: var(--pad-3xs) var(--pad-lg); }
+@media (min-width: 640px) { .prof-list { grid-template-columns: 1fr 1fr; } }
+.prof-list li { display: flex; align-items: center; gap: var(--pad-xs); min-height: 36px; padding: 0 var(--pad-xs); border-bottom: 1px solid var(--outline-navy-subdued); }
+.prof-name { flex: 1; font-size: 19px; line-height: 28px; }
+.prof-list strong { font: 700 19px/28px var(--font-body); font-variant-numeric: tabular-nums; color: var(--text-default); }
+.prof-mark { flex: none; color: var(--text-gold); }
+.prof-mark.step-0 { color: var(--text-subdued); }
+.prof-key { list-style: none; display: flex; flex-wrap: wrap; gap: var(--pad-2xs) var(--pad-md); margin: 0 0 var(--pad-sm); padding: 0; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.prof-key li { display: inline-flex; align-items: center; gap: var(--pad-3xs); }
+.skill-group { margin-top: var(--pad-md); }
+.skill-group h3 { margin: 0 0 var(--pad-3xs); font: 850 16px/24px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-gold); }
+.use-row { margin-bottom: var(--pad-sm); }
+.use-name { margin: 0 0 var(--pad-2xs); font-size: 19px; line-height: 28px; }
+.use-boxes { display: flex; flex-wrap: wrap; gap: var(--pad-2xs); }
+.use-box { appearance: none; -webkit-appearance: none; flex: none; width: 28px; height: 28px; margin: 0; border: 2px solid var(--outline-gold); border-radius: 6px; background: transparent; cursor: pointer; display: inline-grid; place-content: center; }
+.use-box:checked { background: var(--outline-gold); }
+.use-box:checked::after { content: ""; width: 12px; height: 7px; border: solid var(--surface-navy-lighter); border-width: 0 0 3px 3px; transform: rotate(-45deg) translate(1px, -1px); }
+.use-box:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.rest-buttons { display: flex; flex-wrap: wrap; gap: var(--pad-xs); margin-top: var(--pad-xs); }
+.ability-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--pad-sm); }
+.ability { padding: var(--pad-sm) var(--pad-md); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; }
+.ability-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--pad-xs) var(--pad-md); }
+.ability h3 { margin: 0; font-size: 19px; line-height: 28px; color: var(--text-gold); }
+.ability p { margin: var(--pad-3xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-default); }
+.ability-use { display: inline-flex; align-items: center; gap: var(--pad-xs); font-size: 16px; line-height: 24px; cursor: pointer; }

@@ -365,10 +365,28 @@ function build(hero: Hero, log: readonly LevelEntry[]): Built {
     const steps = (lvl >= 4 ? 1 : 0) + (lvl >= 7 ? 1 : 0) + (lvl >= 10 ? 1 : 0);
     const began = p.began;
     let text = "";
-    if (def?.resource.kind === "die") text = `${1 + steps + (began ? picked.die : 0)}d4 ${def.resource.name}`;
-    else if (def?.resource.kind === "fury") text = `Fury +${2 + steps + (began ? picked.furyDamage : 0)} damage, ${2 + steps + (began ? picked.furyUsage : 0)} uses`;
-    else if (def?.resource.kind === "assess") text = `${Math.max(1, traits.INT) + (began ? picked.assess : 0)} Assess uses per short rest`;
-    return { pathId: p.pathId, text };
+    let kind: "die" | "fury" | "assess" | undefined;
+    let count = 0;
+    let name = "";
+    let extra = 0;
+    if (def?.resource.kind === "die") {
+      kind = "die";
+      count = 1 + steps + (began ? picked.die : 0);
+      name = def.resource.name;
+      text = `${count}d4 ${name}`;
+    } else if (def?.resource.kind === "fury") {
+      kind = "fury";
+      extra = 2 + steps + (began ? picked.furyDamage : 0);
+      count = 2 + steps + (began ? picked.furyUsage : 0);
+      name = "Fury";
+      text = `Fury +${extra} damage, ${count} uses`;
+    } else if (def?.resource.kind === "assess") {
+      kind = "assess";
+      count = Math.max(1, traits.INT) + (began ? picked.assess : 0);
+      name = "Assess";
+      text = `${count} Assess uses per short rest`;
+    }
+    return { pathId: p.pathId, text, kind, count, name, extra };
   }).filter((r) => r.text);
 
   // ---- Features

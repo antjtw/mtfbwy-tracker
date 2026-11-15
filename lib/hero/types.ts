@@ -162,6 +162,8 @@ export interface Hero {
   identity: { name: string; backstory: string; languages: string; notes: string };
   /** Set on Heroes rebuilt from the tracker's records: their decisions are only partly known */
   imported?: boolean;
+  /** Play state kept with the Hero: which once-per abilities and uses are spent. Never an input to the rules. */
+  play?: { used: Record<string, number> };
 }
 
 export interface ProgressionPick {
@@ -236,7 +238,7 @@ export interface Derived {
   casting: { kind: CastingKind; modifier: number; pathId: string }[];
   paths: PathProgress[];
   /** Per Path: the die count, Fury or Assess uses at its current level */
-  resources: { pathId: string; text: string }[];
+  resources: { pathId: string; text: string; kind?: "die" | "fury" | "assess"; count: number; name: string; extra: number }[];
   features: { name: string; source: string; text?: string }[];
   powers: { traditions: Tradition[]; extraTier0Force: number };
   weaponProficiencies: string[];

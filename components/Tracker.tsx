@@ -5,6 +5,10 @@ import { Fragment, useId, useRef, useState, type KeyboardEvent } from "react";
 import { DespairChip, usePolledDespair } from "./Despair";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
+import { AbilitiesTab } from "./sheet/AbilitiesTab";
+import { StatsTab } from "./sheet/StatsTab";
+import { usePlay } from "./sheet/usePlay";
+import type { Sheet } from "@/lib/hero/sheet";
 import { SyncBadge, usePolledCharacters } from "./usePolledCharacters";
 import { buildParts } from "@/lib/build";
 import { DAMAGE_SEVERITIES, applyDamage, damageThresholds, type Severity } from "@/lib/damage";
@@ -24,11 +28,14 @@ export function Tracker({
   despair,
   playerName,
   initialTab = "slots",
+  sheet,
 }: {
   initial: Character;
   despair: Record<string, number>;
   playerName: string;
   initialTab?: TabKey;
+  /** The Hero's computed sheet, when this character has one */
+  sheet?: Sheet;
 }) {
   const { chars, patch, sync } = usePolledCharacters([initial], `/api/characters/${initial.id}`);
   const ch = chars[0] ?? initial;
@@ -38,6 +45,7 @@ export function Tracker({
   const [damageMsg, setDamageMsg] = useState("");
   const [flash, setFlash] = useState(0);
   const id = useId();
+  const play = usePlay(initial.id, sheet?.used ?? {});
 
   // Marking a hit point slot pops a brief red glow around the page. Any slot press buzzes the phone where the
   // browser allows it (Android browsers do; iPhones don't offer web pages any vibration); unticking gets a lighter buzz.
@@ -180,6 +188,12 @@ export function Tracker({
 
       {TABS.slice(1).map((t) => (
         <div key={t.key} id={`${id}-panel-${t.key}`} role="tabpanel" aria-labelledby={`${id}-tab-${t.key}`} hidden={tab !== t.key}>
+          {sheet && t.key === "stats" ? (
+            <StatsTab sheet={sheet} play={play} characterId={ch.id} />
+          ) : sheet && t.key === "abilities" ? (
+            <AbilitiesTab sheet={sheet} play={play} />
+          ) : (
+            <>
           {/* Placeholder until the sheet is built: the animation, or its still frame for people who reduce motion */}
           <picture>
             <source media="(prefers-reduced-motion: reduce)" srcSet="/placeholders/tab-placeholder.jpg" />
@@ -193,6 +207,8 @@ export function Tracker({
               alt="Placeholder: Anakin Skywalker standing in drifting smoke"
             />
           </picture>
+            </>
+          )}
         </div>
       ))}
       <SyncBadge sync={sync} />
