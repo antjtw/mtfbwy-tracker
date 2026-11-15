@@ -23,6 +23,11 @@ describe("characterFromHero", () => {
     expect(c.paths).toEqual([{ path: "Mystic", archetypes: [{ name: "Cosmic", level: 1 }] }]);
   });
 
+  it("puts the Hero in the chosen adventure, or none", () => {
+    expect(characterFromHero(labourerMystic(), "p", new Set(), 1, "Campaign 3").adventures).toEqual(["Campaign 3"]);
+    expect(characterFromHero(labourerMystic(), "p", new Set(), 1).adventures).toEqual([]);
+  });
+
   it("never reuses an existing id", () => {
     expect(characterFromHero(labourerMystic(), "p", new Set(["test-hero", "test-hero-2"]), 1).id).toBe("test-hero-3");
   });

@@ -160,6 +160,8 @@ export interface Hero {
   choices: Record<string, string | string[]>;
   levelLog: LevelEntry[];
   identity: { name: string; backstory: string; languages: string; notes: string };
+  /** Set on Heroes rebuilt from the tracker's records: their decisions are only partly known */
+  imported?: boolean;
 }
 
 export interface ProgressionPick {
@@ -244,3 +246,36 @@ export interface Derived {
 }
 
 export const RULES_VERSION = "1.2.0";
+
+// ---------------------------------------------------------------- cards
+
+export type CardSourceType = "tradition" | "path" | "career";
+
+/** What a card needs before it can be taken */
+export type CardPrerequisite =
+  | { kind: "casting"; tradition: Tradition }
+  | { kind: "path_feature"; name: string }
+  | { kind: "archetype_feature"; name: string; featureKey: string }
+  | { kind: "card"; name: string; cardId: string }
+  | { kind: "unresolved"; text: string };
+
+/** One row of the Abilities sheet, normalised (spec 3.2). Keyed by (path, archetype, name): names repeat across Paths. */
+export interface Card {
+  id: string;
+  sourceType: CardSourceType;
+  /** "Force casting", "Devout", "Bounty Hunter" ... */
+  sourceName: string;
+  /** Path name for Path cards; empty for casting traditions */
+  path: string;
+  archetype: string;
+  tier: 0 | 1 | 2 | 3;
+  name: string;
+  content: string;
+  prerequisiteText: string;
+  prerequisite?: CardPrerequisite;
+  actionRoll: "Yes" | "No" | "Conditional";
+  /** The leading number of the cost, when the cost is a plain number; the full text is always kept */
+  willpowerCost: number | null;
+  willpowerCostText: string;
+  sort: number;
+}

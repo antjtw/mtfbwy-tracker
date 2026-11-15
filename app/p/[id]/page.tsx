@@ -49,7 +49,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ id: str
         <PageHeading title="Select a character">
           <p className="lede">Welcome, {first}. You’ve taken your first step into a larger world.</p>
         </PageHeading>
-        <p className="new-character"><Link className="btn" href={`/p/${id}/new`}>New character</Link></p>
+        <p className="new-character"><Link className="btn" href={`/p/${id}/new`}>New character</Link> <Link className="standalone card-link" href="/cards">Browse cards</Link></p>
         {main.length > 0 && (
           <section className="section">
             <h2>Campaign characters</h2>

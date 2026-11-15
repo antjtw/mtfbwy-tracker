@@ -378,3 +378,22 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .review-line strong { color: var(--text-default); }
 .plain-list { margin: var(--pad-xs) 0 0; padding-left: 20px; font-size: 16px; line-height: 24px; }
 .muted { color: var(--text-subdued); }
+
+/* Cards */
+.card-link { margin-left: var(--pad-sm); }
+.card-filters { display: grid; grid-template-columns: 1fr 1fr; gap: var(--pad-sm); align-items: end; margin-bottom: var(--pad-lg); }
+.card-filters .field:last-of-type { grid-column: 1 / -1; }
+.card-filters .field select, .card-filters .field input { max-width: none; }
+.card-grid { display: flex; flex-direction: column; gap: var(--pad-md); margin-top: var(--pad-sm); }
+.card { padding: var(--pad-md); background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy); border-radius: 12px; }
+.card-head { display: flex; justify-content: space-between; gap: var(--pad-sm); font-size: 12px; line-height: 16px; color: var(--text-subdued); text-transform: uppercase; letter-spacing: 0.04em; }
+.card-tier { color: var(--text-gold); font-weight: 700; }
+.card .card-name { margin: var(--pad-2xs) 0 var(--pad-xs); font-size: 24px; line-height: 32px; }
+.card .card-name a { color: inherit; text-decoration: none; }
+.card .card-name a:hover, .card .card-name a:focus-visible { text-decoration: underline; }
+.card-body p { margin: 0 0 var(--pad-2xs); font-size: 16px; line-height: 24px; color: var(--text-default); }
+.card-body strong { color: var(--text-gold); }
+.card-meta { display: flex; flex-wrap: wrap; gap: var(--pad-2xs) var(--pad-md); margin: var(--pad-xs) 0 0; padding-top: var(--pad-xs); border-top: 1px solid var(--outline-navy-subdued); font-size: 14px; line-height: 20px; }
+.card-meta dt { color: var(--text-subdued); }
+.card-meta dd { margin: 0; color: var(--text-default); }
+.card-meta > div { display: flex; gap: var(--pad-2xs); }

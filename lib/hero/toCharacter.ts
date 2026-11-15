@@ -8,7 +8,7 @@ import type { Hero } from "./types";
 const slug = (n: string) => n.toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** The tracker record for a newly built Hero: slots and build line come from the engine, usage starts at zero */
-export function characterFromHero(hero: Hero, playerId: string, takenIds: ReadonlySet<string>, sort: number): Character {
+export function characterFromHero(hero: Hero, playerId: string, takenIds: ReadonlySet<string>, sort: number, adventure = ""): Character {
   const d = computeHero(hero);
   const species = SPECIES_BY_ID[hero.species.id];
   const sub = species?.subspecies?.find((s) => s.id === hero.species.subspeciesId);
@@ -35,7 +35,7 @@ export function characterFromHero(hero: Hero, playerId: string, takenIds: Readon
     description: describeBuild(build),
     era: "",
     ...build,
-    adventures: [],
+    adventures: adventure ? [adventure] : [],
     tracked: true,
     is_main: true,
     sort,

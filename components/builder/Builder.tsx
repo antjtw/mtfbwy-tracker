@@ -15,14 +15,15 @@ import { Ledger } from "./Ledger";
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 const ARRAY_VALUES = [2, 1, 0, -1];
 
-export function Builder({ playerId, playerName }: { playerId: string; playerName: string }) {
+export function Builder({ playerId, playerName, adventures }: { playerId: string; playerName: string; adventures: readonly string[] }) {
   const router = useRouter();
   const params = useSearchParams();
-  const step: StepKey = STEPS.find((s) => s.key === params.get("step"))?.key ?? "species";
+  const step: StepKey = STEPS.find((s) => s.key === params.get("step"))?.key ?? "adventure";
   const index = STEPS.findIndex((s) => s.key === step);
 
   const storageKey = `mtfbwy-draft-${playerId}`;
   const [hero, setHero] = useState<Hero>(emptyHero);
+  const [adventure, setAdventure] = useState("");
   const [loaded, setLoaded] = useState(false);
   const [showProblems, setShowProblems] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -33,7 +34,11 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem(storageKey);
-      if (raw) setHero({ ...emptyHero(), ...JSON.parse(raw) });
+      if (raw) {
+        const saved = JSON.parse(raw) as { hero?: Hero; adventure?: string };
+        if (saved.hero) setHero({ ...emptyHero(), ...saved.hero });
+        if (typeof saved.adventure === "string") setAdventure(saved.adventure);
+      }
     } catch {
       // No storage available: the draft just lives in memory
     }
@@ -42,11 +47,11 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
   useEffect(() => {
     if (!loaded) return;
     try {
-      sessionStorage.setItem(storageKey, JSON.stringify(hero));
+      sessionStorage.setItem(storageKey, JSON.stringify({ hero, adventure }));
     } catch {
       // Ignore
     }
-  }, [hero, loaded, storageKey]);
+  }, [hero, adventure, loaded, storageKey]);
 
   // Each step is its own screen: put focus on its heading so a screen reader starts there
   useEffect(() => {
@@ -79,7 +84,7 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
     setBusy(true);
     setSaveError(null);
     try {
-      const res = await fetch("/api/heroes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerId, hero }) });
+      const res = await fetch("/api/heroes", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ playerId, hero, adventure }) });
       if (res.status === 201) {
         const { id } = (await res.json()) as { id: string };
         try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
@@ -103,6 +108,7 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
   const archetypeFeature = path && hero.path.archetypeId ? ARCHETYPE_FEATURES[archetypeKey(path.id, hero.path.archetypeId)]?.find((f) => f.level === 1) : undefined;
 
   const titles: Record<StepKey, string> = {
+    adventure: "Choose an adventure",
     species: "Choose a species",
     origin: "Choose an origin",
     path: "Choose a path",
@@ -112,6 +118,7 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
     review: "Review your Hero",
   };
   const lede: Record<StepKey, string> = {
+    adventure: "Which story is this Hero part of? You can leave it for now and add it later.",
     species: "Where you come from shapes your body, your senses and your threshold for pain.",
     origin: "What you lived through before the story began.",
     path: "How you fight, and what you believe in. You’ll pick your archetype and two skills.",
@@ -136,6 +143,16 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
       )}
 
       <form onSubmit={next} noValidate className="builder-form">
+        {step === "adventure" && (
+          <div className="field">
+            <label htmlFor="adventure">Adventure</label>
+            <select id="adventure" value={adventure} onChange={(e) => setAdventure(e.target.value)}>
+              <option value="">None, add later</option>
+              {adventures.map((a) => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        )}
+
         {step === "species" && (
           <>
             <RadioList
@@ -273,7 +290,7 @@ export function Builder({ playerId, playerName }: { playerId: string; playerName
           </>
         )}
 
-        {step === "review" && <Review hero={hero} d={d} />}
+        {step === "review" && <Review hero={hero} d={d} adventure={adventure} />}
 
         {saveError && <p className="err-text" role="alert">{saveError}</p>}
 
@@ -323,7 +340,7 @@ function TraitStep({ hero, d, setHero }: { hero: Hero; d: ReturnType<typeof comp
   );
 }
 
-function Review({ hero, d }: { hero: Hero; d: ReturnType<typeof computeHero> }) {
+function Review({ hero, d, adventure }: { hero: Hero; d: ReturnType<typeof computeHero>; adventure: string }) {
   const species = SPECIES_BY_ID[hero.species.id];
   const sub = species?.subspecies?.find((s) => s.id === hero.species.subspeciesId);
   const path = PATH_BY_ID[hero.path.id];
@@ -333,6 +350,7 @@ function Review({ hero, d }: { hero: Hero; d: ReturnType<typeof computeHero> }) 
       <p className="review-line">
         <strong>{hero.identity.name || "Unnamed Hero"}</strong>: {[sub ? `${species?.name} (${sub.name})` : species?.name, ORIGIN_BY_ID[hero.origin.id]?.name, `${path?.name} (${arch?.name} 1)`, CAREER_BY_ID[hero.career.id]?.name].filter(Boolean).join(" • ")}
       </p>
+      <p className="note">Adventure: {adventure || "None yet, add later"}</p>
       {d.issues.length > 0 && (
         <div className="error-summary" role="alert">
           <strong>Not ready yet</strong>

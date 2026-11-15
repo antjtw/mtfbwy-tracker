@@ -3,6 +3,7 @@ import { CAREER_BY_ID, ORIGIN_BY_ID, PATH_BY_ID, SPECIES_BY_ID } from "./data";
 import { type Choice, type Hero, type SkillName, SKILLS, type Source, TRAITS } from "./types";
 
 export const STEPS = [
+  { key: "adventure", label: "Adventure" },
   { key: "species", label: "Species" },
   { key: "origin", label: "Origin" },
   { key: "path", label: "Path" },
@@ -60,6 +61,8 @@ export function stepProblems(hero: Hero, step: StepKey): string[] {
       const c = CAREER_BY_ID[hero.career.id];
       return c ? choiceProblems(hero, careerKey(c.id), c.choices) : ["Choose a career"];
     }
+    case "adventure":
+      return [];
     case "traits":
       return validateTraitArray(hero.traitArray) ? [] : ["Use each value in the starting array once"];
     case "identity":

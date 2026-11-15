@@ -2,7 +2,8 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { SEED_CHARACTERS, SEED_PLAYERS } from "./seed";
-import type { Hero } from "./hero/types";
+import { BUNDLED_CARDS, cardFromRow, type CardRow } from "./hero/cards";
+import type { Card, Hero } from "./hero/types";
 import type { Character, CharacterPatch, Player } from "./types";
 
 export interface Store {
@@ -16,6 +17,8 @@ export interface Store {
   /** Saves a built Hero together with the tracker character made from it */
   createHero(hero: Hero, character: Character): Promise<void>;
   hero(characterId: string): Promise<Hero | null>;
+  /** Every card, from the database when it has them, otherwise the bundled snapshot */
+  cards(): Promise<Card[]>;
 }
 
 // ---------- Supabase ----------
@@ -65,6 +68,11 @@ function supabaseStore(url: string, key: string): Store {
         await db.from("characters").delete().eq("id", character.id); // don't leave a character with no Hero behind
         throw saved.error;
       }
+    },
+    async cards() {
+      const { data, error } = await db.from("cards").select("*").order("sort");
+      if (error || !data?.length) return BUNDLED_CARDS; // table not created or not loaded yet
+      return (data as CardRow[]).map(cardFromRow);
     },
     async hero(characterId) {
       const { data, error } = await db.from("heroes").select("data").eq("id", characterId).maybeSingle();
@@ -158,6 +166,9 @@ function fileStore(): Store {
     },
     async hero(characterId) {
       return (await load()).heroes?.[characterId] ?? null;
+    },
+    async cards() {
+      return BUNDLED_CARDS;
     },
     setDespair(adventure, value) {
       const run = queue.then(async () => {
