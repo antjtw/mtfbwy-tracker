@@ -86,7 +86,6 @@ export function AbilitiesTab({ sheet, play }: { sheet: Sheet; play: Play }) {
         </section>
       )}
       {sheet.abilities.length === 0 && <p className="note">No abilities yet. They appear once the Hero has a species, origin, career and path.</p>}
-      <p className="note">Cards come next.</p>
       {play.error && <p className="err-text" role="alert">{play.error}</p>}
     </div>
   );
