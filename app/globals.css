@@ -505,8 +505,11 @@ select option { background: var(--page-bg); color: var(--input-value); }
 
 /* Dyad Dice roller */
 .dice-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 400ms ease; }
-.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; gap: var(--pad-3xs); min-width: 64px; min-height: 64px; padding: var(--pad-2xs) var(--pad-xs); flex-direction: column; background: var(--surface-navy-lighter); border: 2px solid var(--outline-gold); border-radius: 32px; color: var(--text-gold); font: 700 14px/16px var(--font-body); cursor: pointer; }
-@media (hover: hover) { .roller-trigger:hover { background: var(--surface-gold-darker); } }
+.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; padding: 0; background: transparent; border: 0; color: var(--text-gold); cursor: pointer; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55)); }
+@media (hover: hover) { .roller-trigger:hover { color: #fff; } }
+.roller-trigger:active .roller-die { transform: scale(0.94); }
+.roller-die { transition: transform 120ms ease; }
+@media (prefers-reduced-motion: reduce) { .roller-die { transition: none; } }
 .roller-badge { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-error); border: 2px solid var(--page-bg); }
 .roller { position: fixed; z-index: 95; display: flex; flex-direction: column; background: var(--surface-navy-darker); border: 1px solid var(--outline-navy); color: var(--text-default); transition: transform 250ms ease, height 250ms ease; overflow: hidden; }
 @media (min-width: 769px) {

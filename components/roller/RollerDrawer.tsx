@@ -195,15 +195,16 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, setWillpower, addDesp
         type="button"
         className="roller-trigger"
         aria-label="Open dice roller"
+        title="Roll the dice"
         aria-expanded={open}
         aria-controls="roller-drawer"
         onClick={() => setOpen(true)}
       >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
-          <path d="M12 2.5 20.5 8.6 17.3 19H6.7L3.5 8.6z" />
-          <path d="M12 2.5 9 10.5h6zM3.5 8.6 9 10.5M20.5 8.6 15 10.5M9 10.5 6.7 19M15 10.5 17.3 19M9 10.5l3 4.3 3-4.3M12 14.8V19" />
+        <svg className="roller-die" width="64" height="64" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <polygon points="41.0,4.4 55.5,15.0 61.0,32.0 55.5,49.0 41.0,59.6 23.0,59.6 8.5,49.0 3.0,32.0 8.5,15.0 23.0,4.4" fill="currentColor" />
+          <polygon points="32.0,18.0 45.3,27.7 40.2,43.3 23.8,43.3 18.7,27.7" fill="none" stroke="var(--page-bg)" strokeWidth="2" strokeLinejoin="round" />
+          <path d="M32.0 18.0L41.0 4.4M45.3 27.7L55.5 15.0M40.2 43.3L55.5 49.0M23.8 43.3L23.0 59.6M18.7 27.7L3.0 32.0" stroke="var(--page-bg)" strokeWidth="2" strokeLinecap="round" fill="none" />
         </svg>
-        <span>Roll</span>
         {(awaiting || (roll?.pending && !open)) && <span className="roller-badge" aria-hidden="true" />}
         {awaiting && <span className="sr-only">A roll is waiting for you to say whether it succeeded</span>}
       </button>
