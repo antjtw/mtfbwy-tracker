@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { rollModifiers } from "./rollModifiers";
 import { buildSheet, keysToClear, refreshOf } from "./sheet";
 import { choiceKey, emptyHero, pathKey } from "./engine";
 
@@ -28,5 +29,20 @@ describe("sheet", () => {
     expect(keysToClear(s, "short")).not.toContain(`ability:${charm!.key}`);
     expect(keysToClear(s, "full")).toContain(`ability:${charm!.key}`);
     expect(s.resources.find((r) => r.name === "Fury")?.spendable).toBe(true);
+  });
+
+  it("reads advantage and disadvantage on skills and saves from the wording", () => {
+    
+    const m = rollModifiers([
+      { name: "Feared", text: "You have Advantage on Coercion rolls" },
+      { name: "Hidden Compartments", text: "You have Advantage on Stealth or Skulduggery rolls when concealing items" },
+      { name: "Optimistic Courage", text: "You have disadvantage on Insight rolls to detect deception or hostile intent." },
+      { name: "Agile", text: "Advantage on Agility saving rolls" },
+      { name: "Distraction tactics", text: "you may grant one ally Advantage on their next attack roll against that adversary." },
+    ]);
+    expect(m.skills.Coercion.advantage).toEqual(["Feared"]);
+    expect(Object.keys(m.skills).sort()).toEqual(["Coercion", "Insight", "Skulduggery", "Stealth"]);
+    expect(m.skills.Insight.disadvantage).toEqual(["Optimistic Courage"]);
+    expect(m.saves.AGI?.advantage).toEqual(["Agile"]);
   });
 });

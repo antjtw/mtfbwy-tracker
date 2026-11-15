@@ -68,6 +68,8 @@
   --text-error: #fd6e6e;
   --danger-bg: #3f0a0a; /* spec: error surface */
   --input-value: #ffffff;
+  --surface-game-advantage: #9ad7b0; /* Luminous: Surface/Game/Advantage */
+  --surface-game-disadvantage: #d09999; /* Luminous: Surface/Game/Disadvantage */
 
   --pad-3xs: 4px;
   --pad-2xs: 8px;
@@ -492,3 +494,7 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .basic-chips { margin: 0 0 var(--pad-sm); }
 .basic-chips .chip { border-color: var(--outline-navy-subdued); color: var(--text-subdued); font-size: 14px; line-height: 20px; padding: 2px 10px; }
 .ability-source { margin: 0 !important; font-size: 14px !important; line-height: 20px !important; color: var(--text-subdued) !important; }
+.adv-marks { display: inline-flex; gap: var(--pad-3xs); align-items: center; }
+.adv-mark { display: inline-flex; line-height: 0; }
+.adv-mark.adv { color: var(--surface-game-advantage); }
+.adv-mark.dis { color: var(--surface-game-disadvantage); }

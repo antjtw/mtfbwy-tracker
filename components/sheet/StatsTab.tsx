@@ -24,6 +24,31 @@ export function ProfMark({ step }: { step: ProficiencyStep }) {
   );
 }
 
+/** A small diamond with an A or a D: Advantage in the design system's green, Disadvantage in its red. Names where it comes from. */
+export function AdvMark({ kind, sources }: { kind: "A" | "D"; sources: string[] }) {
+  const word = kind === "A" ? "Advantage" : "Disadvantage";
+  const text = `${word} from ${sources.join(", ")}`;
+  return (
+    <span className={`adv-mark ${kind === "A" ? "adv" : "dis"}`} title={text}>
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true" focusable="false">
+        <path d="M11 1.5 20.5 11 11 20.5 1.5 11z" fill="currentColor" />
+        <text x="11" y="15" textAnchor="middle" fontSize="11" fontWeight="800" fill="var(--page-bg)">{kind}</text>
+      </svg>
+      <span className="sr-only">{text}</span>
+    </span>
+  );
+}
+
+function Marks({ mods }: { mods?: { advantage: string[]; disadvantage: string[] } }) {
+  if (!mods || (!mods.advantage.length && !mods.disadvantage.length)) return null;
+  return (
+    <span className="adv-marks">
+      {mods.advantage.length > 0 && <AdvMark kind="A" sources={mods.advantage} />}
+      {mods.disadvantage.length > 0 && <AdvMark kind="D" sources={mods.disadvantage} />}
+    </span>
+  );
+}
+
 function Stat({ label, value, note }: { label: string; value: string | number; note?: string }) {
   return (
     <div className="stat-tile">
@@ -94,6 +119,7 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
               <ProfMark step={s.proficient ? 2 : 0} />
               <span className="prof-trait" aria-hidden="true">{s.trait}</span>
               <span className="sr-only">{TRAIT_NAMES[s.trait]}, {s.proficient ? "proficient" : "not proficient"}</span>
+              <Marks mods={sheet.rollMods.saves[s.trait]} />
               <b className="mod-chip">{sign(s.modifier)}</b>
             </li>
           ))}
@@ -113,6 +139,7 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
               <ProfMark step={s.step} />
               <span className="prof-trait" aria-hidden="true">{s.trait}</span>
               <span className="prof-name">{s.skill}<span className="sr-only">, {TRAIT_NAMES[s.trait]}, {STEP_LABEL[s.step].toLowerCase()}</span></span>
+              <Marks mods={sheet.rollMods.skills[s.skill]} />
               <b className="mod-chip">{sign(s.modifier)}</b>
             </li>
           ))}

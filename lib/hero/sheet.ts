@@ -2,6 +2,7 @@ import { ARCHETYPE_FEATURES, archetypeKey, PATH_BY_ID } from "./data";
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "./data/features";
 import { abilityKind, type AbilityKind } from "./abilityKind";
 import { computeHero } from "./engine";
+import { rollModifiers, type RollModMap } from "./rollModifiers";
 import type { Hero, ProficiencyStep, Trait } from "./types";
 import { SKILLS, TRAITS } from "./types";
 
@@ -49,6 +50,8 @@ export interface Sheet {
   speed: { metres: number; squares: number; note: string };
   casting: { kind: string; modifier: number }[];
   languages: string;
+  /** Advantage and Disadvantage on skills and saving rolls, with the abilities they come from */
+  rollMods: RollModMap;
   resources: SheetResource[];
   abilities: SheetAbility[];
   used: Record<string, number>;
@@ -124,6 +127,7 @@ export function buildSheet(hero: Hero): Sheet {
     speed,
     casting: d.casting.map((c) => ({ kind: c.kind, modifier: c.modifier })),
     languages: hero.identity.languages,
+    rollMods: rollModifiers(abilities),
     resources,
     abilities,
     used: hero.play?.used ?? {},
