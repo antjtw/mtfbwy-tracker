@@ -331,16 +331,23 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .choice-set { border: 0; margin: 0; padding: 0; min-width: 0; }
 .choice-set legend { padding: 0; font: 850 19px/28px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-default); }
 .choice-hint { margin: var(--pad-3xs) 0 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
-.choice-list { display: grid; grid-template-columns: 1fr; gap: var(--pad-2xs); align-items: start; margin-top: var(--pad-xs); }
-@media (min-width: 600px) { .choice-list { grid-template-columns: 1fr 1fr; gap: var(--pad-xs); } }
-.choice-card { background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; min-width: 0; }
-.choice-card:has(input:checked) { border-color: var(--outline-gold); }
-.choice-card:has(input:focus-visible) { outline: 2px solid #fff; outline-offset: 2px; }
+.choice-list { display: flex; flex-direction: column; gap: var(--pad-2xs); margin-top: var(--pad-xs); }
+.choice-group { margin-top: var(--pad-md); }
+.choice-letter { margin: 0; font: 850 24px/32px var(--font-heading); color: var(--text-gold); }
+.choice-group .choice-list { margin-top: var(--pad-2xs); }
+/* A box you click: the radio underneath is still there for keyboards and screen readers, the box itself is the control */
+.choice-card { position: relative; background: var(--surface-navy-lighter); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; min-width: 0; }
+@media (hover: hover) { .choice-card:not(.disabled):hover { border-color: var(--outline-gold-subdued); } }
+.choice-card:has(input:checked) { background: var(--surface-gold-darker); border-color: var(--outline-gold); }
+.choice-card:has(input:focus-visible) { outline: 2px solid var(--outline-gold); outline-offset: 2px; }
 .choice-card.disabled { opacity: 0.5; }
-.choice { display: flex; gap: var(--pad-xs); align-items: flex-start; min-height: var(--target); padding: var(--pad-xs); cursor: pointer; }
+.choice { display: flex; gap: var(--pad-xs); align-items: flex-start; min-height: var(--target); padding: var(--pad-xs) var(--pad-md); cursor: pointer; }
 .choice-card.disabled .choice { cursor: default; }
-.choice input { flex: none; width: 20px; height: 20px; margin: 4px 0 0; accent-color: var(--outline-gold); }
-.choice-more { padding: 0 var(--pad-xs) var(--pad-xs) calc(var(--pad-xs) * 2 + 20px); }
+.choice input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+.choice-tick { display: none; flex: none; margin: 4px 0 0 auto; color: var(--text-gold); }
+.choice-card:has(input:checked) .choice-tick { display: block; }
+.choice-card:has(input:checked) .choice-meta { color: var(--text-default); }
+.choice-more { padding: 0 var(--pad-md) var(--pad-xs); }
 .choice-more summary { cursor: pointer; color: var(--text-gold); font-size: 16px; line-height: 24px; }
 .choice-more ul { margin: var(--pad-2xs) 0 0; padding-left: 18px; font-size: 16px; line-height: 24px; color: var(--text-default); }
 .choice-more li + li { margin-top: var(--pad-3xs); }

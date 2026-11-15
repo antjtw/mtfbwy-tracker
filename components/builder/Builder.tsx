@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHeading } from "@/components/PageHeading";
+import { CAREER_BLURBS, ORIGIN_BLURBS, SPECIES_BLURBS } from "@/lib/hero/data/blurbs";
 import { ARCHETYPE_FEATURES, archetypeKey, CAREERS, ORIGINS, PATHS, PATH_BY_ID, SPECIES, SPECIES_BY_ID, CAREER_BY_ID, ORIGIN_BY_ID } from "@/lib/hero/data";
-import { describeGrants, oneLine } from "@/lib/hero/describe";
+import { describeGrants, oneLine, playerNotes } from "@/lib/hero/describe";
 import { careerKey, choiceKey, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey } from "@/lib/hero/engine";
 import { STEPS, type StepKey, stepProblems } from "@/lib/hero/steps";
 import { type Hero, SKILLS, STEP_NAMES, TRAIT_NAMES, TRAITS, type Trait } from "@/lib/hero/types";
@@ -201,8 +202,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Species"
               name="species"
               filterable
+              grouped
               value={hero.species.id}
-              options={[...SPECIES].sort((a, b) => a.name.localeCompare(b.name)).map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...(s.notes ?? [])] }))}
+              options={[...SPECIES].sort((a, b) => a.name.localeCompare(b.name)).map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), blurb: SPECIES_BLURBS[s.id], more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...playerNotes(s.notes)] }))}
               onChange={(id) => patch((h) => ({ ...h, species: { id }, choices: dropChoices(h, "species:", "subspecies:") }))}
             />
             {species?.subspecies && (
@@ -216,7 +218,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
             )}
             {species && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={speciesKey(species.id)} choices={species.choices} />}
             {species && sub && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={subspeciesKey(species.id, sub.id)} choices={sub.choices} />}
-            {species && <Gain lines={[`Species damage threshold ${species.threshold}`, ...describeGrants([...species.grants, ...(sub?.grants ?? [])]), ...(species.notes ?? [])]} />}
+            {species && <Gain lines={[`Species damage threshold ${species.threshold}`, ...describeGrants([...species.grants, ...(sub?.grants ?? [])]), ...playerNotes(species.notes)]} />}
           </>
         )}
 
@@ -226,8 +228,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Origin"
               name="origin"
               filterable
+              grouped
               value={hero.origin.id}
-              options={[...ORIGINS].sort((a, b) => a.name.localeCompare(b.name)).map((o) => ({ id: o.id, label: o.name, hint: oneLine(o), more: describeGrants(o.grants) }))}
+              options={[...ORIGINS].sort((a, b) => a.name.localeCompare(b.name)).map((o) => ({ id: o.id, label: o.name, hint: oneLine(o), blurb: ORIGIN_BLURBS[o.id], more: describeGrants(o.grants) }))}
               onChange={(id) => patch((h) => ({ ...h, origin: { id }, choices: dropChoices(h, "origin:") }))}
             />
             {origin && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={originKey(origin.id)} choices={origin.choices} />}
@@ -289,8 +292,9 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
               legend="Career"
               name="career"
               filterable
+              grouped
               value={hero.career.id}
-              options={[...CAREERS].sort((a, b) => a.name.localeCompare(b.name)).map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · "), more: [...describeGrants(c.grants), `Tool proficiency: ${c.tool}`, `Starting equipment: ${c.equipment}`, ...c.fixedKit, `${c.pack} pack`, ...(c.notes ? [c.notes] : [])] }))}
+              options={[...CAREERS].sort((a, b) => a.name.localeCompare(b.name)).map((c) => ({ id: c.id, label: c.name, hint: [c.grants.find((g) => g.type === "skill_proficiency" && true) ? describeGrants(c.grants.filter((g) => g.type === "skill_proficiency")).join(", ").replace("Proficient in ", "") : "", c.tool].filter(Boolean).join(" · "), blurb: CAREER_BLURBS[c.id], more: [...describeGrants(c.grants), `Tool proficiency: ${c.tool}`, `Starting equipment: ${c.equipment}`, ...c.fixedKit, `${c.pack} pack`, ...(c.notes ? [c.notes] : [])] }))}
               onChange={(id) => patch((h) => ({ ...h, career: { id }, choices: dropChoices(h, "career:") }))}
             />
             {career && <ChoiceFields hero={hero} setChoice={setChoice} sourceKey={careerKey(career.id)} choices={career.choices} />}

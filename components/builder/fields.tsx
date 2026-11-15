@@ -11,12 +11,14 @@ export interface Option {
   hint?: string;
   disabled?: boolean;
   reason?: string;
+  /** A line of flavour shown under the name; where there isn't one, the summary of what it gives is shown instead */
+  blurb?: string;
   /** Fuller detail, opened in place under the card */
   more?: readonly string[];
 }
 
 /** One-of-many as native radios: keyboard and screen reader behaviour comes for free */
-export function RadioList({ legend, name, options, value, onChange, hint, filterable }: { legend: string; name: string; options: readonly Option[]; value: string | undefined; onChange: (id: string) => void; hint?: string; filterable?: boolean }) {
+export function RadioList({ legend, name, options, value, onChange, hint, filterable, grouped }: { legend: string; name: string; options: readonly Option[]; value: string | undefined; onChange: (id: string) => void; hint?: string; filterable?: boolean; grouped?: boolean }) {
   const hintId = useId();
   const filterId = useId();
   const [query, setQuery] = useState("");
@@ -36,27 +38,50 @@ export function RadioList({ legend, name, options, value, onChange, hint, filter
           <p className="choice-hint" aria-live="polite">{words.length ? (shown.length ? `Showing ${shown.length} of ${options.length}` : "Nothing matches") : `${options.length} to choose from`}</p>
         </div>
       )}
-      <div className="choice-list">
-        {shown.map((o) => (
-          <div key={o.id} className={`choice-card ${o.disabled ? "disabled" : ""}`}>
-            <label className="choice">
-              <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />
-              <span className="choice-body">
-                <span className="choice-label">{o.label}</span>
-                {o.hint && <span className="choice-meta">{o.hint}</span>}
-                {o.disabled && o.reason && <span className="choice-meta">{o.reason}</span>}
-              </span>
-            </label>
-            {o.more && o.more.length > 0 && (
-              <details className="choice-more">
-                <summary>More info<span className="sr-only"> about {o.label}</span></summary>
-                <ul>{o.more.map((m, i) => <li key={i}>{m}</li>)}</ul>
-              </details>
-            )}
+      {grouped ? (
+        // Alphabetical, under a letter heading each, so a long list can be scanned
+        [...new Set(shown.map((o) => o.label[0].toUpperCase()))].map((letter) => (
+          <div key={letter} className="choice-group">
+            <h3 className="choice-letter">{letter}</h3>
+            <div className="choice-list">{shown.filter((o) => o.label[0].toUpperCase() === letter).map((o) => <RadioCard key={o.id} o={o} name={name} value={value} onChange={onChange} />)}</div>
           </div>
-        ))}
-      </div>
+        ))
+      ) : (
+        <div className="choice-list">{shown.map((o) => <RadioCard key={o.id} o={o} name={name} value={value} onChange={onChange} />)}</div>
+      )}
     </fieldset>
+  );
+}
+
+function RadioCard({ o, name, value, onChange }: { o: Option; name: string; value: string | undefined; onChange: (id: string) => void }) {
+  const detail = [...(o.blurb && o.hint ? [o.hint] : []), ...(o.more ?? [])];
+  return (
+    <div className={`choice-card ${o.disabled ? "disabled" : ""}`}>
+      <label className="choice">
+        <input type="radio" name={name} value={o.id} checked={value === o.id} disabled={o.disabled} onChange={() => onChange(o.id)} />
+        <span className="choice-body">
+          <span className="choice-label">{o.label}</span>
+          {(o.blurb ?? o.hint) && <span className="choice-meta">{o.blurb ?? o.hint}</span>}
+          {o.disabled && o.reason && <span className="choice-meta">{o.reason}</span>}
+        </span>
+        <Tick />
+      </label>
+      {detail.length > 0 && (
+        <details className="choice-more">
+          <summary>What you get<span className="sr-only"> from {o.label}</span></summary>
+          <ul>{detail.map((m, i) => <li key={i}>{m}</li>)}</ul>
+        </details>
+      )}
+    </div>
+  );
+}
+
+/** Shows on the chosen card, so the choice isn't carried by colour alone */
+function Tick() {
+  return (
+    <svg className="choice-tick" aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 10.5l4 4 8-9" />
+    </svg>
   );
 }
 
@@ -85,6 +110,7 @@ export function CheckList({ legend, name, options, value, n, onChange }: { legen
                 <span className="choice-label">{o.label}</span>
                 {o.hint && <span className="choice-meta">{o.hint}</span>}
               </span>
+              <Tick />
             </label>
             </div>
           );

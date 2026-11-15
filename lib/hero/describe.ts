@@ -31,3 +31,6 @@ export function oneLine(source: Source | Species): string {
   if ("threshold" in source && source.threshold !== 3) bits.push(`threshold ${source.threshold}`);
   return bits.join(" · ");
 }
+
+/** Species notes written for the rules data (what hasn't been read or modelled yet) aren't for players */
+export const playerNotes = (notes: readonly string[] | undefined) => (notes ?? []).filter((n) => !/rules (data )?entry|the spec |offered as a choice|isn.t read|weren.t read/i.test(n));
