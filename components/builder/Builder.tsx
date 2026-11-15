@@ -340,7 +340,7 @@ export function Builder({ playerId, playerName, adventures, edit }: { playerId: 
           </>
         )}
 
-        {step === "review" && <Review hero={hero} d={d} adventure={adventure} editing={!!edit} />}
+        {step === "review" && <Review hero={hero} d={d} adventure={adventure} editing={!!edit} characterId={edit?.characterId} />}
 
         {saveError && <p className="err-text" role="alert">{saveError}</p>}
         {saved && (
@@ -400,7 +400,7 @@ function TraitStep({ hero, d, setHero }: { hero: Hero; d: ReturnType<typeof comp
   );
 }
 
-function Review({ hero, d, adventure, editing }: { hero: Hero; d: ReturnType<typeof computeHero>; adventure: string; editing: boolean }) {
+function Review({ hero, d, adventure, editing, characterId }: { hero: Hero; d: ReturnType<typeof computeHero>; adventure: string; editing: boolean; characterId?: string }) {
   const species = SPECIES_BY_ID[hero.species.id];
   const sub = species?.subspecies?.find((s) => s.id === hero.species.subspeciesId);
   const path = PATH_BY_ID[hero.path.id];
@@ -415,6 +415,7 @@ function Review({ hero, d, adventure, editing }: { hero: Hero; d: ReturnType<typ
         <div className="error-summary" role="alert">
           <strong>{editing ? "Still to sort" : "Not ready yet"}</strong>
           <ul>{d.issues.map((i, n) => <li key={n}>{i.message}</li>)}</ul>
+          {editing && characterId && d.issues.some((i) => i.level !== undefined) && <p><Link className="standalone" href={`/c/${characterId}/level-up`}>Fill in the missing levels</Link></p>}
         </div>
       )}
       <Ledger d={d} />

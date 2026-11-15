@@ -174,6 +174,7 @@ export function Tracker({
 
         <p className="edit-link-wrap">
           <Link className="edit-link" href={`/c/${ch.id}/edit`}>Edit character</Link>
+          <Link className="edit-link" href={`/c/${ch.id}/level-up`}>Level up</Link>
         </p>
       </div>
 

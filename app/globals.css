@@ -316,7 +316,9 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .damage-card:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* "Edit character" */
-.edit-link-wrap { margin: var(--pad-2xl) 0 0; }
+.edit-link-wrap { display: flex; flex-wrap: wrap; gap: var(--pad-xs) var(--pad-lg); margin: var(--pad-2xl) 0 0; }
+.level-slot { padding: var(--pad-sm); border: 1px solid var(--outline-navy-subdued); border-radius: 8px; }
+.level-slot .field + .field { margin-top: var(--pad-xs); }
 .edit-link { font-size: 19px; line-height: 28px; color: var(--text-default); text-decoration: underline; }
 
 /* A fraction of a second of red around the page when a slot is marked (inner shadow #FD6E6E, 33%, 64px) */
