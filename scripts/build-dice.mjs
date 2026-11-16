@@ -13,8 +13,10 @@ import { Vector3 } from "three";
 const dir = process.argv[2];
 const OUT = path.resolve("public/dice");
 const values = JSON.parse(fs.readFileSync(path.resolve("scripts/dice-values.json"), "utf8"));
-// Faces expected and the circumradius each die is scaled to (the d12 has a circumradius of about 1.26)
-const SPEC = { d12: { faces: 12, R: 1.2, crystal: true }, d6: { faces: 6, R: 1.45 }, d20: { faces: 20, R: 1.3 }, g4: { faces: 12, R: 1.55 }, g8: { faces: 24, R: 1.4 }, g10: { faces: 30, R: 1.55 } };
+// Each die is scaled to the real dice's relative sizes (insphere diameter in mm: d20 20.23, d12 20, d10 16, d8 15.35, d6 15.87), at 0.1022
+// world units per mm. R is the circumradius that gives that: it was found by printing each die's size ("size (...)" below).
+// The g4 is a rhombic dodecahedron, not a tetrahedron, so it takes the d4's 18.35 mm (tip to base) as its overall width.
+const SPEC = { d12: { faces: 12, R: 1.2, crystal: true }, d6: { faces: 6, R: 1.263 }, d20: { faces: 20, R: 1.181 }, g4: { faces: 12, R: 0.9375 }, g8: { faces: 24, R: 0.862 }, g10: { faces: 30, R: 0.939 } };
 
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -74,6 +76,15 @@ for (const name of Object.keys(SPEC)) {
   const faces = clusters.slice(0, N).map((c) => ({ normal: norm(c.sn), h: c.sh / c.A }));
   console.log(name, "faces", faces.length, "area ratio smallest big/largest small", (clusters[N - 1].A / clusters[N].A).toFixed(2), "h range", Math.min(...faces.map((f) => f.h)).toFixed(3), Math.max(...faces.map((f) => f.h)).toFixed(3));
 
+  {
+    // Insphere diameter: the distance across two opposite faces (the d4 is measured tip to base), for checking sizes against real dice
+    const dots = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    const sums = []; faces.forEach((f, i) => { const j = faces.findIndex((g) => dots(g.normal, f.normal) < -0.98); if (j > i) sums.push(f.h + faces[j].h); });
+    let diam = sums.length ? sums.reduce((a, b) => a + b, 0) / sums.length : 2 * faces.reduce((a, f) => a + f.h, 0) / faces.length;
+    let note = sums.length ? "opposite faces" : "mean inradius x2";
+    if (name === "g4") note += `, overall width ${(2 * R).toFixed(2)}`;
+    console.log("  size (" + note + ")", diam.toFixed(3), "world units");
+  }
   // Numerals: each face's flat top is one big connected patch; the floors of the engraved numerals are small separate patches
   // with the same normal (they only meet the top through the numeral's walls). Mark every vertex on such a floor.
   const T = m.idx.length / 3;
