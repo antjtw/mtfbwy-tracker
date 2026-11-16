@@ -505,11 +505,15 @@ select option { background: var(--page-bg); color: var(--input-value); }
 
 /* Dyad Dice roller */
 .dice-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 90; pointer-events: none; opacity: 0; transition: opacity 400ms ease; }
-.roller-trigger { position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; padding: 0; background: transparent; border: 0; cursor: pointer; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55)); }
-@media (hover: hover) { .roller-trigger:hover .roller-die { transform: scale(1.06); } }
-.roller-trigger:active .roller-die { transform: scale(0.94); }
-.roller-die { transition: transform 120ms ease; }
-@media (prefers-reduced-motion: reduce) { .roller-die { transition: none; } }
+.roller-trigger { --roller-upper-fill: var(--text-standard-subdued, #a8b5c2); --roller-upper-line: var(--outline-navy-subdued, #2a323d); --roller-lower-fill: var(--surface-navy-darker, #12171c); --roller-lower-line: var(--outline-navy, #58697f); position: fixed; right: var(--pad-sm); bottom: var(--pad-sm); z-index: 80; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 48px; height: 92px; padding: 12px 8px; background: var(--surface-navy-lighter, #20252a); border: 0; border-radius: 150px; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 120ms ease, filter 120ms ease; }
+.roller-dice { display: flex; flex-direction: column; gap: 4px; width: 32px; pointer-events: none; }
+.roller-die { display: block; width: 32px; height: 32px; margin-block: -0.34px; overflow: visible; flex: none; }
+.roller-die-upper { position: relative; z-index: 2; }
+.roller-die-lower { position: relative; z-index: 1; }
+@media (max-width: 768px) { .roller-trigger { height: 76px; } .roller-dice { gap: 0; } .roller-die-lower { margin-top: -12.34px; } }
+@media (hover: hover) { .roller-trigger:hover { filter: brightness(1.25); } }
+.roller-trigger:active { filter: brightness(0.85); }
+.roller-trigger:focus-visible { outline: 3px solid var(--text-standard-subdued, #a8b5c2); outline-offset: 3px; }
 .roller-badge { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--text-error); border: 2px solid var(--page-bg); }
 .roller { position: fixed; z-index: 95; display: flex; flex-direction: column; background: var(--surface-navy-darker); border: 1px solid var(--outline-navy); color: var(--text-default); transition: transform 250ms ease, height 250ms ease; overflow: hidden; }
 @media (min-width: 769px) {
