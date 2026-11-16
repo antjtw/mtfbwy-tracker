@@ -161,7 +161,9 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     const geo = new THREE.BufferGeometry();
     geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buf, 0, V * 3), 3));
     geo.setAttribute("eng", new THREE.BufferAttribute(new Float32Array(buf, V * 12, V), 1));
-    const idxArr = meta.indexBytes === 4 ? new Uint32Array(buf, V * 16, meta.indices) : new Uint16Array(buf, V * 16, meta.indices);
+    geo.setAttribute("kind", new THREE.BufferAttribute(new Float32Array(buf, V * 16, V), 1));
+    geo.setAttribute("edge", new THREE.BufferAttribute(new Float32Array(buf, V * 20, V), 1));
+    const idxArr = meta.indexBytes === 4 ? new Uint32Array(buf, V * 24, meta.indices) : new Uint16Array(buf, V * 24, meta.indices);
     geo.setIndex(new THREE.BufferAttribute(idxArr, 1));
     geo.computeBoundingSphere();
     return {

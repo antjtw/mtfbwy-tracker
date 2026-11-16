@@ -541,9 +541,9 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .die { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 var(--pad-2xs); text-align: center; border-radius: 8px; border: 2px solid; font-weight: 700; }
 .die.balance { border-color: #6db4e6; color: #e5bb4d; background: #1d62a0; }
 .die.despair { border-color: #ff6a74; color: #ffffff; background: #c8121d; }
-.die.adv { border-color: #d9611a; color: #b24a0c; background: #efe8d6; min-width: 34px; height: 34px; }
-.die.dis { border-color: #33373b; color: #33373b; background: #efe8d6; min-width: 34px; height: 34px; }
-.die.other { border-color: #33373b; color: #b24a0c; background: #efe8d6; min-width: 34px; height: 34px; }
+.die.adv { border-color: #b2a98f; color: #30343a; background: #e9e2cf; min-width: 34px; height: 34px; }
+.die.dis { border-color: #4c5155; color: #e9e2cf; background: #676d72; min-width: 34px; height: 34px; }
+.die.other { border-color: #e8a64e; color: #30343a; background: #e9e2cf; min-width: 34px; height: 34px; }
 .roller-bonus { display: inline-flex; align-items: center; gap: var(--pad-2xs); }
 .roller-for { margin: 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
 .roller-for b { color: var(--text-gold); }

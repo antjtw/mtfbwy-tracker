@@ -1,7 +1,8 @@
 /*
  * How the dice look. Each look is a solid die with a slightly different finish and flat, opaque numerals that no light, reflection
- * or background can tint. The Dyad pair is Balance (polished blue, gold numerals) and Despair (frosted red, white numerals); every
- * other die is ivory with dark grey or orange numerals, after the ship interiors: warm off-white panels with grey and orange detail.
+ * or background can tint. The Dyad pair is Balance (polished blue, gold numerals) and Despair (frosted red, white numerals). Every
+ * other die is matte painted stone after the ship interiors: ivory (or dark grey) with inset panels, some left plain, some grey,
+ * some orange, and engraved numerals.
  */
 import * as THREE from "three";
 
@@ -18,25 +19,28 @@ export interface LookSpec {
   tableGlow: number;
   /** A faint halo round the numerals (the d12 only) */
   halo: number;
+  /** For the inset-panel dice: the fill of a plain, a grey and an orange panel, and the colour of the panel's outline */
+  panels?: [number, number, number];
+  outline?: number;
 }
 
 export const LOOKS: Record<Look, LookSpec> = {
   balance: { body: 0x2b84c4, numeral: 0xe5bb4d, roughness: 0.3, clearcoat: 0.7, emissive: 0x174f80, tableGlow: 0.2, halo: 0.22 },
   despair: { body: 0xc8121d, numeral: 0xffffff, roughness: 0.62, clearcoat: 0.12, emissive: 0x500006, tableGlow: 0.1, halo: 0.26 },
-  advantage: { body: 0xefe8d6, numeral: 0xd9611a, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
-  disadvantage: { body: 0xefe8d6, numeral: 0x33373b, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
-  cream: { body: 0xefe8d6, numeral: 0xd9611a, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
-  slate: { body: 0xefe8d6, numeral: 0x33373b, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
+  advantage: { body: 0xe9e2cf, numeral: 0x30343a, roughness: 0.88, clearcoat: 0, tableGlow: 0, halo: 0, panels: [0xe9e2cf, 0xa3a6a6, 0xe8a64e], outline: 0xb2a98f },
+  disadvantage: { body: 0x676d72, numeral: 0xe9e2cf, roughness: 0.88, clearcoat: 0, tableGlow: 0, halo: 0, panels: [0x676d72, 0x7c8286, 0xe8a64e], outline: 0x4c5155 },
+  cream: { body: 0xe9e2cf, numeral: 0x30343a, roughness: 0.88, clearcoat: 0, tableGlow: 0, halo: 0, panels: [0xe9e2cf, 0xa3a6a6, 0xe8a64e], outline: 0xb2a98f },
+  slate: { body: 0x676d72, numeral: 0xe9e2cf, roughness: 0.88, clearcoat: 0, tableGlow: 0, halo: 0, panels: [0x676d72, 0x7c8286, 0xe8a64e], outline: 0x4c5155 },
 };
 
 /** Light and dark bands across the die, so it reads as stone or glass rather than flat plastic. Turns with the die. */
 function banded(m: THREE.MeshPhysicalMaterial, extra?: (shader: { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform> }) => void, key = "banded") {
   m.onBeforeCompile = (shader) => {
     shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", "#include <common>\nattribute float eng;\nvarying float vEng;\nvarying float vLy;")
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvEng = eng; vLy = position.y;");
+      .replace("#include <common>", "#include <common>\nattribute float eng;\nattribute float kind;\nattribute float edge;\nvarying float vEng;\nvarying float vLy;\nvarying float vKind;\nvarying float vEdge;\nvarying vec3 vPos;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvEng = eng; vLy = position.y; vKind = kind; vEdge = edge; vPos = position;");
     shader.fragmentShader = shader.fragmentShader
-      .replace("#include <common>", "#include <common>\nvarying float vEng;\nvarying float vLy;")
+      .replace("#include <common>", "#include <common>\nvarying float vEng;\nvarying float vLy;\nvarying float vKind;\nvarying float vEdge;\nvarying vec3 vPos;")
       .replace("#include <color_fragment>", "#include <color_fragment>\ndiffuseColor.rgb *= mix(0.84, 1.1, smoothstep(-1.3, 1.3, vLy));");
     extra?.(shader);
   };
@@ -73,9 +77,29 @@ export function engravedMaterial(look: Look): THREE.Material {
   return banded(
     m,
     (shader) => {
-      shader.uniforms.uNum = { value: raw(LOOKS[look].numeral) };
+      const spec = LOOKS[look];
+      shader.uniforms.uNum = { value: raw(spec.numeral) };
+      const panel = (hex: number) => new THREE.Color(hex);
+      shader.uniforms.uPanel0 = { value: panel(spec.panels?.[0] ?? spec.body) };
+      shader.uniforms.uPanel1 = { value: panel(spec.panels?.[1] ?? spec.body) };
+      shader.uniforms.uPanel2 = { value: panel(spec.panels?.[2] ?? spec.body) };
+      shader.uniforms.uOutline = { value: panel(spec.outline ?? spec.body) };
       shader.fragmentShader = shader.fragmentShader
-        .replace("#include <common>", "#include <common>\nuniform vec3 uNum;")
+        .replace("#include <common>", "#include <common>\nuniform vec3 uNum;\nuniform vec3 uPanel0;\nuniform vec3 uPanel1;\nuniform vec3 uPanel2;\nuniform vec3 uOutline;")
+        // Inset panels: the face inside the rim takes its panel colour, with a thin outline on the rim, and a fine speckle over the lot
+        .replace(
+          "#include <color_fragment>",
+          `#include <color_fragment>
+          {
+            vec3 tint = vKind < 0.5 ? uPanel0 : (vKind < 1.5 ? uPanel1 : uPanel2);
+            float inside = smoothstep(0.125, 0.135, vEdge);
+            diffuseColor.rgb = mix(diffuseColor.rgb, tint, inside);
+            float ln = 1.0 - smoothstep(0.0, 0.012, abs(vEdge - 0.125));
+            diffuseColor.rgb = mix(diffuseColor.rgb, uOutline, ln * 0.85);
+            float grain = fract(sin(dot(floor(vPos * 90.0), vec3(12.9898, 78.233, 45.164))) * 43758.5453);
+            diffuseColor.rgb *= 0.95 + 0.1 * grain;
+          }`,
+        )
         .replace("#include <dithering_fragment>", "#include <dithering_fragment>\nif (vEng > 0.5) gl_FragColor = vec4(uNum, 1.0);");
     },
     "engraved",

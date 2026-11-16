@@ -129,11 +129,48 @@ for (const name of Object.keys(SPEC)) {
   }
   console.log("  collider corners", verts.length);
 
+  // Panels: every vertex knows its face, which kind of panel that face is (ivory, grey or orange) and how far it is inside the face's edge
+  const polys = faces.map((f, k) => {
+    const idxs = verts.map((v, i) => (Math.abs(dot(f.normal, v) - f.h) < 0.012 ? i : -1)).filter((i) => i >= 0);
+    const ref = Math.abs(f.normal[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+    const u = norm(cross(f.normal, ref)); const w = cross(f.normal, u);
+    const c = [0, 0, 0]; idxs.forEach((i) => { c[0] += verts[i][0] / idxs.length; c[1] += verts[i][1] / idxs.length; c[2] += verts[i][2] / idxs.length; });
+    idxs.sort((a, b) => { const pa = sub(verts[a], c), pb = sub(verts[b], c); return Math.atan2(dot(pa, w), dot(pa, u)) - Math.atan2(dot(pb, w), dot(pb, u)); });
+    return idxs.map((i) => verts[i]);
+  });
+  const faceOf = new Float32Array(m.pos.length);
+  const kindOf = new Float32Array(m.pos.length);
+  const edgeOf = new Float32Array(m.pos.length);
+  m.pos.forEach((p, i) => {
+    let best = -1e9, bk = 0;
+    faces.forEach((f, k) => { const d = dot(f.normal, p) - f.h; if (d > best) { best = d; bk = k; } });
+    faceOf[i] = bk;
+    kindOf[i] = [0, 0, 0, 1, 2][(bk * 3 + 1) % 5]; // mostly ivory, some grey, some orange
+    const poly = polys[bk]; let inward = 1e9;
+    for (let e = 0; e < poly.length; e++) {
+      const a = poly[e], b = poly[(e + 1) % poly.length];
+      const edge = sub(b, a); const inn = norm(cross(faces[bk].normal, edge)); // points to the inside for a counter-clockwise polygon
+      const d = dot(sub(p, a), inn);
+      inward = Math.min(inward, d);
+    }
+    edgeOf[i] = inward;
+  });
+  // The inward direction depends on the polygon's winding: if most vertices came out negative, flip the sign
+  const neg = edgeOf.reduce((n, x) => n + (x < 0 ? 1 : 0), 0);
+  if (neg > m.pos.length / 2) for (let i = 0; i < edgeOf.length; i++) edgeOf[i] = 0; // fallback, replaced below
+  if (neg > m.pos.length / 2) {
+    m.pos.forEach((p, i) => {
+      const poly = polys[faceOf[i]]; let inward = 1e9;
+      for (let e = 0; e < poly.length; e++) { const a = poly[e], b = poly[(e + 1) % poly.length]; const inn = norm(cross(sub(b, a), faces[faceOf[i]].normal)); inward = Math.min(inward, dot(sub(p, a), inn)); }
+      edgeOf[i] = inward;
+    });
+  }
+
   // Write the mesh
   const V = m.pos.length;
   const posBuf = new Float32Array(V * 3); m.pos.forEach((p, i) => posBuf.set(p, i * 3));
   const idxBuf = V > 65535 ? new Uint32Array(m.idx) : new Uint16Array(m.idx);
-  const bin = Buffer.concat([Buffer.from(posBuf.buffer), Buffer.from(eng.buffer), Buffer.from(idxBuf.buffer)]);
+  const bin = Buffer.concat([Buffer.from(posBuf.buffer), Buffer.from(eng.buffer), Buffer.from(kindOf.buffer), Buffer.from(edgeOf.buffer), Buffer.from(idxBuf.buffer)]);
   fs.writeFileSync(path.join(OUT, `${name}.bin`), bin);
   const vals = values[name];
   const meta = {
