@@ -54,3 +54,7 @@ in `app/globals.css` already list them first.
 New SQL goes in `supabase/migrations/` as a dated file. Write it so it is safe to run twice (`create table if not exists`, `create or replace function`).
 
 Once `DATABASE_URL` is set in Vercel (Supabase > Project Settings > Database > Connection string > URI, session pooler), the GM can press **Update the database** on `/admin/setup` after a deploy. It runs each new file once and remembers which it has run. Files dated before 2026-11-15 were run by hand and are noted as done without being run. Without `DATABASE_URL`, paste the new file into the Supabase SQL editor instead.
+
+## Dice models
+
+The roller's dice live in `public/dice`. The Dyad d12 is `d12.glb`. The d6, d20 and the g-dice (g4, g8 and g10, which are the d4, d8 and d10 in a form that rolls fairly, with each number on three faces) are built from the supplied STL files by `node scripts/build-dice.mjs <folder of .stl files>`. The script centres and scales each die, finds the flat faces, marks the engraved numerals so they can be coloured, and writes a collider. Which number is on which face is in `scripts/dice-values.json`, read from the models and checked against the rule that opposite faces add up to the same total. The supplied g10 has no numerals engraved on four of its faces; their values come from the faces opposite.

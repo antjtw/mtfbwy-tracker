@@ -1,36 +1,89 @@
 /*
- * How the dice look. Two solid dice, each the other's colour in reverse: Balance is pale (#DAE7EB) with dark numerals (#161B20),
- * Despair is dark (#161B20) with pale numerals (#DAE7EB). Each has a slight gloss. The pale part of each die glows a little:
- * Balance's body, Despair's numerals. The numerals are separate, flat and opaque, and only those on faces turned towards the
- * camera are drawn.
+ * How the dice look. Each look is a solid die with a slightly different finish and flat, opaque numerals that no light, reflection
+ * or background can tint. The Dyad pair is Balance (polished blue, gold numerals) and Despair (frosted red, white numerals); the
+ * Advantage and Disadvantage d6s and the other dice take their colours from the ship interiors: warm cream and ochre panels,
+ * teal and orange indicator glow, grey steel.
  */
 import * as THREE from "three";
 
-export type Kind = "balance" | "despair";
+export type Look = "balance" | "despair" | "advantage" | "disadvantage" | "cream" | "slate";
 
-const PALE = 0xdae7eb;
-const DARK = 0x161b20;
-const LOOK = {
-  balance: { body: PALE, numeral: DARK },
-  despair: { body: DARK, numeral: PALE },
-} as const;
+export interface LookSpec {
+  body: number;
+  numeral: number;
+  roughness: number;
+  clearcoat: number;
+  /** A little light from the body itself (0 for none) */
+  emissive?: number;
+  /** Strength of the soft glow laid on the table under the die */
+  tableGlow: number;
+  /** A faint halo round the numerals (the d12 only) */
+  halo: number;
+}
 
-/** The die itself: solid, with a slight gloss. Balance, the pale one, gives off a little light. */
-export function dieMaterial(kind: Kind): THREE.Material {
-  const pale = kind === "balance";
+export const LOOKS: Record<Look, LookSpec> = {
+  balance: { body: 0x2b84c4, numeral: 0xe5bb4d, roughness: 0.3, clearcoat: 0.7, emissive: 0x174f80, tableGlow: 0.2, halo: 0.22 },
+  despair: { body: 0xc8121d, numeral: 0xffffff, roughness: 0.62, clearcoat: 0.12, emissive: 0x500006, tableGlow: 0.1, halo: 0.26 },
+  advantage: { body: 0xe8dfca, numeral: 0x1c9ea8, roughness: 0.42, clearcoat: 0.3, tableGlow: 0.08, halo: 0 },
+  disadvantage: { body: 0x9c6b2f, numeral: 0xff913d, roughness: 0.48, clearcoat: 0.25, tableGlow: 0.08, halo: 0 },
+  cream: { body: 0xd9d0bd, numeral: 0xc4601a, roughness: 0.45, clearcoat: 0.3, tableGlow: 0, halo: 0 },
+  slate: { body: 0x6c7c84, numeral: 0xf3b24c, roughness: 0.4, clearcoat: 0.45, tableGlow: 0, halo: 0 },
+};
+
+/** Light and dark bands across the die, so it reads as stone or glass rather than flat plastic. Turns with the die. */
+function banded(m: THREE.MeshPhysicalMaterial, extra?: (shader: { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform> }) => void, key = "banded") {
+  m.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader
+      .replace("#include <common>", "#include <common>\nattribute float eng;\nvarying float vEng;\nvarying float vLy;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvEng = eng; vLy = position.y;");
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nvarying float vEng;\nvarying float vLy;")
+      .replace("#include <color_fragment>", "#include <color_fragment>\ndiffuseColor.rgb *= mix(0.84, 1.1, smoothstep(-1.3, 1.3, vLy));");
+    extra?.(shader);
+  };
+  m.customProgramCacheKey = () => key;
+  return m;
+}
+
+function physical(look: Look): THREE.MeshPhysicalMaterial {
+  const s = LOOKS[look];
   return new THREE.MeshPhysicalMaterial({
-    color: LOOK[kind].body,
-    roughness: 0.38,
+    color: s.body,
+    roughness: s.roughness,
     metalness: 0,
-    clearcoat: 0.35,
+    clearcoat: s.clearcoat,
     clearcoatRoughness: 0.25,
-    emissive: pale ? PALE : 0x000000,
-    emissiveIntensity: pale ? 0.05 : 0,
+    emissive: s.emissive ?? 0x000000,
+    emissiveIntensity: s.emissive ? 0.18 : 0,
     envMapIntensity: 1,
   });
 }
 
-/** The twelve face directions of the die. Each numeral belongs to one of them. */
+/** Raw output colour: the shader writes the hex value itself, so nothing in the scene can change it */
+const raw = (hex: number) => new THREE.Color().setHex(hex, THREE.LinearSRGBColorSpace);
+
+/** The body of the d12, whose numerals are a separate mesh */
+export function dieMaterial(look: Look): THREE.Material {
+  return banded(physical(look), undefined, "d12body");
+}
+
+/** The body of a die made from a scanned mesh: the engraved numerals are part of it and are painted flat in the numeral colour */
+export function engravedMaterial(look: Look): THREE.Material {
+  const m = physical(look);
+  m.flatShading = true;
+  return banded(
+    m,
+    (shader) => {
+      shader.uniforms.uNum = { value: raw(LOOKS[look].numeral) };
+      shader.fragmentShader = shader.fragmentShader
+        .replace("#include <common>", "#include <common>\nuniform vec3 uNum;")
+        .replace("#include <dithering_fragment>", "#include <dithering_fragment>\nif (vEng > 0.5) gl_FragColor = vec4(uNum, 1.0);");
+    },
+    "engraved",
+  );
+}
+
+/** The twelve face directions of the d12. Each numeral belongs to one of them. */
 const FACE_NORMALS = /* glsl */ `
 const float FA = 0.850651; const float FB = 0.525731;
 vec3 dieFaceNormal(vec3 p) {
@@ -46,14 +99,12 @@ vec3 dieFaceNormal(vec3 p) {
 `;
 
 /**
- * Flat, unlit numerals in exactly the colour asked for, so lighting, reflections and what is behind the die can't tint them.
- * With `halo`, a faint additive copy that gives the numerals a slight glow.
+ * The d12's numerals: flat, unlit, in exactly the colour asked for, drawn only on faces turned towards the camera.
+ * With `halo`, a faint additive copy that gives them a slight glow.
  */
-export function numeralMaterial(kind: Kind, halo = false): THREE.Material {
-  // Set without colour conversion so the shader's output is the hex value itself
-  const colour = new THREE.Color().setHex(LOOK[kind].numeral, THREE.LinearSRGBColorSpace);
+export function numeralMaterial(look: Look, halo = false): THREE.Material {
   return new THREE.ShaderMaterial({
-    uniforms: { uColour: { value: colour }, uAlpha: { value: halo ? 0.28 : 1 } },
+    uniforms: { uColour: { value: raw(LOOKS[look].numeral) }, uAlpha: { value: halo ? LOOKS[look].halo : 1 } },
     vertexShader: /* glsl */ `
       ${FACE_NORMALS}
       varying vec3 vFaceN;
@@ -81,8 +132,8 @@ export function numeralMaterial(kind: Kind, halo = false): THREE.Material {
   });
 }
 
-/** A soft pale glow laid on the table under a die */
-export function glowMesh(strength: number): THREE.Mesh {
+/** A soft glow laid on the table under a die */
+export function glowMesh(look: Look, strength: number): THREE.Mesh {
   const size = 128;
   const cv = document.createElement("canvas");
   cv.width = cv.height = size;
@@ -95,7 +146,7 @@ export function glowMesh(strength: number): THREE.Mesh {
   ctx.fillRect(0, 0, size, size);
   const m = new THREE.Mesh(
     new THREE.PlaneGeometry(6, 6),
-    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: PALE, transparent: true, opacity: strength, blending: THREE.AdditiveBlending, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), color: LOOKS[look].body, transparent: true, opacity: strength, blending: THREE.AdditiveBlending, depthWrite: false }),
   );
   m.rotation.x = -Math.PI / 2;
   m.position.y = 0.04;

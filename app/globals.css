@@ -531,6 +531,7 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .roller-head { display: flex; align-items: center; justify-content: space-between; padding: var(--pad-sm) var(--pad-md) var(--pad-2xs); }
 .roller-head h2 { margin: 0; font: 850 24px/32px var(--font-heading); text-transform: uppercase; }
 .roller-close { min-width: var(--target); min-height: var(--target); background: transparent; border: 0; color: var(--text-default); font-size: 32px; line-height: 1; cursor: pointer; }
+.roller-body > * { flex-shrink: 0; }
 .roller-body { display: flex; flex-direction: column; gap: var(--pad-sm); padding: 0 var(--pad-md) var(--pad-xl); overflow-y: auto; }
 .roller-body .field input { max-width: 160px; }
 .roller-penalty { margin: 0; color: var(--text-error); font-size: 16px; line-height: 24px; }
@@ -538,8 +539,37 @@ select option { background: var(--page-bg); color: var(--input-value); }
 .roller-readout { display: flex; flex-wrap: wrap; align-items: center; gap: var(--pad-2xs); margin: 0; font-size: 24px; line-height: 32px; font-variant-numeric: tabular-nums; }
 .roller-readout b { color: var(--text-gold); }
 .die { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; height: 40px; padding: 0 var(--pad-2xs); text-align: center; border-radius: 8px; border: 2px solid; font-weight: 700; }
-.die.balance { border-color: var(--balance-border); color: var(--balance-text); background: var(--balance-surface); }
-.die.despair { border-color: #ff3454; color: #ffa4aa; background: var(--danger-bg); }
+.die.balance { border-color: #6db4e6; color: #e5bb4d; background: #1d62a0; }
+.die.despair { border-color: #ff6a74; color: #ffffff; background: #c8121d; }
+.die.adv { border-color: #1c9ea8; color: #0f6f78; background: #e8dfca; min-width: 34px; height: 34px; }
+.die.dis { border-color: #ff913d; color: #ffb066; background: #6b4518; min-width: 34px; height: 34px; }
+.die.other { border-color: #f3b24c; color: #f3b24c; background: #46545b; min-width: 34px; height: 34px; }
+.roller-bonus { display: inline-flex; align-items: center; gap: var(--pad-2xs); }
+.roller-for { margin: 0; font-size: 16px; line-height: 24px; color: var(--text-subdued); }
+.roller-for b { color: var(--text-gold); }
+.roller-steppers { display: flex; flex-direction: column; gap: var(--pad-2xs); }
+.stepper { display: flex; align-items: center; gap: var(--pad-xs); }
+.stepper-label { flex: 1; font-size: 16px; line-height: 24px; }
+.stepper-btn { min-width: var(--target); min-height: var(--target); border-radius: 8px; border: 1px solid var(--outline-navy); background: var(--surface-navy-lighter); color: var(--text-default); font: 700 22px/1 var(--font-body); cursor: pointer; }
+.stepper-btn:disabled { opacity: 0.4; cursor: default; }
+.stepper-btn:focus-visible { outline: 3px solid var(--text-gold); outline-offset: 2px; }
+.stepper-value { min-width: 28px; text-align: center; font: 700 20px/28px var(--font-body); font-variant-numeric: tabular-nums; }
+.roller-hint { margin: 0; font-size: 14px; line-height: 20px; color: var(--text-subdued); }
+.roller-others { border-top: 1px solid var(--outline-navy-subdued); padding-top: var(--pad-xs); display: flex; flex-direction: column; gap: var(--pad-xs); }
+.roller-others summary { cursor: pointer; min-height: var(--target); display: flex; align-items: center; font: 850 16px/24px var(--font-heading); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-gold); }
+.roller-others[open] > :not(summary) { margin-top: var(--pad-xs); }
+.roller-others-note { margin: 0; font-size: 14px; line-height: 20px; }
+/* A skill, saving roll or trait that opens the roller */
+.roll-btn { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: var(--pad-sm); width: 100%; min-height: 52px; padding: var(--pad-2xs) var(--pad-xs); cursor: pointer; color: inherit; font: inherit; border-radius: 4px; }
+.prof-list li:has(> .roll-btn) { padding: 0; }
+@media (hover: hover) { .roll-btn:hover { background: var(--surface-navy-lighter); } }
+.roll-btn:active { background: var(--surface-navy-lighter); }
+.roll-btn:focus-visible { outline: 3px solid var(--text-gold); outline-offset: -3px; }
+.roll-tile-btn { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; background: transparent; border: 0; border-radius: 8px; cursor: pointer; }
+@media (hover: hover) { .roll-tile-btn:hover { background: rgba(255, 255, 255, 0.05); } }
+.roll-tile-btn:active { background: rgba(255, 255, 255, 0.09); }
+.roll-tile-btn:focus-visible { outline: 3px solid var(--text-gold); outline-offset: 2px; }
+.roll-tip { margin: 0 0 var(--pad-xs); font-size: 14px; line-height: 20px; }
 .roller-banner { min-height: 0; padding: 0; border-radius: 8px; }
 .roller-banner:not(:empty) { padding: var(--pad-sm) var(--pad-md); border: 1px solid var(--outline-navy); }
 .roller-banner.balance { border-color: var(--balance-border); background: var(--balance-surface); color: var(--balance-text); }

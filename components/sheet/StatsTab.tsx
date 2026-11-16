@@ -3,8 +3,10 @@
 import { type Sheet, type SheetResource } from "@/lib/hero/sheet";
 import { TRAIT_NAMES, type ProficiencyStep } from "@/lib/hero/types";
 import type { Play } from "./usePlay";
+import type { RollRequest } from "@/components/roller/RollerDrawer";
 import { RestButtons, UseBoxes } from "./AbilitiesTab";
 
+const TRAIT_NAME_SAVE = (t: keyof typeof TRAIT_NAMES) => `${TRAIT_NAMES[t]} saving roll`;
 const sign = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 export const STEP_LABEL = ["Untrained", "Trained", "Proficient", "Expertise"] as const;
 
@@ -49,19 +51,33 @@ function Marks({ mods }: { mods?: { advantage: string[]; disadvantage: string[] 
   );
 }
 
-function Stat({ label, value, note }: { label: string; value: string | number; note?: string }) {
+/** What a check hands the roller: its name, its modifier and where Advantage or Disadvantage may come from */
+export type RollAsk = Omit<RollRequest, "id">;
+
+function Stat({ label, value, note, onRoll }: { label: string; value: string | number; note?: string; onRoll?: () => void }) {
   return (
-    <div className="stat-tile">
+    <div className="stat-tile" style={onRoll ? { position: "relative" } : undefined}>
       <dt>{label}</dt>
       <dd>{value}</dd>
       {note && <span className="stat-note">{note}</span>}
+      {onRoll && <button type="button" className="roll-tile-btn" onClick={onRoll} aria-label={`Roll ${label}, ${value}`} />}
     </div>
   );
 }
 
-export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Play; characterId: string }) {
+export function StatsTab({ sheet, play, characterId, onRoll }: { sheet: Sheet; play: Play; characterId: string; onRoll?: (ask: RollAsk) => void }) {
   const spendable = sheet.resources.filter((r) => r.spendable);
   const dice = sheet.resources.filter((r) => !r.spendable);
+  /** A row that opens the roller with this check's modifier filled in */
+  const rollRow = (label: string, modifier: number, mods: { advantage: string[]; disadvantage: string[] } | undefined, children: React.ReactNode) => {
+    if (!onRoll) return children;
+    const notes = [mods?.advantage.length ? `advantage may apply from ${mods.advantage.join(", ")}` : "", mods?.disadvantage.length ? `disadvantage may apply from ${mods.disadvantage.join(", ")}` : ""].filter(Boolean).join("; ");
+    return (
+      <button type="button" className="roll-btn" aria-label={`Roll ${label}, ${sign(modifier)}${notes ? `; ${notes}` : ""}`} onClick={() => onRoll({ label, modifier, advantage: mods?.advantage, disadvantage: mods?.disadvantage })}>
+        {children}
+      </button>
+    );
+  };
   return (
     <div className="sheet">
       {!sheet.complete && (
@@ -72,9 +88,10 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
 
       <section className="track" aria-labelledby="stats-traits">
         <h2 id="stats-traits">Traits</h2>
+        {onRoll && <p className="muted roll-tip">Select a trait, saving roll or skill to open the dice roller with its modifier ready.</p>}
         <dl className="stat-row traits">
           {sheet.traits.map((t) => (
-            <Stat key={t.trait} label={TRAIT_NAMES[t.trait]} value={sign(t.modifier)} note={t.trait} />
+            <Stat key={t.trait} label={TRAIT_NAMES[t.trait]} value={sign(t.modifier)} note={t.trait} onRoll={onRoll ? () => onRoll({ label: TRAIT_NAMES[t.trait], modifier: t.modifier }) : undefined} />
           ))}
         </dl>
       </section>
@@ -116,11 +133,15 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
         <ul className="prof-list compact">
           {sheet.saves.map((s) => (
             <li key={s.trait}>
-              <ProfMark step={s.proficient ? 2 : 0} />
-              <span className="prof-trait" aria-hidden="true">{s.trait}</span>
-              <span className="sr-only">{TRAIT_NAMES[s.trait]}, {s.proficient ? "proficient" : "not proficient"}</span>
-              <Marks mods={sheet.rollMods.saves[s.trait]} />
-              <b className="mod-chip">{sign(s.modifier)}</b>
+              {rollRow(`${TRAIT_NAME_SAVE(s.trait)}`, s.modifier, sheet.rollMods.saves[s.trait], (
+                <>
+                  <ProfMark step={s.proficient ? 2 : 0} />
+                  <span className="prof-trait" aria-hidden="true">{s.trait}</span>
+                  <span className="sr-only">{TRAIT_NAMES[s.trait]}, {s.proficient ? "proficient" : "not proficient"}</span>
+                  <Marks mods={sheet.rollMods.saves[s.trait]} />
+                  <b className="mod-chip">{sign(s.modifier)}</b>
+                </>
+              ))}
             </li>
           ))}
         </ul>
@@ -136,11 +157,15 @@ export function StatsTab({ sheet, play, characterId }: { sheet: Sheet; play: Pla
         <ul className="prof-list">
           {[...sheet.skills].sort((a, b) => a.skill.localeCompare(b.skill)).map((s) => (
             <li key={s.skill}>
-              <ProfMark step={s.step} />
-              <span className="prof-trait" aria-hidden="true">{s.trait}</span>
-              <span className="prof-name">{s.skill}<span className="sr-only">, {TRAIT_NAMES[s.trait]}, {STEP_LABEL[s.step].toLowerCase()}</span></span>
-              <Marks mods={sheet.rollMods.skills[s.skill]} />
-              <b className="mod-chip">{sign(s.modifier)}</b>
+              {rollRow(s.skill, s.modifier, sheet.rollMods.skills[s.skill], (
+                <>
+                  <ProfMark step={s.step} />
+                  <span className="prof-trait" aria-hidden="true">{s.trait}</span>
+                  <span className="prof-name">{s.skill}<span className="sr-only">, {TRAIT_NAMES[s.trait]}, {STEP_LABEL[s.step].toLowerCase()}</span></span>
+                  <Marks mods={sheet.rollMods.skills[s.skill]} />
+                  <b className="mod-chip">{sign(s.modifier)}</b>
+                </>
+              ))}
             </li>
           ))}
         </ul>

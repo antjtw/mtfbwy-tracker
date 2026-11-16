@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Fragment, useId, useRef, useState, type KeyboardEvent } from "react";
 import { DespairChip, usePolledDespair } from "./Despair";
-import { RollerDrawer } from "./roller/RollerDrawer";
+import { RollerDrawer, type RollRequest } from "./roller/RollerDrawer";
 import { PageHeading } from "./PageHeading";
 import { SlotGrid } from "./SlotGrid";
 import { AbilitiesTab } from "./sheet/AbilitiesTab";
@@ -47,6 +47,8 @@ export function Tracker({
   const [flash, setFlash] = useState(0);
   const id = useId();
   const play = usePlay(initial.id, sheet?.used ?? {});
+  const [rollRequest, setRollRequest] = useState<RollRequest | null>(null);
+  const askRoll = (ask: Omit<RollRequest, "id">) => setRollRequest((r) => ({ ...ask, id: (r?.id ?? 0) + 1 }));
 
   // Marking a hit point slot pops a brief red glow around the page. Any slot press buzzes the phone where the
   // browser allows it (Android browsers do; iPhones don't offer web pages any vibration); unticking gets a lighter buzz.
@@ -190,7 +192,7 @@ export function Tracker({
       {TABS.slice(1).map((t) => (
         <div key={t.key} id={`${id}-panel-${t.key}`} role="tabpanel" aria-labelledby={`${id}-tab-${t.key}`} hidden={tab !== t.key}>
           {sheet && t.key === "stats" ? (
-            <StatsTab sheet={sheet} play={play} characterId={ch.id} />
+            <StatsTab sheet={sheet} play={play} characterId={ch.id} onRoll={askRoll} />
           ) : sheet && t.key === "abilities" ? (
             <AbilitiesTab sheet={sheet} play={play} />
           ) : (
@@ -217,6 +219,7 @@ export function Tracker({
         characterId={ch.id}
         wpUsed={ch.wp_used}
         wpMax={ch.wp_max}
+        request={rollRequest}
         setWillpower={(n) => patch(ch.id, { wp_used: n })}
         addDespair={(body) => addDespair(body, pool)}
       />

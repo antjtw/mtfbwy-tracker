@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyWillpower, KINDS, resolveRoll, settle, type SettledRoll, willpowerPenalty } from "./dyad";
+import { applyWillpower, bonusDiceTotal, KINDS, resolveRoll, settle, type SettledRoll, willpowerPenalty } from "./dyad";
 
 const done = (r: ReturnType<typeof resolveRoll>) => r as SettledRoll;
 
@@ -105,5 +105,26 @@ describe("Dyad Dice", () => {
           seen.add(r.kind!);
         }
     expect(seen.size).toBe(7);
+  });
+});
+
+describe("advantage and disadvantage d6s", () => {
+  it("adds advantage dice and takes away disadvantage dice, leaving Balance and Despair alone", () => {
+    const r = resolveRoll({ balance: 9, despair: 4, modifier: 2, advantage: [5, 3], disadvantage: [2] });
+    expect(r.total).toBe(9 + 4 + 2 + 5 + 3 - 2);
+    expect(r.tone).toBe("balance");
+    expect(r.advantage).toEqual([5, 3]);
+    expect(bonusDiceTotal([5, 3], [2])).toBe(6);
+  });
+  it("still settles as before and keeps the dice on the result", () => {
+    const r = resolveRoll({ balance: 3, despair: 8, advantage: [6], disadvantage: [] });
+    if (!r.pending) throw new Error("expected pending");
+    const done = settle(r, true);
+    expect(done.kind).toBe("success_with_despair");
+    expect(done.advantage).toEqual([6]);
+    expect(done.total).toBe(3 + 8 + 6);
+  });
+  it("rejects a d6 outside 1 to 6", () => {
+    expect(() => resolveRoll({ balance: 3, despair: 8, advantage: [7] })).toThrow(RangeError);
   });
 });

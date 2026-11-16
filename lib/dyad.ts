@@ -52,6 +52,9 @@ interface Base {
   balance: number;
   despair: number;
   modifier: number;
+  /** d6s rolled for Advantage (added to the total) and Disadvantage (taken from it). They don't change Balance or Despair. */
+  advantage: number[];
+  disadvantage: number[];
   difficulty: number | null;
   total: number;
 }
@@ -100,11 +103,17 @@ function build(kind: Kind, base: Base & { tone: Tone; critical: boolean }): Sett
   return { ...base, pending: false, kind, label: LABELS[kind], success: kind.includes("success"), effects: { ...e, willpower: { ...e.willpower } }, lines: describeEffects(kind) };
 }
 
-export function resolveRoll({ balance, despair, modifier = 0, difficulty = null }: { balance: number; despair: number; modifier?: number; difficulty?: number | null }): RollOutcome {
+const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0);
+
+/** The d6s of Advantage and Disadvantage: +1d6 and −1d6 each, as many as the rules give (rituals can add more than one) */
+export const bonusDiceTotal = (advantage: number[], disadvantage: number[]) => sum(advantage) - sum(disadvantage);
+
+export function resolveRoll({ balance, despair, modifier = 0, difficulty = null, advantage = [], disadvantage = [] }: { balance: number; despair: number; modifier?: number; difficulty?: number | null; advantage?: number[]; disadvantage?: number[] }): RollOutcome {
   assertDie(balance, "balance");
   assertDie(despair, "despair");
-  const total = balance + despair + modifier;
-  const base: Base = { balance, despair, modifier, difficulty, total };
+  [...advantage, ...disadvantage].forEach((n) => { if (!Number.isInteger(n) || n < 1 || n > 6) throw new RangeError(`an advantage or disadvantage die must be 1 to 6, got ${n}`); });
+  const total = balance + despair + modifier + bonusDiceTotal(advantage, disadvantage);
+  const base: Base = { balance, despair, modifier, advantage, disadvantage, difficulty, total };
 
   // Matching dice are always a critical, so there are no ties to handle below
   if (balance === 1 && despair === 1) return build(KINDS.MAJOR_CRIT_FAILURE, { ...base, tone: "despair", critical: true });
