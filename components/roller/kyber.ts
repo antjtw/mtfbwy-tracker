@@ -96,21 +96,33 @@ vec3 dieFaceNormal(vec3 p) {
 `;
 
 /**
- * The numerals: white and opaque. Only the ones on faces turned towards the camera are drawn (decided per face, not per
- * pixel, so the glyphs stay clean), so the far faces don't show through the glass.
+ * The numerals: flat, pure white, fully opaque and unlit, so lighting, reflections and whatever is behind the dice can't tint
+ * them. Only the ones on faces turned towards the camera are drawn (decided per face, not per pixel, so the glyphs stay clean).
  */
 export function numeralMaterial(): THREE.Material {
-  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.95, roughness: 0.5 });
-  m.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", `#include <common>\n${FACE_NORMALS}\nvarying vec3 vFaceN;`)
-      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvFaceN = normalize(normalMatrix * dieFaceNormal(position));");
-    shader.fragmentShader = shader.fragmentShader
-      .replace("#include <common>", "#include <common>\nvarying vec3 vFaceN;")
-      .replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\nif (dot(normalize(vViewPosition), normalize(vFaceN)) < 0.12) discard;");
-  };
-  m.customProgramCacheKey = () => "kyber-numerals-face";
-  return m;
+  return new THREE.ShaderMaterial({
+    vertexShader: /* glsl */ `
+      ${FACE_NORMALS}
+      varying vec3 vFaceN;
+      varying vec3 vView;
+      void main() {
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vView = -mv.xyz;
+        vFaceN = normalize(normalMatrix * dieFaceNormal(position));
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      varying vec3 vFaceN;
+      varying vec3 vView;
+      void main() {
+        if (dot(normalize(vView), normalize(vFaceN)) < 0.12) discard;
+        gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+      }
+    `,
+    transparent: false,
+    depthWrite: true,
+  });
 }
 
 /** A soft coloured glow laid on the table under a die, so the crystal seems to light its surroundings */
