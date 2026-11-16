@@ -1,8 +1,7 @@
 /*
  * How the dice look. Each look is a solid die with a slightly different finish and flat, opaque numerals that no light, reflection
- * or background can tint. The Dyad pair is Balance (polished blue, gold numerals) and Despair (frosted red, white numerals); the
- * Advantage and Disadvantage d6s and the other dice take their colours from the ship interiors: warm cream and ochre panels,
- * teal and orange indicator glow, grey steel.
+ * or background can tint. The Dyad pair is Balance (polished blue, gold numerals) and Despair (frosted red, white numerals); every
+ * other die is ivory with dark grey or orange numerals, after the ship interiors: warm off-white panels with grey and orange detail.
  */
 import * as THREE from "three";
 
@@ -24,10 +23,10 @@ export interface LookSpec {
 export const LOOKS: Record<Look, LookSpec> = {
   balance: { body: 0x2b84c4, numeral: 0xe5bb4d, roughness: 0.3, clearcoat: 0.7, emissive: 0x174f80, tableGlow: 0.2, halo: 0.22 },
   despair: { body: 0xc8121d, numeral: 0xffffff, roughness: 0.62, clearcoat: 0.12, emissive: 0x500006, tableGlow: 0.1, halo: 0.26 },
-  advantage: { body: 0xe8dfca, numeral: 0x1c9ea8, roughness: 0.42, clearcoat: 0.3, tableGlow: 0.08, halo: 0 },
-  disadvantage: { body: 0x9c6b2f, numeral: 0xff913d, roughness: 0.48, clearcoat: 0.25, tableGlow: 0.08, halo: 0 },
-  cream: { body: 0xd9d0bd, numeral: 0xc4601a, roughness: 0.45, clearcoat: 0.3, tableGlow: 0, halo: 0 },
-  slate: { body: 0x6c7c84, numeral: 0xf3b24c, roughness: 0.4, clearcoat: 0.45, tableGlow: 0, halo: 0 },
+  advantage: { body: 0xefe8d6, numeral: 0xd9611a, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
+  disadvantage: { body: 0xefe8d6, numeral: 0x33373b, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
+  cream: { body: 0xefe8d6, numeral: 0xd9611a, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
+  slate: { body: 0xefe8d6, numeral: 0x33373b, roughness: 0.42, clearcoat: 0.3, tableGlow: 0, halo: 0 },
 };
 
 /** Light and dark bands across the die, so it reads as stone or glass rather than flat plastic. Turns with the die. */
