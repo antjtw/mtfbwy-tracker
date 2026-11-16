@@ -25,6 +25,8 @@ export interface RollRequest {
   /** Where Advantage or Disadvantage might come from, shown as a reminder: they are situational, so the player adds the dice */
   advantage?: string[];
   disadvantage?: string[];
+  /** A dice-only roll (a class die such as the Mystic Die): these dice are thrown straight away, with no Dyad */
+  dice?: Partial<Record<"d4" | "d6" | "d8" | "d10" | "d20", number>>;
 }
 
 interface Props {
@@ -79,6 +81,8 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
   const [log, setLog] = useState<string[]>([]);
   const [peek, setPeek] = useState(false);
   const [others, setOthers] = useState(noOthers);
+  const [othersOpen, setOthersOpen] = useState(false);
+  const autoOthers = useRef<Record<OtherKey, number> | null>(null);
   const [othersResult, setOthersResult] = useState<{ rolls: { key: OtherKey; value: number }[]; total: number } | null>(null);
   const stage = useRef<DiceStage | null>(null);
   const stageFailed = useRef(false);
@@ -119,6 +123,18 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     setOpen(true);
     if (busy.current || phaseRef.current === "rolling" || phaseRef.current === "awaiting") return; // finish the roll in hand first
     setLabel(request.label);
+    if (request.dice) {
+      const wanted = { ...noOthers(), ...request.dice };
+      setOthers(wanted);
+      setOthersOpen(true);
+      setOthersResult(null);
+      setRoll(null);
+      setApplied([]);
+      setMessage("");
+      setPhase("idle");
+      autoOthers.current = wanted;
+      return;
+    }
     setModifier(String(request.modifier));
     setHints({ advantage: request.advantage ?? [], disadvantage: request.disadvantage ?? [] });
     setAdvCount(0);
@@ -146,6 +162,16 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
       document.removeEventListener("keydown", onKey);
     };
   }, [open, closeDrawer, request]);
+
+  // A class die was asked for: once the drawer is open (so the dice land clear of it), throw it
+  useEffect(() => {
+    if (!open || !autoOthers.current) return;
+    const wanted = autoOthers.current;
+    autoOthers.current = null;
+    const f = requestAnimationFrame(() => void doRollOthers(wanted));
+    return () => cancelAnimationFrame(f);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, request]);
 
   useEffect(() => () => {
     clearTimeout(fadeTimer.current);
@@ -218,9 +244,9 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
   }
 
   /** Throws the chosen damage and other dice on their own: just the numbers and their sum, nothing on the sheet changes */
-  async function doRollOthers() {
+  async function doRollOthers(counts: Record<OtherKey, number> = others) {
     if (busy.current || locked) return;
-    const chosen = OTHERS.flatMap((o) => Array.from({ length: others[o.key] }, () => o));
+    const chosen = OTHERS.flatMap((o) => Array.from({ length: counts[o.key] }, () => o));
     if (!chosen.length) return;
     busy.current = true;
     clearTimeout(fadeTimer.current);
@@ -234,8 +260,8 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     const total = values.reduce((a, b) => a + b, 0);
     setOthersResult({ rolls, total });
     setPhase(before === "rolling" ? "idle" : before);
-    const counts = OTHERS.filter((o) => others[o.key] > 0).map((o) => `${others[o.key]}${o.key}`).join(" ");
-    setLog((l) => [`${counts}: ${values.join(" + ")} = ${total}`, ...l].slice(0, 6));
+    const named = OTHERS.filter((o) => counts[o.key] > 0).map((o) => `${counts[o.key]}${o.key}`).join(" ");
+    setLog((l) => [`${label ? `${label}, ` : ""}${named}: ${values.join(" + ")} = ${total}`, ...l].slice(0, 6));
     fadeLater();
   }
 
@@ -401,7 +427,7 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
             </div>
           )}
 
-          <details className="roller-others">
+          <details className="roller-others" open={othersOpen} onToggle={(e) => setOthersOpen((e.currentTarget as HTMLDetailsElement).open)}>
             <summary>Other dice</summary>
             <p className="muted roller-others-note">Damage and other dice, thrown on their own. Nothing on your sheet changes.</p>
             <div className="roller-steppers">
@@ -409,7 +435,7 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
                 <Stepper key={o.key} label={o.key} value={others[o.key]} max={MAX_EACH} disabled={locked} onChange={(n) => setOthers((s) => ({ ...s, [o.key]: n }))} />
               ))}
             </div>
-            <button type="button" className="btn roller-roll" disabled={locked || othersCount === 0} onClick={doRollOthers}>Roll other dice</button>
+            <button type="button" className="btn roller-roll" disabled={locked || othersCount === 0} onClick={() => doRollOthers()}>Roll other dice</button>
             {othersResult && (
               <p className="roller-readout" aria-label="The other dice">
                 {othersResult.rolls.map((r, i) => (

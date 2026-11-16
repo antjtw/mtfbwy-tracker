@@ -110,7 +110,17 @@ export function StatsTab({ sheet, play, characterId, onRoll }: { sheet: Sheet; p
         <ul className="row-list">
           <li><span>Level</span><b className="mod-chip">{sheet.level}</b></li>
           <li><span>Proficiency bonus</span><b className="mod-chip">{sign(sheet.proficiencyBonus)}</b></li>
-          {dice.map((r) => <li key={r.key}><span>{r.name}</span><b className="mod-chip">{r.count}d4</b></li>)}
+          {dice.map((r) => (
+            <li key={r.key}>
+              {onRoll ? (
+                <button type="button" className="roll-btn roll-die" aria-label={`Roll ${r.name}, ${r.count}d4`} onClick={() => onRoll({ label: r.name, modifier: 0, dice: { d4: r.count } })}>
+                  <span>{r.name}</span><b className="mod-chip">{r.count}d4</b>
+                </button>
+              ) : (
+                <><span>{r.name}</span><b className="mod-chip">{r.count}d4</b></>
+              )}
+            </li>
+          ))}
           {sheet.casting.map((c) => <li key={c.kind}><span>{c.kind}</span><b className="mod-chip">{sign(c.modifier)}</b></li>)}
         </ul>
       </section>
