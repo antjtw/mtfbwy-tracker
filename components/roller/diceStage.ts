@@ -7,7 +7,7 @@ import * as CANNON from "cannon-es";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { glowMesh, kyberMaterial, numeralMaterial, type Kind } from "./kyber";
+import { dieMaterial, glowMesh, numeralMaterial, type Kind } from "./diceLook";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -68,19 +68,20 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.76;
+  renderer.toneMapping = THREE.NoToneMapping; // keep the two die colours as specified
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
   const scene = new THREE.Scene();
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.16; // just enough for the gloss; the dice colours come from the lights below
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
   camera.up.set(0, 0, -1);
 
-  const sun = new THREE.DirectionalLight(0xffffff, 0.65);
+  const sun = new THREE.DirectionalLight(0xffffff, 0.5);
   sun.position.set(-3, 16, 3);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -107,16 +108,22 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     numGeo = meshes[1].geometry;
   }
 
-  // Kyber crystals: Balance blue, Despair red with an amber core. Numerals glow so they stay legible.
+  // Balance is the pale die with dark numerals, Despair the dark die with pale numerals
   const glows: THREE.Mesh[] = [];
-  function makeDie(kind: Kind, seed: number) {
+  function makeDie(kind: Kind) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(bodyGeo!, kyberMaterial(kind, seed));
-    const num = new THREE.Mesh(numGeo!, numeralMaterial());
+    const body = new THREE.Mesh(bodyGeo!, dieMaterial(kind));
+    const num = new THREE.Mesh(numGeo!, numeralMaterial(kind));
     body.castShadow = true;
     g.add(body, num);
+    if (kind === "despair") {
+      // Despair's pale numerals glow a little
+      const halo = new THREE.Mesh(numGeo!, numeralMaterial(kind, true));
+      halo.scale.setScalar(1.025);
+      g.add(halo);
+    }
     scene.add(g);
-    const glow = glowMesh(kind);
+    const glow = glowMesh(kind === "balance" ? 0.2 : 0.07);
     scene.add(glow);
     glows.push(glow);
     return g;
@@ -124,12 +131,12 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
 
   const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -45, 0) });
   world.allowSleep = true;
-  world.defaultContactMaterial.friction = 0.35;
-  world.defaultContactMaterial.restitution = 0.32;
+  world.defaultContactMaterial.friction = 0.6;
+  world.defaultContactMaterial.restitution = 0.15;
   const shape = buildCollider(FACES);
   const dice = [
-    { key: "balance", group: makeDie("balance", 1.7), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
-    { key: "despair", group: makeDie("despair", 4.3), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.2, sleepTimeLimit: 0.5, linearDamping: 0.12, angularDamping: 0.12 }) },
+    { key: "balance", group: makeDie("balance"), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.4, sleepTimeLimit: 0.3, linearDamping: 0.15, angularDamping: 0.2 }) },
+    { key: "despair", group: makeDie("despair"), body: new CANNON.Body({ mass: 1, shape, sleepSpeedLimit: 0.4, sleepTimeLimit: 0.3, linearDamping: 0.15, angularDamping: 0.2 }) },
   ];
   dice.forEach((d) => world.addBody(d.body));
 
@@ -155,7 +162,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const height = Math.max(18.3, 6.7 / (tan * camera.aspect)); // at least about 13 world units visible across: the dice are 20% larger than before
+    const height = Math.max(26, 9.6 / (tan * camera.aspect)); // at least about 18.5 world units visible across: the dice are about 30% smaller than before
     camera.position.set(0, height, 0);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
@@ -195,11 +202,13 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     const q = new THREE.Quaternion(body.quaternion.x, body.quaternion.y, body.quaternion.z, body.quaternion.w);
     let best = FACES.faces[0];
     let bd = -2;
+    let bn = new THREE.Vector3();
     for (const f of FACES.faces) {
-      const d = new THREE.Vector3(...f.normal).applyQuaternion(q).dot(UP);
-      if (d > bd) { bd = d; best = f; }
+      const n = new THREE.Vector3(...f.normal).applyQuaternion(q);
+      const d = n.dot(UP);
+      if (d > bd) { bd = d; best = f; bn = n; }
     }
-    return { value: best.value, flatness: bd };
+    return { value: best.value, flatness: bd, normal: bn };
   }
 
   let raf = 0;
@@ -221,11 +230,12 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
         d.body.angularVelocity.set(rnd(-18, 18), rnd(-18, 18), rnd(-18, 18));
       });
       let last = performance.now();
-      let t0 = last;
-      let nudges = 0;
+      let simTime = 0;
+      let calm = 0;
       const tick = (now: number) => {
         const dt = Math.min(0.05, (now - last) / 1000);
         last = now;
+        simTime += dt;
         world.step(1 / 60, dt, 4);
         dice.forEach((d, i) => {
           const p = d.body.position;
@@ -237,37 +247,53 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
             d.body.velocity.setZero();
             d.body.angularVelocity.setZero();
             d.body.wakeUp();
+            return;
+          }
+          // Once a die is down and slowing it settles briskly: it loses its wobble quickly, and a die balanced on an edge or
+          // corner is eased on to the face it is nearest to (what gravity would do, only sooner) instead of dithering there.
+          if (p.y < 2 && d.body.velocity.length() < 2.2 && d.body.angularVelocity.length() < 4) {
+            d.body.angularDamping = 0.8;
+            d.body.linearDamping = 0.4;
+            const top = readTop(d.body);
+            if (top.flatness < 0.9995) {
+              const cur = new THREE.Quaternion(q.x, q.y, q.z, q.w);
+              const toFlat = new THREE.Quaternion().setFromUnitVectors(top.normal, UP);
+              cur.premultiply(new THREE.Quaternion().slerp(toFlat, 0.22));
+              d.body.quaternion.set(cur.x, cur.y, cur.z, cur.w);
+              d.body.position.y = Math.max(1, p.y * 0.78 + 0.22); // a die lying flat sits one unit above the table
+              d.body.angularVelocity.scale(0.5, d.body.angularVelocity);
+              d.body.velocity.y = Math.min(d.body.velocity.y, 0);
+            }
+          } else {
+            d.body.angularDamping = 0.2;
+            d.body.linearDamping = 0.15;
           }
         });
         sync();
         renderer.render(scene, camera);
-        const asleep = dice.every((d) => d.body.sleepState === CANNON.Body.SLEEPING);
-        if (asleep || now - t0 > 9000) {
-          const r = dice.map((d) => readTop(d.body));
-          if (r.some((x) => x.flatness < 0.985) && nudges < 3) {
-            // Leaning on a wall or the other die: shake and keep going
-            nudges++;
-            t0 = now;
-            dice.forEach((d) => {
-              d.body.wakeUp();
-              d.body.velocity.set(rnd(-2, 2), 4, rnd(-2, 2));
-              d.body.angularVelocity.set(rnd(-6, 6), rnd(-6, 6), rnd(-6, 6));
+        const reads = dice.map((d) => readTop(d.body));
+        const still = dice.every((d, i) => d.body.velocity.length() < 0.25 && d.body.angularVelocity.length() < 0.4 && reads[i].flatness > 0.997);
+        calm = still ? calm + 1 : 0;
+        if (calm >= 8 || simTime > 6) {
+          // Test builds can ask for a particular roll: the dice are turned to show it, then read as usual
+          if (force) {
+            [force.balance, force.despair].forEach((v, k) => {
+              const f = FACES.faces.find((x) => x.value === v)!;
+              const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(...f.normal), UP);
+              dice[k].body.quaternion.set(q.x, q.y, q.z, q.w);
             });
-          } else {
-            // Test builds can ask for a particular roll: the dice are turned to show it, then read as usual
-            if (force) {
-              [force.balance, force.despair].forEach((v, k) => {
-                const f = FACES.faces.find((x) => x.value === v)!;
-                const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(...f.normal), UP);
-                dice[k].body.quaternion.set(q.x, q.y, q.z, q.w);
-              });
-              sync();
-              renderer.render(scene, camera);
-            }
-            const out = dice.map((d) => readTop(d.body));
-            resolve({ balance: out[0].value, despair: out[1].value, flatness: Math.min(out[0].flatness, out[1].flatness) });
-            return;
+            sync();
+            renderer.render(scene, camera);
           }
+          dice.forEach((d) => {
+            d.body.velocity.setZero();
+            d.body.angularVelocity.setZero();
+            d.body.sleep();
+          });
+          const out = dice.map((d) => readTop(d.body));
+          if (process.env.NODE_ENV !== "production") (window as unknown as { __dyadSettle?: number[] }).__dyadSettle = [...((window as unknown as { __dyadSettle?: number[] }).__dyadSettle ?? []), simTime];
+          resolve({ balance: out[0].value, despair: out[1].value, flatness: Math.min(out[0].flatness, out[1].flatness) });
+          return;
         }
         raf = requestAnimationFrame(tick);
       };
