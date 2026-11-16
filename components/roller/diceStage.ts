@@ -6,9 +6,8 @@
  */
 import * as CANNON from "cannon-es";
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { dieMaterial, engravedMaterial, glowMesh, LOOKS, numeralMaterial, type Look } from "./diceLook";
+import { buildStudioEnvironment, crystalMaterials, engravedMaterial, glowMesh, LOOKS, type Look } from "./diceLook";
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -81,7 +80,8 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
-  renderer.toneMapping = THREE.NoToneMapping; // keep the colours as specified
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; // for the crystal; the ivory dice opt out of it
+  renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
@@ -89,6 +89,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
   scene.environmentIntensity = 0.16; // just enough for the gloss; the dice colours come from the lights below
+  const studio = buildStudioEnvironment(renderer); // what the crystal d12s reflect
   scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
@@ -115,39 +116,37 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     }
     return m;
   }
+  /** The Dyad d12: a glass body and a numeral mesh, split from the scan when the files were built */
   async function loadD12(): Promise<Model> {
-    const [FACES, glb] = await Promise.all([
-      fetch("/dice/d12-faces.json").then((r) => r.json() as Promise<FaceMap>),
-      new Promise<{ scene: THREE.Group }>((res, rej) => new GLTFLoader().load("/dice/d12.glb", res as never, undefined, rej)),
+    const [meta, buf] = await Promise.all([
+      fetch("/dice/d12.json").then((r) => r.json() as Promise<FaceMap & { glassTris: number; goldTris: number; radius: number }>),
+      fetch("/dice/d12.bin").then((r) => r.arrayBuffer()),
     ]);
-    let bodyGeo: THREE.BufferGeometry | null = null;
-    let numGeo: THREE.BufferGeometry | null = null;
-    const meshes: THREE.Mesh[] = [];
-    glb.scene.traverse((o) => {
-      const mesh = o as THREE.Mesh;
-      if (!mesh.isMesh) return;
-      meshes.push(mesh);
-      if (/numer/i.test(mesh.name)) numGeo = mesh.geometry;
-      else if (/body/i.test(mesh.name)) bodyGeo = mesh.geometry;
-    });
-    if (!bodyGeo || !numGeo) {
-      meshes.sort((a, b) => b.geometry.attributes.position.count - a.geometry.attributes.position.count);
-      bodyGeo = meshes[0].geometry;
-      numGeo = meshes[1].geometry;
-    }
+    const G = meta.glassTris * 3;
+    const N = meta.goldTris * 3;
+    const glassGeo = new THREE.BufferGeometry();
+    glassGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buf, 0, G * 3), 3));
+    glassGeo.setAttribute("aEdge", new THREE.BufferAttribute(new Float32Array(buf, G * 12, G), 1));
+    glassGeo.computeVertexNormals(); // a triangle soup, so these are flat
+    const goldGeo = new THREE.BufferGeometry();
+    goldGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buf, G * 16, N * 3), 3));
+    goldGeo.computeVertexNormals();
+    const mats = new Map<Look, ReturnType<typeof crystalMaterials>>();
     return {
-      faces: FACES.faces,
-      shape: buildCollider(FACES),
+      faces: meta.faces,
+      shape: buildCollider(meta),
       make(look) {
-        const g = new THREE.Group();
-        const body = new THREE.Mesh(bodyGeo!, dieMaterial(look));
-        body.castShadow = true;
-        g.add(body, new THREE.Mesh(numGeo!, numeralMaterial(look)));
-        if (LOOKS[look].halo > 0) {
-          const halo = new THREE.Mesh(numGeo!, numeralMaterial(look, true));
-          halo.scale.setScalar(1.025);
-          g.add(halo);
+        let m = mats.get(look);
+        if (!m) {
+          m = crystalMaterials(look as "balance" | "despair", meta.radius, studio);
+          m.glass.userData.keep = true;
+          m.numerals.userData.keep = true;
+          mats.set(look, m);
         }
+        const g = new THREE.Group();
+        const body = new THREE.Mesh(glassGeo, m.glass);
+        body.castShadow = true;
+        g.add(body, new THREE.Mesh(goldGeo, m.numerals));
         return g;
       },
     };
@@ -196,7 +195,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
       scene.remove(d.group);
       d.group.traverse((o) => {
         const mesh = o as THREE.Mesh;
-        if (mesh.isMesh) (mesh.material as THREE.Material).dispose(); // the shared geometry stays
+        if (mesh.isMesh && !(mesh.material as THREE.Material).userData.keep) (mesh.material as THREE.Material).dispose(); // shared geometry and the crystal materials stay
       });
       if (d.glow) {
         scene.remove(d.glow);

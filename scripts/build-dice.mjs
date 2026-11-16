@@ -7,12 +7,14 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { ConvexHull } from "three/addons/math/ConvexHull.js";
+import { Vector3 } from "three";
 
 const dir = process.argv[2];
 const OUT = path.resolve("public/dice");
 const values = JSON.parse(fs.readFileSync(path.resolve("scripts/dice-values.json"), "utf8"));
 // Faces expected and the circumradius each die is scaled to (the d12 has a circumradius of about 1.26)
-const SPEC = { d6: { faces: 6, R: 1.45 }, d20: { faces: 20, R: 1.3 }, g4: { faces: 12, R: 1.55 }, g8: { faces: 24, R: 1.4 }, g10: { faces: 30, R: 1.55 } };
+const SPEC = { d12: { faces: 12, R: 1.2, crystal: true }, d6: { faces: 6, R: 1.45 }, d20: { faces: 20, R: 1.3 }, g4: { faces: 12, R: 1.55 }, g8: { faces: 24, R: 1.4 }, g10: { faces: 30, R: 1.55 } };
 
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
@@ -164,6 +166,54 @@ for (const name of Object.keys(SPEC)) {
       for (let e = 0; e < poly.length; e++) { const a = poly[e], b = poly[(e + 1) % poly.length]; const inn = norm(cross(sub(b, a), faces[faceOf[i]].normal)); inward = Math.min(inward, dot(sub(p, a), inn)); }
       edgeOf[i] = inward;
     });
+  }
+
+  if (SPEC[name].crystal) {
+    // Frosted crystal dice: split into a glass body and a numeral mesh using the convex hull (every numeral pocket is deeper than the
+    // hull), and bake each glass vertex's distance to the nearest real facet edge so bevels can be polished and faces left frosted.
+    const hull = new ConvexHull().setFromPoints(m.pos.map((p) => new Vector3(...p)));
+    const planeMap = new Map();
+    for (const f of hull.faces) {
+      const k = [f.normal.x, f.normal.y, f.normal.z].map((x) => Math.round(x * 1e3)).join("|") + "|" + Math.round(f.constant * 1e3);
+      if (!planeMap.has(k)) planeMap.set(k, [f.normal.x, f.normal.y, f.normal.z, f.constant]);
+    }
+    const planes = [...planeMap.values()];
+    const minCos = Math.cos((6 * Math.PI) / 180);
+    const depthU = new Float32Array(m.pos.length), edgeU = new Float32Array(m.pos.length);
+    const dist = new Float32Array(planes.length);
+    m.pos.forEach((p, i) => {
+      let best = 0, bd = -Infinity;
+      planes.forEach((pl, j) => { const d = pl[0] * p[0] + pl[1] * p[1] + pl[2] * p[2] - pl[3]; dist[j] = d; if (d > bd) { bd = d; best = j; } });
+      depthU[i] = -bd;
+      const nb = planes[best]; let e = 5;
+      planes.forEach((pl, j) => {
+        if (j === best) return;
+        const cos = nb[0] * pl[0] + nb[1] * pl[1] + nb[2] * pl[2];
+        if (cos > minCos) return;
+        const sn = Math.sqrt(Math.max(1 - cos * cos, 1e-9));
+        e = Math.min(e, -dist[j] / sn);
+      });
+      edgeU[i] = e;
+    });
+    const pocket = 0.05 * s;
+    const glassP = [], glassE = [], goldP = [];
+    for (let t = 0; t < m.idx.length; t += 3) {
+      const tri = [m.idx[t], m.idx[t + 1], m.idx[t + 2]];
+      const inPocket = tri.some((v) => depthU[v] > pocket);
+      tri.forEach((v) => { if (inPocket) goldP.push(...m.pos[v]); else { glassP.push(...m.pos[v]); glassE.push(edgeU[v]); } });
+    }
+    console.log("  glass tris", glassP.length / 9, "numeral tris", goldP.length / 9, "hull planes", planes.length);
+    const bin = Buffer.concat([Buffer.from(new Float32Array(glassP).buffer), Buffer.from(new Float32Array(glassE).buffer), Buffer.from(new Float32Array(goldP).buffer)]);
+    fs.writeFileSync(path.join(OUT, `${name}.bin`), bin);
+    const vals = values[name];
+    fs.writeFileSync(path.join(OUT, `${name}.json`), JSON.stringify({
+      name, crystal: true, radius: R, glassTris: glassP.length / 9, goldTris: goldP.length / 9,
+      faces: faces.map((f, i) => ({ normal: f.normal.map((x) => +x.toFixed(5)), h: +f.h.toFixed(5), value: vals ? vals[i] : 0 })),
+      colliderVertices: verts.map((v) => v.map((x) => +x.toFixed(5))),
+    }));
+    fs.writeFileSync(`/tmp/dz/${name}.gold.json`, JSON.stringify(goldP));
+    console.log("  wrote", (bin.length / 1024).toFixed(0), "KB");
+    continue;
   }
 
   // Write the mesh
