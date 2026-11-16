@@ -9,9 +9,11 @@ import type { DiceStage, DieSpec } from "./diceStage";
  * so it keeps its state while the player switches tabs. It changes the Hero's Willpower on the sheet and adds to the
  * campaign's Despair pool. Roll state is in memory only.
  *
- * A skill, saving roll or trait on the sheet can open it with the modifier filled in (see `request`). Advantage and Disadvantage
- * are a d6 added to or taken from the total, so they are thrown alongside the Dyad and the sum is done here; the player can add as
- * many as the rules give (a ritual can add more than one). Other dice (damage and so on) can be thrown separately.
+ * A skill, saving roll or trait on the sheet opens it ready for that check, with its modifier already applied (see `request`).
+ * The Willpower adjustment (-2 for each slot marked past the sixth) is always applied and shown. Advantage and Disadvantage are a
+ * d6 added to or taken from the total, so they are thrown alongside the Dyad and the sum is done here; the player can add as many
+ * as the rules give (a ritual can add more than one). "More options" holds an extra modifier, extra dice (damage and so on,
+ * thrown with the roll and summed on their own, not added to the Dyad total) and a switch to leave the Dyad out.
  */
 
 type Phase = "idle" | "rolling" | "awaiting" | "resolved";
@@ -21,12 +23,15 @@ export interface RollRequest {
   /** Changes with every request, so asking twice for the same check still opens it */
   id: number;
   label: string;
+  /** What sort of roll this is, for the title: "Make a skill roll", "Make a saving roll". A class die uses its own name. */
+  kind: "skill" | "saving" | "trait" | "attack" | "die";
+  /** The check's own modifier, applied automatically */
   modifier: number;
   /** Where Advantage or Disadvantage might come from, shown as a reminder: they are situational, so the player adds the dice */
   advantage?: string[];
   disadvantage?: string[];
   /** A dice-only roll (a class die such as the Mystic Die): these dice are thrown straight away, with no Dyad */
-  dice?: Partial<Record<"d4" | "d6" | "d8" | "d10" | "d20", number>>;
+  dice?: Partial<Record<"d4" | "d6" | "d8" | "d10" | "d12" | "d20", number>>;
 }
 
 interface Props {
@@ -41,19 +46,22 @@ interface Props {
 }
 
 const sign = (n: number) => (n >= 0 ? `+ ${n}` : `− ${Math.abs(n)}`);
+const signed = (n: number) => (n >= 0 ? `+${n}` : `−${Math.abs(n)}`);
 const newId = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `r${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`);
 
-/** The other dice a player can throw. d4, d8 and d10 use the g-dice models, which show each number on three faces. */
-const OTHERS = [
-  { key: "d4", sides: 4, spec: { type: "g4", look: "slate" } },
+/** The extra dice a player can add. d4, d8 and d10 use the g-dice models, which show each number on three faces. */
+const EXTRAS = [
+  { key: "d4", sides: 4, spec: { type: "g4", look: "cream" } },
   { key: "d6", sides: 6, spec: { type: "d6", look: "cream" } },
-  { key: "d8", sides: 8, spec: { type: "g8", look: "slate" } },
+  { key: "d8", sides: 8, spec: { type: "g8", look: "cream" } },
   { key: "d10", sides: 10, spec: { type: "g10", look: "cream" } },
-  { key: "d20", sides: 20, spec: { type: "d20", look: "slate" } },
+  { key: "d12", sides: 12, spec: { type: "d12", look: "cream" } },
+  { key: "d20", sides: 20, spec: { type: "d20", look: "cream" } },
 ] as const satisfies readonly { key: string; sides: number; spec: DieSpec }[];
-type OtherKey = (typeof OTHERS)[number]["key"];
+type ExtraKey = (typeof EXTRAS)[number]["key"];
+type Extras = Record<ExtraKey, number>;
 const MAX_EACH = 8;
-const noOthers = (): Record<OtherKey, number> => ({ d4: 0, d6: 0, d8: 0, d10: 0, d20: 0 });
+const noExtras = (): Extras => ({ d4: 0, d6: 0, d8: 0, d10: 0, d12: 0, d20: 0 });
 
 function Stepper({ label, value, onChange, disabled, max = MAX_EACH }: { label: string; value: number; onChange: (n: number) => void; disabled?: boolean; max?: number }) {
   return (
@@ -66,24 +74,31 @@ function Stepper({ label, value, onChange, disabled, max = MAX_EACH }: { label: 
   );
 }
 
+interface RollOptions {
+  extras?: Extras;
+  noDyad?: boolean;
+}
+
 export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower, addDespair }: Props) {
   const [open, setOpen] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
-  const [modifier, setModifier] = useState("0");
-  const [label, setLabel] = useState("");
+  const [label, setLabel] = useState(""); // what is being rolled, such as Perception
+  const [action, setAction] = useState("action"); // the sort of roll, for the title: skill, saving, attack... or just action
+  const [baseMod, setBaseMod] = useState(0); // the check's own modifier
+  const [extraMod, setExtraMod] = useState("0"); // an additional modifier typed in "More options"
   const [hints, setHints] = useState<{ advantage: string[]; disadvantage: string[] }>({ advantage: [], disadvantage: [] });
   const [advCount, setAdvCount] = useState(0);
   const [disCount, setDisCount] = useState(0);
+  const [extras, setExtras] = useState(noExtras);
+  const [noDyad, setNoDyad] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [roll, setRoll] = useState<RollOutcome | null>(null);
   const [penalty, setPenalty] = useState(0);
+  const [extraResult, setExtraResult] = useState<{ rolls: { key: ExtraKey; value: number }[]; total: number } | null>(null);
   const [applied, setApplied] = useState<string[]>([]);
   const [message, setMessage] = useState("");
   const [log, setLog] = useState<string[]>([]);
   const [peek, setPeek] = useState(false);
-  const [others, setOthers] = useState(noOthers);
-  const [othersOpen, setOthersOpen] = useState(false);
-  const autoOthers = useRef<Record<OtherKey, number> | null>(null);
-  const [othersResult, setOthersResult] = useState<{ rolls: { key: OtherKey; value: number }[]; total: number } | null>(null);
   const stage = useRef<DiceStage | null>(null);
   const stageFailed = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -98,10 +113,12 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
   const phaseRef = useRef<Phase>("idle");
   phaseRef.current = phase;
   const focusRoll = useRef(false);
+  const autoRoll = useRef<RollOptions | null>(null);
   const titleId = useId();
 
   const awaiting = phase === "awaiting";
   const locked = phase === "rolling" || awaiting;
+  const wpAdjust = willpowerPenalty(wpUsed); // how much to take off, from the slots marked right now
 
   // Where the dice may land: everything the drawer isn't covering
   const freeArea = useCallback((peekNow: boolean) => {
@@ -112,37 +129,59 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     return lg ? { x0: 0, y0: 0, x1: Math.max(200, W - 380), y1: H } : { x0: 0, y0: 0, x1: W, y1: Math.round(H * (peekNow ? 0.62 : 0.12)) };
   }, [open]);
 
+  /** Opened from the button at the corner rather than from a check on the sheet: a plain action roll with nothing filled in */
+  function openPlain() {
+    if (!open && !busy.current && phaseRef.current !== "rolling" && phaseRef.current !== "awaiting") {
+      setLabel("");
+      setAction("action");
+      setBaseMod(0);
+      setExtraMod("0");
+      setHints({ advantage: [], disadvantage: [] });
+      setAdvCount(0);
+      setDisCount(0);
+      setExtras(noExtras());
+      setNoDyad(false);
+      setRoll(null);
+      setExtraResult(null);
+      setApplied([]);
+      setMessage("");
+      setPhase("idle");
+    }
+    setOpen(true);
+  }
+
   const closeDrawer = useCallback(() => {
     setOpen(false);
     requestAnimationFrame(() => triggerRef.current?.focus());
   }, []);
 
-  // A skill, saving roll or trait asked for the roller: open it ready for that check
+  // A skill, saving roll, trait or class die asked for the roller: open it ready for that
   useEffect(() => {
     if (!request) return;
     setOpen(true);
     if (busy.current || phaseRef.current === "rolling" || phaseRef.current === "awaiting") return; // finish the roll in hand first
     setLabel(request.label);
-    if (request.dice) {
-      const wanted = { ...noOthers(), ...request.dice };
-      setOthers(wanted);
-      setOthersOpen(true);
-      setOthersResult(null);
-      setRoll(null);
-      setApplied([]);
-      setMessage("");
-      setPhase("idle");
-      autoOthers.current = wanted;
-      return;
-    }
-    setModifier(String(request.modifier));
+    setAction(request.kind === "die" ? request.label : request.kind);
+    setBaseMod(request.modifier);
+    setExtraMod("0");
     setHints({ advantage: request.advantage ?? [], disadvantage: request.disadvantage ?? [] });
     setAdvCount(0);
     setDisCount(0);
     setRoll(null);
+    setExtraResult(null);
     setApplied([]);
     setMessage("");
     setPhase("idle");
+    if (request.dice) {
+      const wanted = { ...noExtras(), ...request.dice };
+      setExtras(wanted);
+      setNoDyad(true);
+      setMoreOpen(true);
+      autoRoll.current = { extras: wanted, noDyad: true };
+      return;
+    }
+    setExtras(noExtras());
+    setNoDyad(false);
     focusRoll.current = true;
   }, [request]);
 
@@ -165,10 +204,10 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
 
   // A class die was asked for: once the drawer is open (so the dice land clear of it), throw it
   useEffect(() => {
-    if (!open || !autoOthers.current) return;
-    const wanted = autoOthers.current;
-    autoOthers.current = null;
-    const f = requestAnimationFrame(() => void doRollOthers(wanted));
+    if (!open || !autoRoll.current) return;
+    const wanted = autoRoll.current;
+    autoRoll.current = null;
+    const f = requestAnimationFrame(() => void doRoll(wanted));
     return () => cancelAnimationFrame(f);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, request]);
@@ -212,57 +251,55 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     return sides.map((n) => 1 + Math.floor(Math.random() * n));
   }
 
-  async function doRoll() {
+  /** One roll: the Dyad (unless it is left out), any Advantage and Disadvantage d6s, and any extra dice, all thrown together */
+  async function doRoll(opts?: RollOptions) {
     if (busy.current || awaiting) return;
+    const extrasNow = opts?.extras ?? extras;
+    const dyad = !(opts?.noDyad ?? noDyad);
+    const chosen = EXTRAS.flatMap((o) => Array.from({ length: extrasNow[o.key] }, () => o));
+    if (!dyad && !chosen.length) return;
     busy.current = true;
     clearTimeout(fadeTimer.current);
     setPhase("rolling");
     setApplied([]);
     setMessage("");
     setRoll(null);
+    setExtraResult(null);
     const penaltyNow = willpowerPenalty(wp.current.used); // the count before this roll's own effects
     setPenalty(penaltyNow);
-    const mod = parseInt(modifier, 10) || 0;
-    const nAdv = advCount;
-    const nDis = disCount;
+    const mod = baseMod + (parseInt(extraMod, 10) || 0);
+    const nAdv = dyad ? advCount : 0;
+    const nDis = dyad ? disCount : 0;
     const specs: DieSpec[] = [
-      { type: "d12", look: "balance" },
-      { type: "d12", look: "despair" },
+      ...(dyad ? ([{ type: "d12", look: "balance" }, { type: "d12", look: "despair" }] as DieSpec[]) : []),
       ...Array.from({ length: nAdv }, () => ({ type: "d6", look: "advantage" }) as DieSpec),
       ...Array.from({ length: nDis }, () => ({ type: "d6", look: "disadvantage" }) as DieSpec),
+      ...chosen.map((o) => o.spec as DieSpec),
     ];
-    const values = await throwThese(specs, specs.map((s) => (s.type === "d12" ? 12 : 6)));
-    const out = resolveRoll({ balance: values[0], despair: values[1], modifier: mod - penaltyNow, advantage: values.slice(2, 2 + nAdv), disadvantage: values.slice(2 + nAdv) });
+    const sides = [...(dyad ? [12, 12] : []), ...Array(nAdv + nDis).fill(6), ...chosen.map((o) => o.sides)];
+    const values = await throwThese(specs, sides);
+    const at = dyad ? 2 : 0;
+    const extraValues = values.slice(at + nAdv + nDis);
+    const rolls = chosen.map((o, i) => ({ key: o.key, value: extraValues[i] }));
+    const extraTotal = extraValues.reduce((a, b) => a + b, 0);
     setPeek(false);
     busy.current = false;
     setAdvCount(0); // Advantage and Disadvantage are situational, so each roll starts without them
     setDisCount(0);
-    // The total shows the modifier and penalty separately
+    if (rolls.length) setExtraResult({ rolls, total: extraTotal });
+    const named = EXTRAS.filter((o) => extrasNow[o.key] > 0).map((o) => `${extrasNow[o.key]}${o.key}`).join(" ");
+    if (!dyad) {
+      setPhase("idle");
+      setLog((l) => [`${label ? `${label}, ` : ""}${named}: ${extraValues.join(" + ")} = ${extraTotal}`, ...l].slice(0, 6));
+      fadeLater();
+      return;
+    }
+    const out = resolveRoll({ balance: values[0], despair: values[1], modifier: mod - penaltyNow, advantage: values.slice(at, at + nAdv), disadvantage: values.slice(at + nAdv, at + nAdv + nDis) });
+    // The total shows the modifier and the Willpower adjustment separately
     setRoll(out);
+    if (named) setMessage("");
     if (out.pending) setPhase("awaiting");
-    else await finish(out, mod, penaltyNow);
-  }
-
-  /** Throws the chosen damage and other dice on their own: just the numbers and their sum, nothing on the sheet changes */
-  async function doRollOthers(counts: Record<OtherKey, number> = others) {
-    if (busy.current || locked) return;
-    const chosen = OTHERS.flatMap((o) => Array.from({ length: counts[o.key] }, () => o));
-    if (!chosen.length) return;
-    busy.current = true;
-    clearTimeout(fadeTimer.current);
-    const before = phaseRef.current;
-    setPhase("rolling");
-    setOthersResult(null);
-    const values = await throwThese(chosen.map((o) => o.spec), chosen.map((o) => o.sides));
-    setPeek(false);
-    busy.current = false;
-    const rolls = chosen.map((o, i) => ({ key: o.key, value: values[i] }));
-    const total = values.reduce((a, b) => a + b, 0);
-    setOthersResult({ rolls, total });
-    setPhase(before === "rolling" ? "idle" : before);
-    const named = OTHERS.filter((o) => counts[o.key] > 0).map((o) => `${counts[o.key]}${o.key}`).join(" ");
-    setLog((l) => [`${label ? `${label}, ` : ""}${named}: ${values.join(" + ")} = ${total}`, ...l].slice(0, 6));
-    fadeLater();
+    else await finish(out, mod, penaltyNow, named ? `${named}: ${extraValues.join(" + ")} = ${extraTotal}` : "");
   }
 
   const fadeLater = () => {
@@ -274,20 +311,21 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     if (!roll || !roll.pending || busy.current) return;
     busy.current = true; // one press only: a double-tap can't apply twice
     const mod = (roll.modifier ?? 0) + penalty;
-    await finish(settle(roll, succeeded), mod, penalty);
+    await finish(settle(roll, succeeded), mod, penalty, extraResult ? `${extraResult.rolls.map((r) => r.value).join(" + ")} = ${extraResult.total}` : "");
     busy.current = false;
   }
 
   function disregard() {
     if (busy.current) return;
     setRoll(null);
+    setExtraResult(null);
     setPhase("idle");
     setMessage("Roll disregarded");
     fadeLater();
   }
 
   /** Applies a settled roll to the sheet once: Despair first (safe to retry), then Willpower */
-  async function finish(out: SettledRoll, mod: number, penaltyUsed: number) {
+  async function finish(out: SettledRoll, mod: number, penaltyUsed: number, extrasNote: string) {
     setRoll(out);
     setPhase("resolved");
     const notes: string[] = [];
@@ -314,14 +352,15 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
     if (w.exhausted && w.changed) notes.push("Every Willpower slot is marked.");
     setApplied(notes);
     const dice = `${out.balance} + ${out.despair}${mod ? ` ${sign(mod)}` : ""}${penaltyUsed ? ` − ${penaltyUsed}` : ""}${out.advantage.length ? ` + A(${out.advantage.join(", ")})` : ""}${out.disadvantage.length ? ` − D(${out.disadvantage.join(", ")})` : ""}`;
-    setLog((l) => [`${label ? `${label}: ` : ""}${dice} = ${out.total} · ${out.label}`, ...l].slice(0, 6));
+    setLog((l) => [`${label ? `${label}: ` : ""}${dice} = ${out.total} · ${out.label}${extrasNote ? `; ${extrasNote}` : ""}`, ...l].slice(0, 6));
     fadeLater();
   }
 
   const tone = roll?.tone;
   const shown = roll;
-  const modNum = parseInt(modifier, 10) || 0;
-  const othersCount = OTHERS.reduce((n, o) => n + others[o.key], 0);
+  const modNum = baseMod + (parseInt(extraMod, 10) || 0);
+  const extrasCount = EXTRAS.reduce((n, o) => n + extras[o.key], 0);
+  const nothingToRoll = noDyad && extrasCount === 0;
 
   return (
     <>
@@ -336,7 +375,7 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
         title="Open dice roller"
         aria-expanded={open}
         aria-controls="roller-drawer"
-        onClick={() => setOpen(true)}
+        onClick={openPlain}
       >
         {/* The two d12s from the design file: one button, so both are decorative */}
         <span className="roller-dice" aria-hidden="true">
@@ -365,27 +404,33 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
       >
         <div className="roller-handle" aria-hidden="true" />
         <div className="roller-head">
-          <h2 id={titleId}>Dyad Dice</h2>
+          <h2 id={titleId}>Make {/^[aeiou]/i.test(action) ? "an" : "a"} {action} roll</h2>
           <button ref={closeRef} type="button" className="roller-close" onClick={closeDrawer} aria-label="Close dice roller">×</button>
         </div>
 
         <div className="roller-body">
-          {label && <p className="roller-for">Rolling for <b>{label}</b></p>}
-          <div className="field">
-            <label htmlFor="roller-mod">Modifier</label>
-            <input id="roller-mod" type="number" inputMode="numeric" step={1} value={modifier} disabled={locked} onChange={(e) => setModifier(e.target.value)} />
-          </div>
-          {willpowerPenalty(wpUsed) > 0 && <p className="roller-penalty">Willpower penalty −{willpowerPenalty(wpUsed)}</p>}
+          <p className="roller-lead">{noDyad ? "Roll your extra dice" : "Roll your Dyad Dice"}</p>
 
-          <div className="roller-steppers">
-            <Stepper label="Advantage (+d6)" value={advCount} onChange={setAdvCount} disabled={locked} />
-            <Stepper label="Disadvantage (−d6)" value={disCount} onChange={setDisCount} disabled={locked} />
-            {hints.advantage.length > 0 && <p className="roller-hint">Advantage may apply, from {hints.advantage.join(", ")}.</p>}
-            {hints.disadvantage.length > 0 && <p className="roller-hint">Disadvantage may apply, from {hints.disadvantage.join(", ")}.</p>}
-          </div>
+          <dl className="roller-sums">
+            {label && !noDyad ? <div><dt>{label} modifier</dt><dd>{signed(baseMod)}</dd></div> : null}
+            <div>
+              <dt>Willpower adjustment</dt>
+              <dd>{wpAdjust ? `−${wpAdjust}` : "None"}</dd>
+            </div>
+          </dl>
+          {wpAdjust > 0 && <p className="roller-hint">{wpUsed} Willpower slots are marked, so every Dyad roll takes off 2 for each past the sixth.</p>}
 
-          <button ref={rollBtnRef} type="button" className="btn roller-roll" disabled={locked} onClick={doRoll}>
-            {phase === "rolling" ? "Rolling…" : "Roll Dyad Dice"}
+          {!noDyad && (
+            <div className="roller-steppers">
+              <Stepper label="Advantage (+d6)" value={advCount} onChange={setAdvCount} disabled={locked} />
+              <Stepper label="Disadvantage (−d6)" value={disCount} onChange={setDisCount} disabled={locked} />
+              {hints.advantage.length > 0 && <p className="roller-hint">Advantage may apply, from {hints.advantage.join(", ")}.</p>}
+              {hints.disadvantage.length > 0 && <p className="roller-hint">Disadvantage may apply, from {hints.disadvantage.join(", ")}.</p>}
+            </div>
+          )}
+
+          <button ref={rollBtnRef} type="button" className="btn roller-roll" disabled={locked || nothingToRoll} onClick={() => doRoll()}>
+            {phase === "rolling" ? "Rolling…" : "Roll"}
           </button>
 
           {shown && (
@@ -398,6 +443,19 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
               {shown.disadvantage.map((n, i) => <span key={`d${i}`} className="roller-bonus"><span>−</span><span className="die dis" aria-label={`Disadvantage die ${n}`}>{n}</span></span>)}
               <span>=</span>
               <b>{shown.total}</b>
+            </p>
+          )}
+
+          {extraResult && (
+            <p className="roller-readout" aria-label="The extra dice">
+              {extraResult.rolls.map((r, i) => (
+                <span key={i} className="roller-bonus">
+                  {i > 0 && <span>+</span>}
+                  <span className="die other" aria-label={`${r.key} ${r.value}`}>{r.value}</span>
+                </span>
+              ))}
+              <span>=</span>
+              <b>{extraResult.total}</b>
             </p>
           )}
 
@@ -427,27 +485,25 @@ export function RollerDrawer({ characterId, wpUsed, wpMax, request, setWillpower
             </div>
           )}
 
-          <details className="roller-others" open={othersOpen} onToggle={(e) => setOthersOpen((e.currentTarget as HTMLDetailsElement).open)}>
-            <summary>Other dice</summary>
-            <p className="muted roller-others-note">Damage and other dice, thrown on their own. Nothing on your sheet changes.</p>
-            <div className="roller-steppers">
-              {OTHERS.map((o) => (
-                <Stepper key={o.key} label={o.key} value={others[o.key]} max={MAX_EACH} disabled={locked} onChange={(n) => setOthers((s) => ({ ...s, [o.key]: n }))} />
-              ))}
+          <details className="roller-others" open={moreOpen} onToggle={(e) => setMoreOpen((e.currentTarget as HTMLDetailsElement).open)}>
+            <summary>More options</summary>
+            <div className="field">
+              <label htmlFor="roller-mod">Add additional modifier</label>
+              <input id="roller-mod" type="number" inputMode="numeric" step={1} value={extraMod} disabled={locked} onChange={(e) => setExtraMod(e.target.value)} />
             </div>
-            <button type="button" className="btn roller-roll" disabled={locked || othersCount === 0} onClick={() => doRollOthers()}>Roll other dice</button>
-            {othersResult && (
-              <p className="roller-readout" aria-label="The other dice">
-                {othersResult.rolls.map((r, i) => (
-                  <span key={i} className="roller-bonus">
-                    {i > 0 && <span>+</span>}
-                    <span className="die other" aria-label={`${r.key} ${r.value}`}>{r.value}</span>
-                  </span>
+            <fieldset className="roller-extras">
+              <legend>Add additional dice</legend>
+              <p className="muted roller-others-note">Thrown with this roll and added up on their own. They aren’t added to the Dyad total.</p>
+              <div className="roller-steppers">
+                {EXTRAS.map((o) => (
+                  <Stepper key={o.key} label={o.key} value={extras[o.key]} disabled={locked} onChange={(n) => setExtras((s) => ({ ...s, [o.key]: n }))} />
                 ))}
-                <span>=</span>
-                <b>{othersResult.total}</b>
-              </p>
-            )}
+              </div>
+            </fieldset>
+            <label className="roller-check">
+              <input type="checkbox" checked={noDyad} disabled={locked} onChange={(e) => setNoDyad(e.target.checked)} />
+              <span>Remove Dyad Dice</span>
+            </label>
           </details>
 
           {log.length > 0 && (

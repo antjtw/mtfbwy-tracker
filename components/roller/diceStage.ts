@@ -136,14 +136,22 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
       faces: meta.faces,
       shape: buildCollider(meta),
       make(look) {
+        const g = new THREE.Group();
+        if (look !== "balance" && look !== "despair") {
+          // A plain d12 for damage and other rolls: ivory with dark numerals, like the other dice
+          const spec = LOOKS[look];
+          const body = new THREE.Mesh(glassGeo, new THREE.MeshPhysicalMaterial({ color: spec.body, roughness: spec.roughness, clearcoat: spec.clearcoat, clearcoatRoughness: 0.25, flatShading: true, toneMapped: false }));
+          body.castShadow = true;
+          g.add(body, new THREE.Mesh(goldGeo, new THREE.MeshBasicMaterial({ color: spec.numeral, toneMapped: false })));
+          return g;
+        }
         let m = mats.get(look);
         if (!m) {
-          m = crystalMaterials(look as "balance" | "despair", meta.radius, studio);
+          m = crystalMaterials(look, meta.radius, studio);
           m.glass.userData.keep = true;
           m.numerals.userData.keep = true;
           mats.set(look, m);
         }
-        const g = new THREE.Group();
         const body = new THREE.Mesh(glassGeo, m.glass);
         body.castShadow = true;
         g.add(body, new THREE.Mesh(goldGeo, m.numerals));
