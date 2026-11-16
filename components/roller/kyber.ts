@@ -2,8 +2,8 @@
  * Kyber crystal look for the dice (spec section 9): a translucent body that goes deep at the thick end and pale at the
  * thin, a glow that shows when you look straight through it, a hot fresnel rim, and fractures and specks from object-space
  * noise (the model has no UVs, so there is no painted texture). Blue for Balance; red with an amber core for Despair.
- * The body is frosted glass: mostly see-through, with the edges and the scattered specks catching the light. The numerals
- * are separate, white and opaque, and only the ones facing you are drawn so the far faces don't show through.
+ * The body is solid frosted crystal: matte, with soft highlights, a rim and a few specks catching the light. The numerals are
+ * separate, white and opaque, and only the ones facing you are drawn.
  */
 import * as THREE from "three";
 
@@ -16,7 +16,7 @@ const PALETTE = {
 
 const NOISE = /* glsl */ `
 varying vec3 vObj;
-uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uPale; uniform vec3 uCore; uniform vec3 uRim; uniform float uSeed; uniform float uAlpha;
+uniform vec3 uDeep; uniform vec3 uMid; uniform vec3 uPale; uniform vec3 uCore; uniform vec3 uRim; uniform float uSeed;
 float kSpeck; float kVein; float kG; float kFres;
 float h31(vec3 p) { p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
 float vnoise(vec3 x) {
@@ -40,9 +40,9 @@ const COLOUR = /* glsl */ `
 }
 `;
 
-/** Glass is clearest face on and more solid at its edges, with the odd speck catching the light */
+/** The body is solid, not see-through */
 const ALPHA = /* glsl */ `
-diffuseColor.a = clamp(uAlpha + kFres * 0.55 + kSpeck * 0.35, 0.0, 1.0);
+diffuseColor.a = 1.0;
 #include <opaque_fragment>
 `;
 
@@ -60,8 +60,8 @@ const EMISSIVE = /* glsl */ `
 
 export function kyberMaterial(kind: Kind, seed: number): THREE.Material {
   const c = PALETTE[kind];
-  // Frosted: rough, so highlights are soft and wide rather than a sharp gloss; transparent, so the table shows through
-  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.62, metalness: 0, envMapIntensity: 0.22, transparent: true, opacity: 1, depthWrite: false });
+  // Frosted: rough, so highlights are soft and wide rather than a sharp gloss
+  const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.62, metalness: 0, envMapIntensity: 0.22, });
   mat.onBeforeCompile = (shader) => {
     shader.uniforms.uDeep = { value: new THREE.Color(c.deep) };
     shader.uniforms.uMid = { value: new THREE.Color(c.mid) };
@@ -69,7 +69,6 @@ export function kyberMaterial(kind: Kind, seed: number): THREE.Material {
     shader.uniforms.uCore = { value: new THREE.Color(c.core) };
     shader.uniforms.uRim = { value: new THREE.Color(c.rim) };
     shader.uniforms.uSeed = { value: seed };
-    shader.uniforms.uAlpha = { value: 0.3 };
     shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vObj;").replace("#include <begin_vertex>", "#include <begin_vertex>\nvObj = position;");
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", `#include <common>\n${NOISE}`)

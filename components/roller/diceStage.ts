@@ -155,7 +155,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const height = Math.max(22, 8 / (tan * camera.aspect)); // at least about 16 world units visible across, so the dice sit small on the sheet
+    const height = Math.max(18.3, 6.7 / (tan * camera.aspect)); // at least about 13 world units visible across: the dice are 20% larger than before
     camera.position.set(0, height, 0);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
