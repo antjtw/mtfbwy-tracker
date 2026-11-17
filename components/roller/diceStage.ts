@@ -99,7 +99,7 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
   sun.position.set(-3, 16, 3);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
-  Object.assign(sun.shadow.camera, { left: -26, right: 26, top: 26, bottom: -26, near: 1, far: 40 });
+  Object.assign(sun.shadow.camera, { left: -40, right: 40, top: 40, bottom: -40, near: 1, far: 60 });
   scene.add(sun);
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.ShadowMaterial({ opacity: 0.28 }));
   floor.rotation.x = -Math.PI / 2;
@@ -236,7 +236,9 @@ export async function createDiceStage(canvas: HTMLCanvasElement): Promise<DiceSt
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const height = Math.max(26, 9.6 / (tan * camera.aspect)); // at least about 18.5 world units visible across
+    // At least about 18.5 world units visible across. The dice are 20% smaller than that on big screens and 20% bigger on small ones.
+    const zoom = w <= 768 ? 1.2 : 0.8;
+    const height = Math.max(26, 9.6 / (tan * camera.aspect)) / zoom;
     camera.position.set(0, height, 0);
     camera.lookAt(0, 0, 0);
     camera.updateProjectionMatrix();
