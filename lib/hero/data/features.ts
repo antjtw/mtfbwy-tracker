@@ -27,6 +27,11 @@ export const SPECIES_FEATURES: Record<string, FeatureText[]> = {
     { name: "Two hearts ", text: "Once per full rest, when you expend your last hit point slot, you can clear 1 hit point slot and dodge the dying condition" },
     { name: "Trance", text: "You gain the benefits of a Full rest in 4 hours rather than 8" },
   ],
+  "clawdite": [
+    { name: "Shapeshifter", text: "As a manoeuvre, mark 1 Willpower to take the appearance of a humanoid of similar build to your own, or return to your natural form at no cost. To imitate a specific individual, you must first have studied them up close. Your size, traits and abilities do not change, and neither do your clothes, armour or gear. You cannot change form while wearing heavy armour. When someone scrutinises your borrowed form, make an Agility (Skulduggery) roll against their passive Insight (the GM sets a Difficulty for an NPC). You revert to your natural form when you gain the Dying or Unconscious condition" },
+    { name: "Aching change", text: "Holding a borrowed form hurts. While you wear one, a short or full rest does not clear Willpower slots" },
+    { name: "Trust no face", text: "You have advantage on Insight rolls to see through a disguise, an impersonation or another shapeshifter" },
+  ],
   "gand": [
     { name: "Respirator", text: "You breathe ammonia. Without your respirator, treat Type I atmospheres as Type III. While wearing it, you ignore atmosphere saving rolls and are immune to inhaled poisons" },
     { name: "Exoskeleton", text: "While you wear no armour, you have an armour score equal to your Resilience (RES) modifier (minimum 1) that is effective against PHY damage. These slots are cleared with Tend to Wounds, not Repair Armour" },

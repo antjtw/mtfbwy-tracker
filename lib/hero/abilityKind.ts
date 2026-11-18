@@ -17,6 +17,9 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(
 /** Set by hand where the wording alone gets it wrong, keyed by the ability's name */
 const OVERRIDES: Record<string, AbilityKind> = {
   "guided-actions": "passive",
+  "shapeshifter": "manoeuvre",
+  "aching-change": "passive",
+  "trust-no-face": "passive",
   "product-of-magick": "passive",
   "bolstered-by-magick": "manoeuvre",
   "duelist": "trigger",

@@ -112,6 +112,10 @@ export const SPECIES: readonly Species[] = [
     subspecies: [sub("Red", [t("STR")]), sub("Green", [t("RES")]), sub("Mountain", [t("AGI")])],
     notes: ["Each kind also gives a skill; the spec says these weren't read, so none is applied yet"],
   }),
+  species("Clawdite", 3, [t("AGI")], {
+    choices: [oneOf("Skulduggery", "Deception")],
+    notes: ["Speaks Galactic Basic and Zolanese", "Optional shifting colours display, with no mechanical effect"],
+  }),
   species("Anomid", 3, [t("INT"), sk("Technology"), sk("Skulduggery")], { choices: [language("One language")], notes: ["Vocoder mask"] }),
   species("Mon Calamari", 3, [t("INT")], { choices: [oneOf("Negotiation", "Technology")] }),
   species("Mustafarian", 3, [], {
