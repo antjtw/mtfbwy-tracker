@@ -27,6 +27,11 @@ export const SPECIES_FEATURES: Record<string, FeatureText[]> = {
     { name: "Two hearts ", text: "Once per full rest, when you expend your last hit point slot, you can clear 1 hit point slot and dodge the dying condition" },
     { name: "Trance", text: "You gain the benefits of a Full rest in 4 hours rather than 8" },
   ],
+  "chironian": [
+    { name: "Gallop", text: "When you take the Focus and move in a straight line, you can move up to Far range without making an Athletics roll" },
+    { name: "Hind kick", text: "Your hind legs act as an unarmed attack, with which you are proficient. Attack modifier is Strength (STR), 1 target, close range, 1d8 PHY damage, and the target is pushed back to Near range" },
+    { name: "Four-legged", text: "You have advantage on rolls to avoid being knocked Prone" },
+  ],
   "clawdite": [
     { name: "Shapeshifter", text: "As a manoeuvre, mark 1 Willpower to take the appearance of a humanoid of similar build to your own, or return to your natural form at no cost. To imitate a specific individual, you must first have studied them up close. Your size, traits and abilities do not change, and neither do your clothes, armour or gear. You cannot change form while wearing heavy armour. When someone scrutinises your borrowed form, make an Agility (Skulduggery) roll against their passive Insight (the GM sets a Difficulty for an NPC). You revert to your natural form when you gain the Dying or Unconscious condition" },
     { name: "Aching change", text: "Holding a borrowed form hurts. While you wear one, a short or full rest does not clear Willpower slots" },

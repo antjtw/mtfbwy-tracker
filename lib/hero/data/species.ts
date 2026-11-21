@@ -116,6 +116,7 @@ export const SPECIES: readonly Species[] = [
     choices: [oneOf("Skulduggery", "Deception")],
     notes: ["Speaks Galactic Basic and Zolanese", "Optional shifting colours display, with no mechanical effect"],
   }),
+  species("Chironian", 4, [t("STR")], { notes: ["Cannot move through small spaces", "Speaks Galactic Basic and Chironian"] }),
   species("Anomid", 3, [t("INT"), sk("Technology"), sk("Skulduggery")], { choices: [language("One language")], notes: ["Vocoder mask"] }),
   species("Mon Calamari", 3, [t("INT")], { choices: [oneOf("Negotiation", "Technology")] }),
   species("Mustafarian", 3, [], {
@@ -146,9 +147,11 @@ export const SPECIES: readonly Species[] = [
  */
 export const BOOKS = [
   "Core rules",
+  "Playtest manual",
   "B. Clandis and V. Khargon’s Unlikely Intergalactic Collection",
   "The Essential Guide to Droids",
   "Beyond the Stormwall",
+  "Myths and Fables",
   "Allies and adversaries",
   "Luthen Rael’s antiques and objects of interest",
 ] as const;
@@ -156,7 +159,9 @@ export type Book = (typeof BOOKS)[number];
 
 const BOOK_OF: Record<string, Book> = {};
 const put = (book: Book, ...names: string[]) => names.forEach((n) => { BOOK_OF[n] = book; });
-put("Core rules", "Human", "Bith", "Cerean", "Pantoran", "Pkorian", "Rodian", "Twi’lek", "Wookiee");
+put("Core rules", "Human", "Bith", "Cerean", "Rodian", "Twi’lek", "Wookiee");
+put("Playtest manual", "Pantoran", "Pkorian");
+put("Myths and Fables", "Chironian");
 put("B. Clandis and V. Khargon’s Unlikely Intergalactic Collection", "Anzellan", "Besalisk", "Clawdite", "Dashade", "Kalleran", "Kiffar", "Lasat", "Mon Calamari", "Nautolan", "Nikto", "Tiss’shar", "Trandoshan", "Zabrak");
 put("The Essential Guide to Droids", "Droid, second class", "Droid, third class", "Droid, fourth class");
 put("Beyond the Stormwall", "Evereni", "Ikkrukkian", "Pooba", "Tynnan", "Vintian");
