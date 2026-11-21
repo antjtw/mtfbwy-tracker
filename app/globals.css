@@ -118,6 +118,7 @@
 }
 
 * { box-sizing: border-box; }
+html { scroll-padding-bottom: 96px; } /* keeps a focused item clear of the sticky Back and Continue bar */
 html, body { margin: 0; background: var(--page-bg); color: var(--text-default); }
 body { font-family: var(--font-body); font-size: 19px; line-height: 28px; min-height: 100vh; display: flex; flex-direction: column; }
 p { margin: 0; }
@@ -389,7 +390,8 @@ button.slot:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .field select, .field textarea { width: 100%; max-width: var(--input-max); background-color: var(--page-bg); border: 1px solid var(--outline-navy); border-radius: 4px; color: var(--input-value); font: inherit; font-size: 19px; padding: 0 var(--pad-xs); }
 .field select { min-height: var(--target); }
 .field textarea { max-width: none; padding: var(--pad-xs); line-height: 28px; }
-.step-nav { display: flex; justify-content: space-between; gap: var(--pad-sm); margin-top: var(--pad-xs); }
+/* Back and Continue stay in view at the bottom of the screen, so a long list (the species, say) doesn't have to be scrolled to the end first */
+.step-nav { position: sticky; bottom: 0; z-index: 20; display: flex; justify-content: space-between; gap: var(--pad-sm); margin-top: var(--pad-xs); padding: var(--pad-xs) 0 calc(var(--pad-xs) + env(safe-area-inset-bottom)); background: var(--page-bg); border-top: 1px solid var(--outline-navy-subdued); }
 .btn.quiet { color: var(--text-subdued); border-color: var(--outline-navy); }
 .btn.quiet:hover { background: rgba(168, 181, 194, 0.08); }
 .trait-grid { display: flex; flex-direction: column; gap: var(--pad-xs); }
