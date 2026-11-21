@@ -140,4 +140,34 @@ export const SPECIES: readonly Species[] = [
   species("Droid, fourth class", 3, [t("STR"), t("AGI")], { id: "droid-4", notes: ["2 module slots", "Plating armour 2"] }),
 ];
 
+/**
+ * The book each species comes from, in the order the builder lists them (each book's species are then A to Z). From the "Included in"
+ * line on each entry in the Luminous Beings Collection.
+ */
+export const BOOKS = [
+  "Core rules",
+  "B. Clandis and V. Khargon’s Unlikely Intergalactic Collection",
+  "The Essential Guide to Droids",
+  "Beyond the Stormwall",
+  "Allies and adversaries",
+  "Luthen Rael’s antiques and objects of interest",
+] as const;
+export type Book = (typeof BOOKS)[number];
+
+const BOOK_OF: Record<string, Book> = {};
+const put = (book: Book, ...names: string[]) => names.forEach((n) => { BOOK_OF[n] = book; });
+put("Core rules", "Human", "Bith", "Cerean", "Pantoran", "Pkorian", "Rodian", "Twi’lek", "Wookiee");
+put("B. Clandis and V. Khargon’s Unlikely Intergalactic Collection", "Anzellan", "Besalisk", "Clawdite", "Dashade", "Kalleran", "Kiffar", "Lasat", "Mon Calamari", "Nautolan", "Nikto", "Tiss’shar", "Trandoshan", "Zabrak");
+put("The Essential Guide to Droids", "Droid, second class", "Droid, third class", "Droid, fourth class");
+put("Beyond the Stormwall", "Evereni", "Ikkrukkian", "Pooba", "Tynnan", "Vintian");
+put("Allies and adversaries", "Aqualish", "Barabel", "Gand", "Togorian", "Tusken");
+put("Luthen Rael’s antiques and objects of interest", "Anomid", "Mustafarian");
+
+export const bookOf = (s: Species): Book => BOOK_OF[s.name] ?? "Core rules";
+
+/** Species in book order, each book A to Z (the droid classes stay in class order: second, third, fourth) */
+export const SPECIES_BY_BOOK: readonly Species[] = [...SPECIES].sort(
+  (a, b) => BOOKS.indexOf(bookOf(a)) - BOOKS.indexOf(bookOf(b)) || (bookOf(a) === "The Essential Guide to Droids" ? SPECIES.indexOf(a) - SPECIES.indexOf(b) : a.name.localeCompare(b.name)),
+);
+
 export const SPECIES_BY_ID: Record<string, Species> = Object.fromEntries(SPECIES.map((s) => [s.id, s]));

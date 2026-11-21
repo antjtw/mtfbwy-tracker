@@ -6,7 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHeading } from "@/components/PageHeading";
 import { CAREER_BLURBS, ORIGIN_BLURBS, SPECIES_BLURBS } from "@/lib/hero/data/blurbs";
 import { CAREER_FEATURES, ORIGIN_FEATURES, SPECIES_FEATURES } from "@/lib/hero/data/features";
-import { ARCHETYPE_FEATURES, archetypeKey, CAREERS, ORIGINS, PATHS, PATH_BY_ID, SPECIES, SPECIES_BY_ID, CAREER_BY_ID, ORIGIN_BY_ID } from "@/lib/hero/data";
+import { bookOf, SPECIES_BY_BOOK } from "@/lib/hero/data/species";
+import { ARCHETYPE_FEATURES, archetypeKey, CAREERS, ORIGINS, PATHS, PATH_BY_ID, SPECIES_BY_ID, CAREER_BY_ID, ORIGIN_BY_ID } from "@/lib/hero/data";
 import { describeGrants, oneLine, playerNotes } from "@/lib/hero/describe";
 import { arrayLeft, careerKey, choiceKey, cleanTraitArray, computeHero, emptyHero, originKey, pathKey, speciesKey, subspeciesKey, TIER0_KEY } from "@/lib/hero/engine";
 import { tier0Pool } from "@/lib/hero/powers";
@@ -207,7 +208,8 @@ export function Builder({ playerId, playerName, adventures, edit, cards }: { pla
               filterable
               grouped
               value={hero.species.id}
-              options={[...SPECIES].sort((a, b) => a.name.localeCompare(b.name)).map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), blurb: SPECIES_BLURBS[s.id], features: SPECIES_FEATURES[s.id], more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...playerNotes(s.notes).filter((n) => !SPECIES_FEATURES[s.id]?.some((f) => f.name.toLowerCase() === n.toLowerCase()))] }))}
+              groupBy={(o) => bookOf(SPECIES_BY_ID[o.id])}
+              options={SPECIES_BY_BOOK.map((s) => ({ id: s.id, label: s.name, hint: oneLine(s), blurb: SPECIES_BLURBS[s.id], features: SPECIES_FEATURES[s.id], more: [`Species damage threshold ${s.threshold}`, ...describeGrants(s.grants), ...playerNotes(s.notes).filter((n) => !SPECIES_FEATURES[s.id]?.some((f) => f.name.toLowerCase() === n.toLowerCase()))] }))}
               onChange={(id) => patch((h) => ({ ...h, species: { id }, choices: dropChoices(h, "species:", "subspecies:") }))}
             />
             {species?.subspecies && (
