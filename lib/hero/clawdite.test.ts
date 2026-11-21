@@ -26,6 +26,7 @@ describe("species by book", () => {
     expect(SPECIES_BY_BOOK).toHaveLength(SPECIES.length);
     // Nothing quietly fell into the default: each of these names is listed under its book
     expect(SPECIES.filter((s) => bookOf(s) === "Core rules").map((s) => s.name).sort()).toEqual(["Bith", "Cerean", "Human", "Rodian", "Twi’lek", "Wookiee"]);
+    expect(SPECIES.filter((s) => bookOf(s) === "Allies and adversaries").map((s) => s.name).sort()).toEqual(["Aqualish", "Barabel", "Gand", "Pantoran", "Pkorian", "Togorian", "Tusken"]);
     expect(SPECIES.filter((s) => bookOf(s) === "Myths and Fables").map((s) => s.name)).toEqual(["Chironian"]);
     const books = SPECIES_BY_BOOK.map(bookOf);
     expect(books).toEqual([...books].sort((a, b) => BOOKS.indexOf(a) - BOOKS.indexOf(b)));

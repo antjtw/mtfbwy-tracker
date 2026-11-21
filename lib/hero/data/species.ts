@@ -147,7 +147,6 @@ export const SPECIES: readonly Species[] = [
  */
 export const BOOKS = [
   "Core rules",
-  "Playtest manual",
   "B. Clandis and V. Khargon’s Unlikely Intergalactic Collection",
   "The Essential Guide to Droids",
   "Beyond the Stormwall",
@@ -160,12 +159,11 @@ export type Book = (typeof BOOKS)[number];
 const BOOK_OF: Record<string, Book> = {};
 const put = (book: Book, ...names: string[]) => names.forEach((n) => { BOOK_OF[n] = book; });
 put("Core rules", "Human", "Bith", "Cerean", "Rodian", "Twi’lek", "Wookiee");
-put("Playtest manual", "Pantoran", "Pkorian");
 put("Myths and Fables", "Chironian");
 put("B. Clandis and V. Khargon’s Unlikely Intergalactic Collection", "Anzellan", "Besalisk", "Clawdite", "Dashade", "Kalleran", "Kiffar", "Lasat", "Mon Calamari", "Nautolan", "Nikto", "Tiss’shar", "Trandoshan", "Zabrak");
 put("The Essential Guide to Droids", "Droid, second class", "Droid, third class", "Droid, fourth class");
 put("Beyond the Stormwall", "Evereni", "Ikkrukkian", "Pooba", "Tynnan", "Vintian");
-put("Allies and adversaries", "Aqualish", "Barabel", "Gand", "Togorian", "Tusken");
+put("Allies and adversaries", "Aqualish", "Barabel", "Gand", "Pantoran", "Pkorian", "Togorian", "Tusken");
 put("Luthen Rael’s antiques and objects of interest", "Anomid", "Mustafarian");
 
 export const bookOf = (s: Species): Book => BOOK_OF[s.name] ?? "Core rules";
